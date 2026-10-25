@@ -1,0 +1,268 @@
+{
+ "topic": "solar energy",
+ "world": "solar",
+ "palette": "warm",
+ "title": {
+  "en": "How Solar Panels Make Electricity",
+  "ur": "سولر پینل بجلی کیسے بناتے ہیں"
+ },
+ "scenes": [
+  {
+   "id": "hook",
+   "purpose": "hook",
+   "narration": {
+    "en": "Every day, sunlight lands on your roof. Most of it turns into heat and drifts away. A solar panel catches that light and turns part of it into electricity.",
+    "ur": "ہر روز سورج کی روشنی آپ کی چھت پر پڑتی ہے۔ اس کا زیادہ تر حصہ گرمی بن کر اڑ جاتا ہے۔ سولر پینل اس روشنی کو پکڑ کر اس کا کچھ حصہ بجلی میں بدل دیتا ہے۔"
+   },
+   "headline": {
+    "en": "Sunlight is already on your roof",
+    "ur": "دھوپ پہلے سے آپ کی چھت پر ہے"
+   },
+   "keywords": {},
+   "motif": "flow",
+   "elements": [
+    {
+     "type": "sky",
+     "slot": "back"
+    },
+    {
+     "type": "sun",
+     "slot": "sun"
+    },
+    {
+     "type": "house",
+     "slot": "house"
+    },
+    {
+     "type": "panel",
+     "slot": "roof",
+     "params": {
+      "rows": 3,
+      "cols": 4
+     }
+    },
+    {
+     "type": "label",
+     "slot": "panel_label",
+     "params": {
+      "en": "solar panel",
+      "ur": "سولر پینل"
+     }
+    }
+   ],
+   "beats": [],
+   "character": {
+    "pose": "point_right",
+    "slot": "char_left"
+   },
+   "camera": "push_in",
+   "actions": [
+    {
+     "action": "sun_rise",
+     "params": {}
+    },
+    {
+     "action": "rays_travel",
+     "params": {
+      "count": 9
+     }
+    },
+    {
+     "action": "panel_glow",
+     "params": {}
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "id": "cells",
+   "purpose": "explain",
+   "narration": {
+    "en": "Inside the panel sit many silicon cells. When light particles, called photons, hit the silicon, they knock electrons loose. Those electrons flow, and flowing electrons are an electric current.",
+    "ur": "پینل کے اندر سلکان کے بہت سے خلیے ہوتے ہیں۔ جب روشنی کے ذرے، جنہیں فوٹون کہتے ہیں، سلکان پر گرتے ہیں تو وہ الیکٹرانوں کو آزاد کر دیتے ہیں۔ یہ الیکٹران بہنے لگتے ہیں، اور بہتے الیکٹران ہی برقی رو کہلاتے ہیں۔"
+   },
+   "headline": {
+    "en": "Inside: silicon cells",
+    "ur": "اندر کیا ہے؟ سلکان کے خلیے"
+   },
+   "keywords": {},
+   "motif": "flow",
+   "elements": [
+    {
+     "type": "sky",
+     "slot": "back"
+    },
+    {
+     "type": "sun",
+     "slot": "sun"
+    },
+    {
+     "type": "layer_stack",
+     "slot": "stack",
+     "params": {
+      "labels_en": [
+       "glass",
+       "silicon cell",
+       "backing"
+      ],
+      "labels_ur": [
+       "شیشہ",
+       "سلکان خلیہ",
+       "پچھلی تہہ"
+      ]
+     }
+    }
+   ],
+   "beats": [],
+   "character": {
+    "pose": "think",
+    "slot": "char_left"
+   },
+   "camera": "push_in",
+   "actions": [
+    {
+     "action": "explode_layers",
+     "params": {}
+    },
+    {
+     "action": "photons_hit",
+     "params": {
+      "count": 16
+     }
+    },
+    {
+     "action": "electrons_flow",
+     "params": {}
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "id": "inverter",
+   "purpose": "explain",
+   "narration": {
+    "en": "The panel produces direct current, which always flows one way. Your home needs alternating current that changes direction many times a second. An inverter makes that change.",
+    "ur": "پینل ڈائریکٹ کرنٹ بناتا ہے، جو ہمیشہ ایک ہی سمت میں بہتا ہے۔ آپ کے گھر کو متبادل کرنٹ چاہیے جو ہر سیکنڈ کئی بار سمت بدلتا ہے۔ انورٹر یہ تبدیلی کرتا ہے۔"
+   },
+   "headline": {
+    "en": "DC becomes AC",
+    "ur": "ڈی سی بنتی ہے اے سی"
+   },
+   "keywords": {},
+   "motif": "flow",
+   "elements": [
+    {
+     "type": "panel",
+     "slot": "stage_left",
+     "params": {
+      "rows": 3,
+      "cols": 3
+     }
+    },
+    {
+     "type": "inverter",
+     "slot": "stage_right"
+    },
+    {
+     "type": "wire",
+     "slot": "wire",
+     "params": {
+      "from": "panel",
+      "to": "inverter"
+     }
+    },
+    {
+     "type": "waveform",
+     "slot": "wave",
+     "params": {
+      "kind": "dc_then_ac"
+     }
+    },
+    {
+     "type": "house",
+     "slot": "house_small"
+    }
+   ],
+   "beats": [],
+   "character": {
+    "pose": "present",
+    "slot": "char_right"
+   },
+   "camera": "push_in",
+   "actions": [
+    {
+     "action": "dc_arrow",
+     "params": {}
+    },
+    {
+     "action": "inverter_pulse",
+     "params": {}
+    },
+    {
+     "action": "ac_wave",
+     "params": {}
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "id": "recap",
+   "purpose": "recap",
+   "narration": {
+    "en": "Light in, electrons moving, an inverter shaping the current, and a battery holding it: that is how a solar panel powers a home.",
+    "ur": "روشنی اندر، الیکٹران حرکت میں، انورٹر کرنٹ کو درست کرتا ہوا، اور بیٹری اسے سنبھالے ہوئے: یوں سولر پینل گھر کو بجلی دیتا ہے۔"
+   },
+   "headline": {
+    "en": "Light in, current out",
+    "ur": "روشنی اندر، کرنٹ باہر"
+   },
+   "keywords": {},
+   "motif": "flow",
+   "elements": [
+    {
+     "type": "panel",
+     "slot": "stage_left",
+     "params": {
+      "rows": 3,
+      "cols": 3
+     }
+    },
+    {
+     "type": "inverter",
+     "slot": "stage_mid"
+    },
+    {
+     "type": "battery",
+     "slot": "stage_right"
+    },
+    {
+     "type": "house",
+     "slot": "house_small"
+    },
+    {
+     "type": "recap_flow",
+     "slot": "stage"
+    }
+   ],
+   "beats": [],
+   "character": {
+    "pose": "celebrate",
+    "slot": "char_left"
+   },
+   "camera": "push_in",
+   "actions": [
+    {
+     "action": "flow_recap",
+     "params": {}
+    }
+   ],
+   "notes": ""
+  }
+ ],
+ "languages": [
+  "en"
+ ],
+ "generator": "curated-pack",
+ "warnings": [],
+ "source_pack": "solar"
+}

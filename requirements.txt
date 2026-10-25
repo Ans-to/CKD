@@ -1,0 +1,14 @@
+# CPU-only, free and open source. Install with:
+#   pip install -r requirements.txt
+pillow>=10.1
+numpy>=1.24
+uharfbuzz>=0.37
+freetype-py>=2.4
+imageio-ffmpeg>=0.5      # ships a static ffmpeg binary; no system ffmpeg needed
+python-bidi>=0.4         # only used for direction helpers, not for shaping
+# optional, needed for neural narration (falls back to the offline espeak voice)
+piper-tts>=1.2
+espeakng-loader>=0.2.2
+py-espeak-ng>=0.1.1
+# optional, local LLM scripting (experimental, no hosted API is ever used)
+# llama-cpp-python>=0.2.90
