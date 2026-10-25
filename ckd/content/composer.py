@@ -26,12 +26,21 @@ def _words(text: str) -> int:
     return len([w for w in text.split() if w])
 
 
-def estimate_duration(scene: Scene, langs: Sequence[str]) -> float:
-    per_lang = [max(1.0, _words(scene.text_for(l)) / WPS.get(l, 2.4)) for l in langs]
+def estimate_duration(scene: Scene, langs: Sequence[str], speech_rate: float = 1.0) -> float:
+    """Rough spoken length of one scene.
+
+    `speech_rate` scales the words-per-second table for the voice that will
+    actually be used: the offline espeak fallback speaks at roughly half the rate
+    of a Piper neural voice, so planning with the Piper numbers and rendering with
+    espeak used to overshoot the requested duration by ~80 %.
+    """
+    rate = max(0.1, float(speech_rate))
+    per_lang = [max(1.0, _words(scene.text_for(l)) / (WPS.get(l, 2.4) * rate)) for l in langs]
     return max(per_lang) + SCENE_OVERHEAD
 
 
-def _select_scenes(pack: Dict, target: float, langs: Sequence[str]) -> List[Dict]:
+def _select_scenes(pack: Dict, target: float, langs: Sequence[str],
+                   speech_rate: float = 1.0) -> List[Dict]:
     """Pick hook + middle scenes + recap that fit the target duration."""
     scenes = [Scene.from_dict(s) for s in pack["scenes"]]
     if not scenes:
@@ -40,12 +49,12 @@ def _select_scenes(pack: Dict, target: float, langs: Sequence[str]) -> List[Dict
     recap = scenes[-1] if len(scenes) > 1 else None
     middle = scenes[1:-1] if recap else scenes[1:]
     chosen = [scenes[0]]
-    total = estimate_duration(hook, langs)
+    total = estimate_duration(hook, langs, speech_rate)
     if recap:
-        total += estimate_duration(recap, langs)
+        total += estimate_duration(recap, langs, speech_rate)
     # add middle scenes while they fit (allow 15% overshoot on the first pick)
     for sc in middle:
-        d = estimate_duration(sc, langs)
+        d = estimate_duration(sc, langs, speech_rate)
         if total + d <= target * 1.15 or len(chosen) == 1:
             chosen.append(sc)
             total += d
@@ -200,7 +209,8 @@ def _split_sentences(text: str) -> List[str]:
     return out
 
 
-def _fit_duration(story: Story, langs: Sequence[str], target: float) -> List[str]:
+def _fit_duration(story: Story, langs: Sequence[str], target: float,
+                  speech_rate: float = 1.0) -> List[str]:
     """Trim trailing sentences until the plan fits `target` (never below 2 sentences).
 
     Curated packs are written for ~45-60 s. Asking for a shorter video must actually
@@ -210,7 +220,7 @@ def _fit_duration(story: Story, langs: Sequence[str], target: float) -> List[str
     warnings: List[str] = []
     budget = target * 1.08
     for _ in range(24):
-        total = sum(estimate_duration(sc, langs) for sc in story.scenes)
+        total = sum(estimate_duration(sc, langs, speech_rate) for sc in story.scenes)
         if total <= budget:
             break
         # longest scene with the most sentences wins the trim
@@ -221,19 +231,19 @@ def _fit_duration(story: Story, langs: Sequence[str], target: float) -> List[str
             counts = [len(_split_sentences(sc.narration.get(l, ""))) for l in langs]
             if not counts or min(counts) <= 2:
                 continue
-            if cand is None or estimate_duration(sc, langs) > estimate_duration(cand, langs):
+            if cand is None or estimate_duration(sc, langs, speech_rate) > estimate_duration(cand, langs, speech_rate):
                 cand = sc
         if cand is None:
             # nothing left to trim sentence-by-sentence: drop one middle scene
             middle = [sc for sc in story.scenes if sc.purpose not in ("hook", "recap")]
             if len(story.scenes) <= 3 or not middle:
                 break
-            drop = min(middle, key=lambda sc: estimate_duration(sc, langs),
+            drop = min(middle, key=lambda sc: estimate_duration(sc, langs, speech_rate),
                        default=None)
             if drop is None:
                 break
             # only drop when that actually lands closer to the requested length
-            shorter = total - estimate_duration(drop, langs)
+            shorter = total - estimate_duration(drop, langs, speech_rate)
             if abs(target - shorter) >= abs(target - total):
                 break
             story.scenes.remove(drop)
@@ -251,7 +261,7 @@ def _fit_duration(story: Story, langs: Sequence[str], target: float) -> List[str
         )
     else:
         pass
-    total = sum(estimate_duration(sc, langs) for sc in story.scenes)
+    total = sum(estimate_duration(sc, langs, speech_rate) for sc in story.scenes)
     if total > target * 1.25:
         warnings.append(
             f"the curated pack still needs about {total:.0f}s at this length; "
@@ -260,15 +270,16 @@ def _fit_duration(story: Story, langs: Sequence[str], target: float) -> List[str
     return warnings
 
 
-def compose_from_pack(pack: Dict, topic: str, langs: Sequence[str], target_seconds: float) -> Story:
-    picked = _select_scenes(pack, target_seconds, langs)
+def compose_from_pack(pack: Dict, topic: str, langs: Sequence[str], target_seconds: float,
+                      speech_rate: float = 1.0) -> Story:
+    picked = _select_scenes(pack, target_seconds, langs, speech_rate)
     scenes = [Scene.from_dict(s) for s in picked]
     story = Story(
         topic=topic.strip(), world=pack["world"], palette=pack["palette"],
         title=dict(pack["title"]), scenes=scenes, languages=list(langs),
         generator="curated-pack", source_pack=pack["id"],
     )
-    story.warnings.extend(_fit_duration(story, langs, target_seconds))
+    story.warnings.extend(_fit_duration(story, langs, target_seconds, speech_rate))
     return story
 
 
@@ -280,6 +291,7 @@ def compose_story(
     llm: Optional[object] = None,
     palette: str = "auto",
     notes: str = "",
+    speech_rate: float = 1.0,
 ) -> Story:
     """Build a validated story for `topic`."""
     topic = (topic or "").strip()
@@ -289,7 +301,7 @@ def compose_story(
     # 1. curated pack
     pack = find_pack(topic)
     if pack is not None:
-        story = compose_from_pack(pack, topic, langs, target_seconds)
+        story = compose_from_pack(pack, topic, langs, target_seconds, speech_rate)
     # 2. optional local LLM
     elif llm is not None:
         from .llm import generate_with_llm

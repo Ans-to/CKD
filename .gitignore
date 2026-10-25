@@ -13,3 +13,6 @@ __pycache__/
 # editor / OS
 .DS_Store
 *.swp
+
+# build artifacts
+dist/

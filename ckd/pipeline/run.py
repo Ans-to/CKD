@@ -64,7 +64,7 @@ ProgressFn = Callable[[str, float, str], None]
 # Bump when the *drawing* changes (composition, palette, timings). Scene caches from
 # an older value are treated as stale, because a cached clip would otherwise keep an
 # old look. Script/logic changes bump the "v" inside script_hash instead.
-RENDER_VERSION = 6
+RENDER_VERSION = 11
 
 
 def _noop(stage: str, frac: float, msg: str) -> None:  # pragma: no cover
@@ -101,6 +101,21 @@ class Pipeline:
         }
         return hash_json(payload, prefix="script")
 
+    def _speech_rate(self) -> float:
+        """Words-per-second scale for the voice that will actually narrate.
+
+        Planning with Piper's speaking rate and then rendering with the offline
+        espeak fallback overshot the requested duration by ~80 %, so the composer
+        is told which one it is dealing with.
+        """
+        from ..voice.narration import resolve_engine
+
+        engines = set()
+        for lang, want in (("en", self.options.voice_en), ("ur", self.options.voice_ur)):
+            if lang in self.options.languages:
+                engines.add(resolve_engine(lang, want))
+        return 0.55 if "espeak" in engines else 1.0
+
     def build_story(self, *, compile_only: bool = False) -> Story:
         stage = "script"
         self.progress(stage, 0.05, "Composing script and scene plan")
@@ -127,6 +142,7 @@ class Pipeline:
                 self.options.topic, languages=self.options.languages,
                 target_seconds=self.options.duration, llm=llm,
                 palette=self.options.palette, notes=self.options.notes,
+                speech_rate=self._speech_rate(),
             )
             self.project.write_json(story_path, story.to_dict())
         validate_story(story, languages=self.options.languages)
@@ -204,6 +220,28 @@ class Pipeline:
                                      f"{track.engine}/{track.voice} {track.duration:.1f}s "
                                      f"timing={track.timing_kind}", time.time() - t0))
             self.progress(stage, 1.0, f"{lang}: {track.engine} narration {track.duration:.1f}s")
+        # measured narration is the ground truth for duration.  The composer plans
+        # with a speaking-rate table; if the voice that actually ran is much slower
+        # (the offline espeak fallback is ~half the rate of a Piper voice), say so
+        # instead of shipping a video that quietly misses the requested length.
+        target = float(self.options.duration)
+        for lang, track in tracks.items():
+            if target <= 0:
+                continue
+            ratio = track.duration / target
+            if ratio > 1.2 or ratio < 0.7:
+                note = (
+                    f"{lang}: narration measured {track.duration:.1f}s against a "
+                    f"{target:.0f}s target (engine: {track.engine}). The plan was sized "
+                    f"with an estimated speaking rate; re-run with --duration "
+                    f"{track.duration:.0f} to keep every beat, or a shorter --duration "
+                    f"to drop scenes."
+                )
+                if note not in story.warnings:
+                    story.warnings.append(note)
+                    LOG.warning(note)
+        self.project.write_json(self.project.story_path, story.to_dict())
+
         # storyboards (per language, with measured timing)
         board = storyboard_timing(story, tracks)
         for lang in tracks:
@@ -333,6 +371,7 @@ class Pipeline:
                     parts.append(part)
                     self.progress(f"video:{key}", 0.05 + 0.85 * (i + 1) / len(story.scenes),
                                   f"{lang}/{fmt}: scene {i + 1}/{len(story.scenes)} {status}")
+                self._prune_scene_dir(lang, fmt, [sc.id for sc in story.scenes])
                 joined = self.project.out_dir / f"{key}.video.mp4"
                 concat_videos(parts, joined)
                 final = self.project.video_path(lang, fmt)
@@ -367,6 +406,28 @@ class Pipeline:
         self.project.state["videos_by_key"] = results
         self.project.save()
         return results
+
+    def _prune_scene_dir(self, lang: str, fmt: str, scene_ids: Sequence[str]) -> None:
+        """Delete clips left over from a longer plan (e.g. 4 scenes -> 3).
+
+        Cached scene files are keyed by index, so a plan that drops a scene would
+        otherwise leave orphaned ``03_recap.mp4`` sitting in the project forever,
+        which is confusing when the folder is inspected or zipped.
+        """
+        from .project import slugify
+
+        wanted = {f"{i:02d}_{slugify(sid, 18)}" for i, sid in enumerate(scene_ids)}
+        folder = self.project.scene_dir / f"{lang}_{fmt}"
+        for path in folder.glob("*"):
+            if path.suffix not in (".mp4", ".json", ".part.mp4"):
+                continue
+            # scene files are named "<index>_<id>.mp4" / ".json"
+            stem = path.name.split(".", 1)[0]
+            if stem not in wanted:
+                try:
+                    path.unlink()
+                except OSError:
+                    pass
 
     def _all_cues(self, story: Story, track: NarrationTrack, lang: str) -> List[dict]:
         cues: List[dict] = []

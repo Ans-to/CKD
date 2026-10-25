@@ -58,16 +58,21 @@ class TextRenderer:
         self._sprite_cache: Dict[tuple, StyledSprite] = {}
         self._measure_cache: Dict[tuple, Tuple[float, float]] = {}
         self._layout_cache: Dict[tuple, Layout] = {}
-        self._size_cache: Dict[tuple, None] = {}
+        # current FreeType char size per *face object* (a face is shared by every
+        # role/weight combination that resolves to the same font).  Never cache
+        # "size applied" by (font, px): that claims the shared face is still at a
+        # size some other call has since changed, which rasterizes glyphs at the
+        # wrong pixel size while layout advances stay correct.
+        self._face_px: Dict[int, float] = {}
 
     # ------------------------------------------------------------------ masks
     def _apply_size(self, run: Run, style: TextStyle) -> freetype.Face:
         face = self.shaper.fonts.face(run.font)
-        px = style.size * self.ss
-        key = (run.font.key, round(px, 2))
-        if key not in self._size_cache:
+        px = round(style.size * self.ss, 2)
+        key = id(face.ft)
+        if self._face_px.get(key) != px:
             face.ft.set_char_size(int(round(px * 64)), 0, 72, 72)
-            self._size_cache[key] = None
+            self._face_px[key] = px
         return face.ft
 
     def word_mask(self, word: Word, style: TextStyle) -> WordMask:

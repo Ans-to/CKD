@@ -39,7 +39,7 @@ class SolarWorld(World):
             s["sun"] = (ww * 0.70, wy + wh * 0.02, ww * 0.24, wh * 0.26)
             s["house"] = (ww * 0.08, wy + wh * 0.34, ww * 0.62, wh * 0.58)
             s["roof"] = (ww * 0.12, wy + wh * 0.28, ww * 0.56, wh * 0.26)
-            s["panel_label"] = (ww * 0.40, wy + wh * 0.80, ww * 0.56, wh * 0.14)
+            s["panel_label"] = (ww * 0.10, wy + wh * 0.88, ww * 0.52, wh * 0.10)
             s["stage"] = (ww * 0.05, wy + wh * 0.08, ww * 0.90, wh * 0.84)
             s["stage_left"] = (ww * 0.03, wy + wh * 0.06, ww * 0.30, wh * 0.44)
             s["stage_mid"] = (ww * 0.34, wy + wh * 0.06, ww * 0.30, wh * 0.44)
@@ -48,15 +48,17 @@ class SolarWorld(World):
             s["circuit"] = (ww * 0.04, wy + wh * 0.10, ww * 0.92, wh * 0.70)
             s["wire"] = (ww * 0.20, wy + wh * 0.30, ww * 0.60, wh * 0.28)
             s["wave"] = (ww * 0.05, wy + wh * 0.58, ww * 0.90, wh * 0.30)
+            s["wave_band"] = (ww * 0.06, wy + wh * 0.80, ww * 0.88, wh * 0.16)
             s["grid"] = (ww * 0.60, wy + wh * 0.05, ww * 0.34, wh * 0.40)
-            s["house_small"] = (ww * 0.64, wy + wh * 0.44, ww * 0.30, wh * 0.42)
+            # the recap puts a battery directly above this, so keep the gable low
+            s["house_small"] = (ww * 0.66, wy + wh * 0.56, ww * 0.26, wh * 0.32)
             s["caption_band"] = (ww * 0.04, wy + wh * 0.78, ww * 0.92, wh * 0.18)
         else:
             s["back"] = (wx, wy, ww, wh)
             s["sun"] = (wx + ww * 0.74, wy + wh * 0.02, ww * 0.19, wh * 0.34)
             s["house"] = (wx + ww * 0.50, wy + wh * 0.34, ww * 0.36, wh * 0.56)
             s["roof"] = (wx + ww * 0.48, wy + wh * 0.24, ww * 0.38, wh * 0.26)
-            s["panel_label"] = (wx + ww * 0.54, wy + wh * 0.56, ww * 0.28, wh * 0.13)
+            s["panel_label"] = (wx + ww * 0.52, wy + wh * 0.93, ww * 0.30, wh * 0.10)
             s["stage"] = (wx + ww * 0.06, wy + wh * 0.06, ww * 0.66, wh * 0.82)
             s["stage_left"] = (wx + ww * 0.01, wy + wh * 0.10, ww * 0.40, wh * 0.74)
             s["stage_mid"] = (wx + ww * 0.44, wy + wh * 0.14, ww * 0.20, wh * 0.62)
@@ -65,6 +67,9 @@ class SolarWorld(World):
             s["circuit"] = (wx + ww * 0.44, wy + wh * 0.30, ww * 0.40, wh * 0.50)
             s["wire"] = (wx + ww * 0.24, wy + wh * 0.52, ww * 0.30, wh * 0.22)
             s["wave"] = (wx + ww * 0.40, wy + wh * 0.58, ww * 0.46, wh * 0.24)
+            # a wide, low band under the props: reads as an oscilloscope strip, never
+            # collides with the wire or the inverter body
+            s["wave_band"] = (wx + ww * 0.06, wy + wh * 0.80, ww * 0.88, wh * 0.16)
             s["grid"] = (wx + ww * 0.80, wy + wh * 0.06, ww * 0.19, wh * 0.40)
             s["house_small"] = (wx + ww * 0.78, wy + wh * 0.40, ww * 0.21, wh * 0.46)
             s["caption_band"] = (wx + ww * 0.04, wy + wh * 0.84, ww * 0.92, wh * 0.14)
@@ -178,9 +183,13 @@ class SolarWorld(World):
         if ph > h * 0.9:
             ph = h * 0.9
             pw = ph * (cols / max(1, rows)) / 0.72
-        cx, cy = x + w / 2, y + h / 2
-        # tilted panel: parallelogram
+        # tilted panel: parallelogram.  The skew pushes the top edge right and the
+        # bottom edge left, so reserve that overhang inside the slot instead of
+        # letting the panel bleed past the safe area (and get cropped by the
+        # camera push-in).
         tilt = ph * 0.18
+        pw = max(ctx.stage.px(90), pw - tilt)
+        cx, cy = x + w / 2, y + h / 2
         x0, x1 = cx - pw / 2, cx + pw / 2
         top_y, bot_y = cy - ph / 2, cy + ph / 2
         quad = [(x0 + tilt, top_y), (x1, top_y - tilt * 0.2), (x1 - tilt, bot_y), (x0, bot_y - tilt * 0.2)]
@@ -491,7 +500,11 @@ class SolarWorld(World):
             return
         params = el.get("params", {})
         alpha = 1.0
-        appear = ctx.progress("panel_glow")
+        target = params.get("leader_to")
+        if target:
+            tx, ty, tw, th = self.slot(ctx.stage, target)
+            p.line([(x + w * 0.5, y + h * 0.15), (tx + tw * 0.5, ty + th * 0.95)],
+                   with_alpha(ctx.col("muted"), 0.75), width=max(1.5, ctx.stage.px(2)))
         self.label(p, ctx, x + w / 2, y + h / 2, text,
                    size=params.get("size", ctx.stage.label_size()), alpha=max(0.55, alpha))
 
@@ -520,7 +533,8 @@ class SolarWorld(World):
                           a[3] * 0.35, 14)
         pts_b = sag_curve((b[0] + b[2] * 0.92, b[1] + b[3] * 0.50), (c[0] + c[2] * 0.10, c[1] + c[3] * 0.50),
                           a[3] * 0.30, 14)
-        pts_c = [(c[0] + c[2] * 0.55, c[1] + c[3] * 0.30), (d[0] + d[2] * 0.50, d[1] + d[3] * 0.05)]
+        pts_c = sag_curve((c[0] + c[2] * 0.55, c[1] + c[3] * 0.30), (d[0] + d[2] * 0.50, d[1] + d[3] * 0.05),
+                          a[3] * 0.22, 12)
         prog = ctx.progress("flow_recap")
         if prog <= 0:
             return

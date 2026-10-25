@@ -158,6 +158,26 @@ class SpeechCache:
         )
 
 
+def resolve_engine(lang: str, pref: str = "auto") -> str:
+    """Which engine *would* narrate this language, without downloading anything.
+
+    Returns "espeak", "piper" (voice already cached) or "piper-download" (a
+    download would be attempted).  The composer uses this to plan a duration with
+    the right speaking rate: espeak is roughly half as fast as a Piper voice.
+    """
+    pref = str(pref or "auto")
+    if pref.startswith("espeak"):
+        return "espeak"
+    try:
+        from .registry import DEFAULT_VOICE_BY_LANG, voice_available
+    except Exception:  # pragma: no cover - registry is always importable
+        return "piper-download"
+    voice_id = pref if pref not in ("auto", "", None) else DEFAULT_VOICE_BY_LANG.get(lang)
+    if not voice_id:
+        return "piper-download"
+    return "piper" if voice_available(voice_id) else "piper-download"
+
+
 class Narrator:
     """Creates narration tracks using the best available engine per language."""
 

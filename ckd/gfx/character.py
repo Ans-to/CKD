@@ -282,9 +282,9 @@ class Character:
             _blk(d, mx - 0.6, my - 0.7, 0.7, 0.8, s.outline)
             _blk(d, mx + 2.6, my - 0.7, 0.7, 0.8, s.outline)
         elif mouth == "open":
-            _blk(d, mx - 0.5, my - 0.6, 3.6, 2.6, s.outline)
-            _blk(d, mx + 0.1, my + 0.3, 2.4, 1.1, (152, 62, 72, 255))
-            _blk(d, mx + 0.1, my + 1.4, 2.4, 0.4, (238, 238, 238, 255))
+            _blk(d, mx - 0.1, my - 0.4, 2.7, 1.9, s.outline)
+            _blk(d, mx + 0.35, my + 0.35, 1.8, 0.8, (140, 58, 68, 255))
+            _blk(d, mx + 0.35, my + 1.15, 1.8, 0.3, (238, 238, 238, 255))
         elif mouth == "flat":
             _blk(d, mx, my, 2.6, 0.7, s.outline)
         elif mouth == "o":

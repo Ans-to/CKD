@@ -104,7 +104,8 @@ class Painter:
         self.width = int(width)
         self.height = int(height)
         self.ss = int(ss)
-        self.image = Image.new("RGBA", (self.width * self.ss, self.height * self.ss), background or (0, 0, 0, 0))
+        self._bg = background or (0, 0, 0, 0)
+        self.image = Image.new("RGBA", (self.width * self.ss, self.height * self.ss), self._bg)
         self._draw = ImageDraw.Draw(self.image, "RGBA")
         self._transform = Transform()
         self._stack: List[Transform] = []
@@ -153,87 +154,174 @@ class Painter:
     def _radius(self, r: float) -> float:
         return r * self.ss * self._transform.scale
 
+    # ------------------------------------------------------- alpha compositing
+    @staticmethod
+    def _needs_blend(*colors) -> bool:
+        return any(c is not None and rgba(c)[3] < 255 for c in colors)
+
+    def _draw_blended(self, bbox, fn) -> None:
+        """Draw through a temporary layer and composite it once.
+
+        ImageDraw writes RGBA values *verbatim* (it does not blend), so a 20 %
+        white ellipse would replace the pixel with 20 %-opaque white and punch a
+        hole in the frame. Anything translucent goes through this path instead.
+        """
+        x0 = max(0, int(math.floor(bbox[0])) - 1)
+        y0 = max(0, int(math.floor(bbox[1])) - 1)
+        x1 = min(self.image.width, int(math.ceil(bbox[2])) + 1)
+        y1 = min(self.image.height, int(math.ceil(bbox[3])) + 1)
+        if x1 <= x0 or y1 <= y0:
+            return
+        layer = Image.new("RGBA", (x1 - x0, y1 - y0), (0, 0, 0, 0))
+        fn(ImageDraw.Draw(layer, "RGBA"), x0, y0)
+        self.image.alpha_composite(layer, (x0, y0))
+
     # ------------------------------------------------------------- primitives
     def polygon(self, pts: Sequence[Point], fill=None, outline=None, width: float = 0.0) -> None:
         p = self._p(pts)
         if len(p) < 3:
             return
-        self._draw.polygon(p, fill=rgba(fill) if fill is not None else None)
-        if outline is not None:
-            closed = p + [p[0]]
-            self._draw.line(closed, fill=rgba(outline), width=self._w(width or 2), joint="curve")
+        w = self._w(width or 2) if outline is not None else 0
+        fill_rgba = rgba(fill) if fill is not None else None
+        outline_rgba = rgba(outline) if outline is not None else None
+
+        def draw(d, dx, dy):
+            q = [(x - dx, y - dy) for x, y in p]
+            d.polygon(q, fill=fill_rgba)
+            if outline_rgba is not None:
+                d.line(q + [q[0]], fill=outline_rgba, width=w, joint="curve")
+
+        if self._needs_blend(fill, outline):
+            xs = [x for x, _ in p]; ys = [y for _, y in p]
+            self._draw_blended((min(xs) - w, min(ys) - w, max(xs) + w, max(ys) + w), draw)
+        else:
+            draw(self._draw, 0, 0)
 
     def shape_path(self, pts: Sequence[Point], fill=None, outline=None, width: float = 0.0, closed: bool = True) -> None:
         p = self._p(pts)
-        if closed and len(p) >= 3:
-            self._draw.polygon(p, fill=rgba(fill) if fill is not None else None)
-        if outline is not None:
-            seq = p + ([p[0]] if closed else [])
-            if len(seq) > 1:
-                self._draw.line(seq, fill=rgba(outline), width=self._w(width or 2), joint="curve")
+        if len(p) < 2:
+            return
+        w = self._w(width or 2) if outline is not None else 0
+        fill_rgba = rgba(fill) if fill is not None else None
+        outline_rgba = rgba(outline) if outline is not None else None
+
+        def draw(d, dx, dy):
+            q = [(x - dx, y - dy) for x, y in p]
+            if closed and len(q) >= 3:
+                d.polygon(q, fill=fill_rgba)
+            if outline_rgba is not None:
+                d.line(q + ([q[0]] if closed else []), fill=outline_rgba, width=w, joint="curve")
+
+        if self._needs_blend(fill, outline):
+            xs = [x for x, _ in p]; ys = [y for _, y in p]
+            self._draw_blended((min(xs) - w, min(ys) - w, max(xs) + w, max(ys) + w), draw)
+        else:
+            draw(self._draw, 0, 0)
 
     def line(self, pts: Sequence[Point], color, width: float = 2.0, cap: str = "round") -> None:
         p = self._p(pts)
+        if len(p) < 2:
+            return
         w = self._w(width)
-        if len(p) >= 2:
-            self._draw.line(p, fill=rgba(color), width=w, joint="curve")
+        col = rgba(color)
+
+        def draw(d, dx, dy):
+            q = [(x - dx, y - dy) for x, y in p]
+            d.line(q, fill=col, width=w, joint="curve")
             if cap == "round":
                 r = w / 2
-                for x, y in (p[0], p[-1]):
-                    self._draw.ellipse((x - r, y - r, x + r, y + r), fill=rgba(color))
+                for x, y in (q[0], q[-1]):
+                    d.ellipse((x - r, y - r, x + r, y + r), fill=col)
 
-    def rect(self, x0: float, y0: float, x1: float, y1: float, fill=None, outline=None, width: float = 0.0, radius: float = 0.0) -> None:
+        if col[3] < 255:
+            xs = [x for x, _ in p]; ys = [y for _, y in p]
+            pad = w
+            self._draw_blended((min(xs) - pad, min(ys) - pad, max(xs) + pad, max(ys) + pad), draw)
+        else:
+            draw(self._draw, 0, 0)
+
+    def rect(self, x0: float, y0: float, x1: float, y1: float, fill=None, outline=None,
+             width: float = 0.0, radius: float = 0.0) -> None:
         a = self._pt(x0, y0)
         b = self._pt(x1, y1)
         box = (min(a[0], b[0]), min(a[1], b[1]), max(a[0], b[0]), max(a[1], b[1]))
-        if radius > 0 and hasattr(self._draw, "rounded_rectangle"):
-            self._draw.rounded_rectangle(
-                box,
-                radius=self._radius(radius),
-                fill=rgba(fill) if fill is not None else None,
-                outline=rgba(outline) if outline is not None else None,
-                width=self._w(width) if outline is not None else 0,
-            )
-        else:
-            self._draw.rectangle(
-                box,
-                fill=rgba(fill) if fill is not None else None,
-                outline=rgba(outline) if outline is not None else None,
-                width=self._w(width) if outline is not None else 0,
-            )
+        w = self._w(width) if outline is not None else 0
+        fill_rgba = rgba(fill) if fill is not None else None
+        outline_rgba = rgba(outline) if outline is not None else None
+        r = self._radius(radius) if radius > 0 else 0
 
-    def ellipse(self, cx: float, cy: float, rx: float, ry: float | None = None, fill=None, outline=None, width: float = 0.0) -> None:
+        def draw(d, dx, dy):
+            bb = (box[0] - dx, box[1] - dy, box[2] - dx, box[3] - dy)
+            if r > 0 and hasattr(d, "rounded_rectangle"):
+                d.rounded_rectangle(bb, radius=r, fill=fill_rgba, outline=outline_rgba, width=w)
+            else:
+                d.rectangle(bb, fill=fill_rgba, outline=outline_rgba, width=w)
+
+        if self._needs_blend(fill, outline):
+            pad = w + 2
+            self._draw_blended((box[0] - pad, box[1] - pad, box[2] + pad, box[3] + pad), draw)
+        else:
+            draw(self._draw, 0, 0)
+
+    def ellipse(self, cx: float, cy: float, rx: float, ry: float | None = None, fill=None,
+                outline=None, width: float = 0.0) -> None:
         ry = rx if ry is None else ry
         c = self._pt(cx, cy)
         rx_p = self._radius(rx)
         ry_p = self._radius(ry)
         box = (c[0] - rx_p, c[1] - ry_p, c[0] + rx_p, c[1] + ry_p)
-        self._draw.ellipse(
-            box,
-            fill=rgba(fill) if fill is not None else None,
-            outline=rgba(outline) if outline is not None else None,
-            width=self._w(width) if outline is not None else 0,
-        )
+        w = self._w(width) if outline is not None else 0
+        fill_rgba = rgba(fill) if fill is not None else None
+        outline_rgba = rgba(outline) if outline is not None else None
 
-    def arc(self, cx: float, cy: float, rx: float, ry: float, start: float, end: float, color, width: float = 3.0) -> None:
+        def draw(d, dx, dy):
+            d.ellipse((box[0] - dx, box[1] - dy, box[2] - dx, box[3] - dy),
+                      fill=fill_rgba, outline=outline_rgba, width=w)
+
+        if self._needs_blend(fill, outline):
+            pad = w + 2
+            self._draw_blended((box[0] - pad, box[1] - pad, box[2] + pad, box[3] + pad), draw)
+        else:
+            draw(self._draw, 0, 0)
+
+    def arc(self, cx: float, cy: float, rx: float, ry: float, start: float, end: float,
+            color, width: float = 3.0) -> None:
         c = self._pt(cx, cy)
-        box = (c[0] - self._radius(rx), c[1] - self._radius(ry), c[0] + self._radius(rx), c[1] + self._radius(ry))
-        self._draw.arc(box, start, end, fill=rgba(color), width=self._w(width))
+        box = (c[0] - self._radius(rx), c[1] - self._radius(ry),
+               c[0] + self._radius(rx), c[1] + self._radius(ry))
+        w = self._w(width)
+        col = rgba(color)
 
-    def pie(self, cx: float, cy: float, r: float, start: float, end: float, fill=None, outline=None, width: float = 0.0) -> None:
+        def draw(d, dx, dy):
+            d.arc((box[0] - dx, box[1] - dy, box[2] - dx, box[3] - dy), start, end, fill=col, width=w)
+
+        if col[3] < 255:
+            pad = w + 2
+            self._draw_blended((box[0] - pad, box[1] - pad, box[2] + pad, box[3] + pad), draw)
+        else:
+            draw(self._draw, 0, 0)
+
+    def pie(self, cx: float, cy: float, r: float, start: float, end: float, fill=None,
+            outline=None, width: float = 0.0) -> None:
         c = self._pt(cx, cy)
         rp = self._radius(r)
         box = (c[0] - rp, c[1] - rp, c[0] + rp, c[1] + rp)
-        self._draw.pieslice(
-            box,
-            start,
-            end,
-            fill=rgba(fill) if fill is not None else None,
-            outline=rgba(outline) if outline is not None else None,
-            width=self._w(width) if outline is not None else 0,
-        )
+        w = self._w(width) if outline is not None else 0
+        fill_rgba = rgba(fill) if fill is not None else None
+        outline_rgba = rgba(outline) if outline is not None else None
 
-    def ring(self, cx: float, cy: float, r_out: float, thickness: float, color, start: float = 0.0, end: float = 360.0) -> None:
+        def draw(d, dx, dy):
+            d.pieslice((box[0] - dx, box[1] - dy, box[2] - dx, box[3] - dy), start, end,
+                       fill=fill_rgba, outline=outline_rgba, width=w)
+
+        if self._needs_blend(fill, outline):
+            pad = w + 2
+            self._draw_blended((box[0] - pad, box[1] - pad, box[2] + pad, box[3] + pad), draw)
+        else:
+            draw(self._draw, 0, 0)
+
+    def ring(self, cx: float, cy: float, r_out: float, thickness: float, color,
+             start: float = 0.0, end: float = 360.0) -> None:
         r_in = max(0.1, r_out - thickness)
         steps = max(8, int(abs(end - start) / 6))
         outer, inner = [], []
@@ -246,9 +334,11 @@ class Painter:
     def glow(self, cx: float, cy: float, r: float, color, alpha: float = 0.5, steps: int = 5) -> None:
         for i in range(steps, 0, -1):
             f = i / steps
-            self.ellipse(cx, cy, r * f, r * f, fill=with_alpha(color, alpha / steps * (1.2 - 0.5 * f)))
+            self.ellipse(cx, cy, r * f, r * f,
+                         fill=with_alpha(color, alpha / steps * (1.2 - 0.5 * f)))
 
-    def blob(self, cx: float, cy: float, r: float, wobble: float = 0.12, points: int = 16, seed: int = 7, fill=None, outline=None, width: float = 0.0, phase: float = 0.0) -> None:
+    def blob(self, cx: float, cy: float, r: float, wobble: float = 0.12, points: int = 16,
+             seed: int = 7, fill=None, outline=None, width: float = 0.0, phase: float = 0.0) -> None:
         rnd = random.Random(seed)
         radii = [1.0 + (rnd.random() - 0.5) * 2 * wobble for _ in range(points)]
         pts = []
@@ -409,10 +499,17 @@ class Painter:
         than LANCZOS and exactly correct for 2x supersampling.
         """
         if self.ss == 1:
-            return self.image
-        if self.ss == 2:
-            return self.image.reduce(2)
-        return self.image.resize((self.width, self.height), Image.LANCZOS)
+            out = self.image
+        elif self.ss == 2:
+            out = self.image.reduce(2)
+        else:
+            out = self.image.resize((self.width, self.height), Image.LANCZOS)
+        # never hand back a frame with holes: translucent draws composite now, but a
+        # bare painter (or a stray partial alpha) must still flatten onto the backdrop
+        if out.getchannel("A").getextrema()[0] < 255:
+            backdrop = self._bg if self._bg[3] == 255 else (0, 0, 0, 255)
+            out = Image.alpha_composite(Image.new("RGBA", out.size, backdrop), out)
+        return out
 
     def result_rgb(self) -> Image.Image:
         return self.result().convert("RGB")

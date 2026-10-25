@@ -106,6 +106,15 @@ class SceneRenderer:
         if spec.include_character:
             slot = (spec.scene.character or {}).get("slot", "char_left")
             side = "right" if str(slot).endswith("right") else "left"
+            # the presenter must not stand in front of the props: if the scene puts
+            # more elements on one side, take the other side regardless of the slot
+            slots = [str(el.get("slot", "")) for el in spec.scene.elements]
+            rightish = sum(1 for sl in slots if "right" in sl)
+            leftish = sum(1 for sl in slots if "left" in sl)
+            if rightish > leftish:
+                side = "left"
+            elif leftish > rightish:
+                side = "right"
         self.stage = replace(spec.stage, character_side=side)
         spec = replace(spec, stage=self.stage)
         self.spec = spec
@@ -245,11 +254,16 @@ class SceneRenderer:
                           role="display" if self.spec.language != "ur" else "display",
                           align="left" if self.spec.language != "ur" else "right", line_height=1.14)
         text = " ".join(w for w, _ in self.headline_words)
-        max_w = min(aw, st.content_w * (0.94 if st.format == "vertical" else 0.60))
+        wide = st.format == "vertical" or self.spec.language == "ur"
+        max_w = min(aw if not wide else st.content_w, st.content_w * (0.94 if st.format == "vertical" else 0.62))
         lay, style = _autosize(self.renderer, text, style, max_w, ah, min_size=size * 0.6, max_lines=3)
         size = style.size
         if st.format == "vertical":
             ox = (st.width - lay.width) / 2
+        elif self.spec.language == "ur":
+            # RTL reads from the right edge: mirror the LTR top-left block instead of
+            # leaving an Urdu headline stranded on the left half of the frame.
+            ox = (st.width - st.safe_x) - lay.width
         else:
             ox = ax
         # vertically centre the block inside its area so ascenders never clip
@@ -291,9 +305,20 @@ class SceneRenderer:
             # keep the strip inside the safe area: it used to sit above the frame edge
             # sit it at the far edge of the content area, level with the first line,
             # instead of above the headline (where it used to clip the frame top)
-            ky = oy + max(0.0, st.px(4) - ease_out(clamp(t / 0.5)) * st.px(10))
-            kx = st.width - st.safe_x
-            self.world.kicker(p, ctx, kicker, kx, ky, align="right")
+            if st.format == "vertical":
+                # the vertical headline spans the full width, so the chip cannot share
+                # its first line: park it just above the caption band instead
+                ky = st.caption_area[1] - st.px(26)
+                kx = st.width - st.safe_x
+                self.world.kicker(p, ctx, kicker, kx, ky, align="right")
+            elif self.spec.language == "ur":
+                # mirror the LTR chip: top-left for right-to-left headlines
+                ky = oy + max(0.0, st.px(4) - ease_out(clamp(t / 0.5)) * st.px(10))
+                self.world.kicker(p, ctx, kicker, st.safe_x, ky, align="left")
+            else:
+                ky = oy + max(0.0, st.px(4) - ease_out(clamp(t / 0.5)) * st.px(10))
+                kx = st.width - st.safe_x
+                self.world.kicker(p, ctx, kicker, kx, ky, align="right")
 
     def _kicker_text(self) -> str:
         idx = self.spec.scene_index + 1
@@ -368,13 +393,14 @@ class SceneRenderer:
         # intro: quick fade from background colour + horizontal wipe
         if t < 0.26:
             k = 1 - ease_out(t / 0.26)
-            glow = mix(st.palette["bg_top"], st.palette["accent3"], 0.28)
-            p.rect(0, 0, st.width, st.height, fill=with_alpha(glow, k * 0.85))
+            glow = mix(st.palette["ink"], st.palette["accent3"], 0.10)
+            p.rect(0, 0, st.width, st.height, fill=with_alpha(glow, k * 0.90))
         # outro: fade to colour with a shrink cue
         if dur - t < 0.32:
             k = 1 - ease_in_out((dur - t) / 0.32)
+            # fade to the dark ink, never to a pale sky wash (that read as a flash)
             p.rect(0, 0, st.width, st.height,
-                   fill=with_alpha(mix(st.palette["bg_top"], st.palette["accent3"], 0.22), k * 0.88))
+                   fill=with_alpha(mix(st.palette["ink"], st.palette["accent3"], 0.08), k * 0.92))
             bar_h = st.height * 0.012 * k
             p.rect(0, st.height / 2 - bar_h / 2, st.width * k, st.height / 2 + bar_h / 2,
                    fill=with_alpha(st.palette["accent"], 0.9 * k))

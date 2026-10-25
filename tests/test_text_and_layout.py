@@ -76,3 +76,25 @@ def test_every_pack_scene_renders_headline_and_caption_inside_safe_area(wifi_nar
         edges = [img[:6], img[-6:], img[:, :6], img[:, -6:]]
         for band in edges:
             assert not (band.min(axis=2) > 245).any(), "text is clipped by the frame edge"
+
+
+def test_glyph_raster_size_follows_style_when_one_renderer_mixes_sizes():
+    """Regression: masks must not reuse glyphs rasterized at a stale face size.
+
+    A single TextRenderer draws kickers, labels, captions and headlines at many
+    sizes on faces that are shared per font.  Caching "size already applied" by
+    (font, px) makes glyph bitmaps come out at whatever size was set last while
+    layout advances stay correct, which reads as tiny letters with huge gaps.
+    """
+    big = TextStyle(size=50, language="en", role="body")
+    small = TextStyle(size=20, language="en", role="body")
+    shared = TextRenderer(ss=2)
+    shared.word_mask(shared.shaper.shape_word("Electricity", big), big)
+    shared.word_mask(shared.shaper.shape_word("kicker", small), small)
+    warm = shared.word_mask(shared.shaper.shape_word("change.", big), big)
+
+    fresh = TextRenderer(ss=2)
+    cold = fresh.word_mask(fresh.shaper.shape_word("change.", big), big)
+
+    assert abs(warm.height - cold.height) < 0.5, (warm.height, cold.height)
+    assert abs(warm.width - cold.width) < 0.5, (warm.width, cold.width)

@@ -78,8 +78,8 @@
    "id": "cells",
    "purpose": "explain",
    "narration": {
-    "en": "Inside the panel sit many silicon cells. When light particles, called photons, hit the silicon, they knock electrons loose. Those electrons flow, and flowing electrons are an electric current.",
-    "ur": "پینل کے اندر سلکان کے بہت سے خلیے ہوتے ہیں۔ جب روشنی کے ذرے، جنہیں فوٹون کہتے ہیں، سلکان پر گرتے ہیں تو وہ الیکٹرانوں کو آزاد کر دیتے ہیں۔ یہ الیکٹران بہنے لگتے ہیں، اور بہتے الیکٹران ہی برقی رو کہلاتے ہیں۔"
+    "en": "Inside the panel sit many silicon cells. When light particles, called photons, hit the silicon, they knock electrons loose.",
+    "ur": "پینل کے اندر سلکان کے بہت سے خلیے ہوتے ہیں۔ جب روشنی کے ذرے، جنہیں فوٹون کہتے ہیں، سلکان پر گرتے ہیں تو وہ الیکٹرانوں کو آزاد کر دیتے ہیں۔"
    },
    "headline": {
     "en": "Inside: silicon cells",
@@ -170,23 +170,12 @@
       "from": "panel",
       "to": "inverter"
      }
-    },
-    {
-     "type": "waveform",
-     "slot": "wave",
-     "params": {
-      "kind": "dc_then_ac"
-     }
-    },
-    {
-     "type": "house",
-     "slot": "house_small"
     }
    ],
    "beats": [],
    "character": {
     "pose": "present",
-    "slot": "char_right"
+    "slot": "char_left"
    },
    "camera": "push_in",
    "actions": [
@@ -260,9 +249,14 @@
   }
  ],
  "languages": [
-  "en"
+  "en",
+  "ur"
  ],
  "generator": "curated-pack",
- "warnings": [],
+ "warnings": [
+  "narration shortened to approach the 60s target: dropped one sentence from scene 'cells'",
+  "en: narration measured 74.8s against a 60s target (engine: espeak). The plan was sized with an estimated speaking rate; re-run with --duration 75 to keep every beat, or a shorter --duration to drop scenes.",
+  "ur: narration measured 91.6s against a 60s target (engine: espeak). The plan was sized with an estimated speaking rate; re-run with --duration 92 to keep every beat, or a shorter --duration to drop scenes."
+ ],
  "source_pack": "solar"
 }

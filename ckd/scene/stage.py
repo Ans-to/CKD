@@ -57,7 +57,7 @@ class Stage:
     @property
     def headline_area(self) -> Rect:
         if self.format == "vertical":
-            return (self.safe_x, self.height * 0.055, self.content_w, self.height * 0.17)
+            return (self.safe_x, self.height * 0.075, self.content_w, self.height * 0.155)
         return (self.safe_x, self.safe_top, self.content_w * 0.60, self.height * 0.22)
 
     @property
@@ -77,7 +77,7 @@ class Stage:
         world keeps the full width above it.
         """
         if self.format == "vertical":
-            return (0.0, self.height * 0.215, float(self.width), self.height * 0.325)
+            return (0.0, self.height * 0.245, float(self.width), self.height * 0.295)
         # start below the headline band: a tall prop must never grow into the text
         top, bottom = self.height * 0.245, self.height * 0.795
         if self.character_side == "right":
@@ -110,7 +110,7 @@ class Stage:
 
     # -------------------------------------------------------------- type sizes
     def headline_size(self) -> float:
-        return self.px(50 if self.format == "landscape" else 46)
+        return self.px(50 if self.format == "landscape" else 40)
 
     def caption_size(self) -> float:
         return self.px(33 if self.format == "landscape" else 31)

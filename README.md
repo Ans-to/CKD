@@ -5,7 +5,7 @@ explainer with one recurring character, and renders a verified MP4 — in **Engl
 **16:9 or 9:16** — with no GPU, no paid API and **no hosted AI inference**.
 
 ```
-"solar energy"  →  script + scene plan  →  your review  →  1280×720 MP4, 83 s, H.264 + AAC
+"solar energy"  →  script + scene plan  →  your review  →  1280×720 MP4, H.264 + AAC
 ```
 
 ## What it actually does
@@ -37,8 +37,17 @@ python -m ckd preview --topic "how wifi works" --langs en --formats landscape  #
 python -m ckd render  --topic "solar energy" --langs en,ur --formats landscape,vertical --quality standard
 ```
 
-A finished sample (rendered by the code in this repo, not a mockup) is in
-`samples/solar-en-16x9.mp4` with its `story.json`, `report.json` and a frame contact sheet.
+Two finished samples, rendered by the code in this repo (not mockups):
+
+| file | language / format | length | notes |
+|---|---|---|---|
+| `samples/solar-en-16x9.mp4` | English 16:9, 1280×720 | 74.8 s | + `story.json`, `report.json`, `srt`, frame sheet |
+| `samples/solar-ur-9x16.mp4` | Urdu 9:16, 404×720 | 91.6 s | Nastaliq, RTL, Urdu numerals |
+
+Both were asked for at `--duration 60`. The offline espeak fallback speaks slower than the planner
+assumes, so the narration came out at 75 s / 92 s — that is recorded in `story.warnings` and
+`report.json` rather than hidden. Rendered here on 2 vCPU; see `docs/TEST_REPORT.md` for what is and
+is not verified.
 
 ## Formats and languages, genuinely re-composed
 

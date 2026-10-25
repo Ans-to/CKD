@@ -201,7 +201,14 @@ class World:
         style = TextStyle(size=ctx.stage.kicker_size(), language=ctx.language, role="small")
         lay = ctx.renderer.layout(text, style, ctx.stage.content_w)
         x0 = x - lay.width if align == "right" else x
-        ctx.renderer.draw_layout(p, lay, style, (x0, y), with_alpha(ctx.col("muted"), alpha))
+        # a bare muted caption vanished against bright skies: give it a chip
+        pad_x, pad_y = style.size * 0.55, style.size * 0.26
+        p.rect(x0 - pad_x, y - pad_y, x0 + lay.width + pad_x, y + lay.height + pad_y,
+               fill=with_alpha(ctx.col("ink"), 0.42 * alpha), radius=style.size * 0.5)
+        p.rect(x0 - pad_x * 0.62, y + lay.height * 0.10, x0 - pad_x * 0.20,
+               y + lay.height * 0.90, fill=with_alpha(ctx.col("accent3"), 0.95 * alpha),
+               radius=style.size * 0.16)
+        ctx.renderer.draw_layout(p, lay, style, (x0, y), with_alpha(ctx.col("paper"), alpha))
         return lay.width
 
     def atmosphere(self, p: Painter, ctx: RenderContext, strength: float = 0.35) -> None:

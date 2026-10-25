@@ -103,15 +103,13 @@ _pack(
                 {"type": "panel", "slot": "stage_left", "params": {"rows": 3, "cols": 3}},
                 {"type": "inverter", "slot": "stage_right"},
                 {"type": "wire", "slot": "wire", "params": {"from": "panel", "to": "inverter"}},
-                {"type": "waveform", "slot": "wave", "params": {"kind": "dc_then_ac"}},
-                {"type": "house", "slot": "house_small"},
             ],
             "actions": [
                 {"action": "dc_arrow", "params": {}},
                 {"action": "inverter_pulse", "params": {}},
                 {"action": "ac_wave", "params": {}},
             ],
-            "character": {"pose": "present", "slot": "char_right"},
+            "character": {"pose": "present", "slot": "char_left"},
         },
         {
             "id": "storage",
