@@ -11,15 +11,19 @@ one worker, from `report.json`:
 
 | output | frames | per frame | scene render time | video length |
 |---|---|---|---|---|
-| 16:9 720p (English) | 2 642 | ~110 ms | **291 s** | 110.1 s |
-| 16:9 720p (Urdu) | 3 293 | ~107 ms | **352 s** | 137.2 s |
-| 9:16 720p (English) | 2 642 | ~36 ms | **96 s** | 110.1 s |
-| 9:16 720p (Urdu) | 3 293 | ~36 ms | **120 s** | 137.2 s |
-| 16:9 480p draft | — | roughly 0.4× the 720p cost | **~2 min** per 110 s | — |
-| 16:9 1080p (`high`) | — | **not measured** — expect ~2.25× the 720p cost | **~11 min** per 110 s (estimate) | — |
+| 16:9 720p (English) | 1 527 | ~115 ms | **176 s** | 63.6 s |
+| 16:9 720p (Urdu) | 1 805 | ~112 ms | **202 s** | 75.2 s |
+| 9:16 720p (English) | 1 527 | ~40 ms | **61 s** | 63.6 s |
+| 9:16 720p (Urdu) | 1 805 | ~40 ms | **72 s** | 75.2 s |
+| 16:9 480p draft | — | roughly 0.4× the 720p cost | **~1 min** per 60 s | — |
+| 16:9 1080p (`high`) | — | **not measured** — expect ~2.25× the 720p cost | **~7 min** per 60 s (estimate) | — |
 
-**All four combinations** of the same six-beat plan took **14 min 40 s** end to end on 2 vCPU,
-including narration, per-scene clips, concat, mux, probe and verify, and produced four verified MP4s.
+**All four combinations** of the same six-beat plan took **13 min** end to end on 2 vCPU, including
+narration, per-scene clips, concat, mux, probe and verify, and produced four verified MP4s.
+
+Narration, measured separately: Kokoro-82M q8 runs at about **1.5× real time** on 2 cores — 63 s of
+English speech synthesises in ~40 s, once, and is then cached clause by clause. espeak is ~50× real
+time but is only used for Urdu here. The one-off Kokoro download is 89 MB from npm.
 
 Vertical costs ~0.33× of landscape because there are 3.2× fewer pixels per frame. A scene is
 rendered once per language×format: changing only the caption language does not re-render video.

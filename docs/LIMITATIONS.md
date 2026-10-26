@@ -19,8 +19,11 @@ words, a local TTS voice reads them. It is designed for short, factual, structur
 - **Not a fact source.** The three curated packs contain descriptive, non-numeric explanations. The
   generic scaffold for unknown topics is a *structure*, not knowledge — it says so in its warnings and
   in `report.json`. **Check anything you publish.** No citations are generated because none were used.
-- **Not a narrator with emotion.** Word timings are measured (engine events) or interpolated, and the
-  fallback voice is `espeak`, which sounds robotic. The pipeline labels which one was used, per video.
+- **Not a narrator with emotion.** English uses a neural voice (Kokoro-82M) with a fixed neutral
+  read: no emphasis control, no emotion, no breath. Urdu uses `espeak`, which sounds robotic, because
+  no Urdu neural voice exists in any mirror this environment can reach. Word timings are measured
+  (espeak events) or interpolated (Kokoro, labelled `estimated`). The pipeline records which engine and
+  which timing kind produced each video, per language.
 - **Not a character animator.** One character rig, a handful of poses, a mouth flap keyed to speech and
   a blink timer. It cannot gesture at a specific labelled object or walk.
 - **Not a diagram engine with real data.** The solar layer stack, the Wi-Fi wave and the truss are
@@ -50,17 +53,20 @@ words, a local TTS voice reads them. It is designed for short, factual, structur
   have the final MP4 and the project will still resume (it will re-render on demand).
 - **Cache invalidation is explicit.** If you change drawing code, bump `RENDER_VERSION` in
   `ckd/pipeline/run.py`, otherwise previously rendered scenes are reused with the old look.
-- **Audio pipeline** muxes one narration track per language. There is no music, no ducking, no
-  sound-effects layer, and no loudness normalisation beyond peak limiting.
+- **Audio pipeline** muxes one narration track per language, mastered to -15 LUFS / -1.5 dBTP
+  (high-pass, EQ, de-esser, 4:1 compression, two-stage loudness). There is no music, no ducking and no
+  sound-effects layer.
 - **Subtitles** are SRT + ASS generated from the same timings. They are *phrase-level accurate*
-  (each cue matches the words spoken in that window), but on the espeak fallback the per-word timings
-  are proportional, not measured — the report says `timing_kind: proportional` when that happens.
+  (each cue matches the words spoken in that window). With Kokoro the per-word timings are proportional
+  within a clause, not measured; the report says `timing_kind: estimated` when that happens, and
+  `espeak-events` only when they really were measured.
 
 ## Environment limits
 
-- **Piper voices must be downloaded once.** In a network-restricted sandbox (or a locked-down Colab),
-  the download can fail; the pipeline then uses the offline `espeak` voice and says so. It will not
-  produce a silent video and pretend.
+- **A neural voice must be fetched once.** The English Kokoro model is a single 89 MB npm download
+  (SHA-256 verified); Piper voices are 60-120 MB from Hugging Face / GitHub. In a network-restricted
+  sandbox either can fail; the pipeline then falls back to the offline `espeak` voice *and says so* in
+  the log, in `report.json` and in `audio/<lang>.json`. It will not produce a silent video and pretend.
 - **No Colab-specific tricks.** No tunnels, no keep-alive pings, no background services, no quota
   evasion. The notebook renders, then stops.
 - **Windows/macOS** are untested. The code is pure Python + Pillow + ffmpeg and should work, but the

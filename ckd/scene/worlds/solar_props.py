@@ -452,12 +452,12 @@ def battery(pal: Dict[str, str], ss: int, x: float, y: float, w: float, h: float
 
     def paint(img, ox, oy, s):
         pen = Pen(img, ox, oy, s)
-        bx0, bx1 = x + w * 0.22, x + w * 0.78
+        bx0, bx1 = x + w * 0.10, x + w * 0.90
         by0, by1 = y + h * 0.10, y + h
         pen.shadow([(bx0, by1 - 5), (bx1, by1 - 5), (bx1 + 5, by1 + 3), (bx0 - 5, by1 + 3)],
                    dy=4, blur=7, strength=0.42)
         # terminal
-        pen.rect(x + w * 0.44, by0 - h * 0.05, x + w * 0.56, by0 + 2,
+        pen.rect(x + w * 0.40, by0 - h * 0.05, x + w * 0.60, by0 + 2,
                  fill=alpha(shade(pal["metal"], 0.75), 0.95), radius=2)
         pen.grad_round(bx0, by0, bx1, by1, shade(pal["metal"], 1.06), shade(pal["metal"], 0.58),
                        radius=8)

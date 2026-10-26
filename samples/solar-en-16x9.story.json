@@ -369,7 +369,9 @@
  "warnings": [
   "narration shortened to approach the 90s target: dropped one sentence from scene 'cells'",
   "en: narration measured 110.1s against a 90s target (engine: espeak). The plan was sized with an estimated speaking rate; re-run with --duration 110 to keep every beat, or a shorter --duration to drop scenes.",
-  "ur: narration measured 137.2s against a 90s target (engine: espeak). The plan was sized with an estimated speaking rate; re-run with --duration 137 to keep every beat, or a shorter --duration to drop scenes."
+  "ur: narration measured 137.2s against a 90s target (engine: espeak). The plan was sized with an estimated speaking rate; re-run with --duration 137 to keep every beat, or a shorter --duration to drop scenes.",
+  "en: narration measured 110.5s against a 90s target (engine: espeak). The plan was sized with an estimated speaking rate; re-run with --duration 110 to keep every beat, or a shorter --duration to drop scenes.",
+  "ur: narration measured 137.6s against a 90s target (engine: espeak). The plan was sized with an estimated speaking rate; re-run with --duration 138 to keep every beat, or a shorter --duration to drop scenes."
  ],
  "source_pack": "solar"
 }

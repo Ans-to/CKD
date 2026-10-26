@@ -31,19 +31,19 @@ When light particles, called photons, hit the
 silicon, they knock electrons loose.
 
 9
-00:00:20,512 --> 00:00:24,022
+00:00:20,512 --> 00:00:24,023
 The panel produces direct current, which always
 
 10
-00:00:24,022 --> 00:00:26,998
+00:00:24,023 --> 00:00:26,998
 flows one way. Your home needs alternating
 
 11
-00:00:26,998 --> 00:00:30,538
+00:00:26,998 --> 00:00:30,539
 current that changes direction many times a
 
 12
-00:00:30,538 --> 00:00:32,903
+00:00:30,539 --> 00:00:32,904
 second. An inverter makes that change.
 
 13
@@ -51,11 +51,11 @@ second. An inverter makes that change.
 Power you do not use right away
 
 14
-00:00:35,357 --> 00:00:38,114
+00:00:35,357 --> 00:00:38,113
 is either stored in a battery or
 
 15
-00:00:38,114 --> 00:00:39,933
+00:00:38,113 --> 00:00:39,933
 sent into the grid. That way the
 
 16
@@ -95,5 +95,5 @@ the current, and a battery holding it:
 that is how a solar panel powers
 
 25
-00:01:03,265 --> 00:01:03,941
+00:01:03,265 --> 00:01:03,942
 a home.

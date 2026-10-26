@@ -39,22 +39,30 @@ python -m ckd render  --topic "solar energy" --langs en,ur --formats landscape,v
 
 Two finished samples, rendered by the code in this repo (not mockups):
 
-| file | language / format | length | notes |
-|---|---|---|---|
-| `samples/solar-en-16x9.mp4` | English 16:9, 1280×720 | 110.1 s | + `story.json`, `report.json`, `srt`, frame sheet |
-| `samples/solar-en-9x16.mp4` | English 9:16, 404×720 | 110.1 s | re-composed vertical layout, `srt`, frame sheet |
-| `samples/solar-ur-16x9.mp4` | Urdu 16:9, 1280×720 | 137.2 s | Nastaliq, RTL, Urdu numerals, `srt`, frame sheet |
-| `samples/solar-ur-9x16.mp4` | Urdu 9:16, 404×720 | 137.2 s | Nastaliq, RTL, Urdu numerals, `srt`, frame sheet |
+| file | language / format | length | audio | notes |
+|---|---|---|---|---|
+| `samples/solar-en-16x9.mp4` | English 16:9, 1280×720 | 63.6 s | Kokoro `af_heart`, -15.7 LUFS / -1.4 dBTP | + `story.json`, `report.json`, `srt`, frame sheet |
+| `samples/solar-en-9x16.mp4` | English 9:16, 404×720 | 63.6 s | same master | re-composed vertical layout, `srt`, frame sheet |
+| `samples/solar-ur-16x9.mp4` | Urdu 16:9, 1280×720 | 75.2 s | espeak (no neural Urdu voice), -15.6 LUFS / -1.3 dBTP | Nastaliq, RTL, Urdu numerals, `srt`, frame sheet |
+| `samples/solar-ur-9x16.mp4` | Urdu 9:16, 404×720 | 75.2 s | same master | Nastaliq, RTL, Urdu numerals, `srt`, frame sheet |
+
+Two 28 s audio-only previews are in the same folder (`voice-preview-en.mp3`, `voice-preview-ur.mp3`)
+if you want to judge the narration without downloading a video.
 
 Download any of them straight from GitHub ("Download raw file" on the file page, or the `raw.githubusercontent.com`
 URL) — they are ordinary MP4s with H.264 video and AAC audio, no special player needed.
 
-Both use the same six-beat plan (hook → silicon cells → inverter → storage → efficiency → recap) and
-were asked for at `--duration 90`. The offline espeak fallback in this container speaks at about half
-the rate the planner assumes for the Piper neural voice, so the narration came out at 110 s / 137 s —
-that is recorded in `story.warnings` and `report.json` rather than hidden, and it is why
-`--duration` is a target, not a promise. Rendered here on 2 vCPU; see `docs/TEST_REPORT.md` for what
-is and is not verified.
+All four use the same six-beat plan (hook → silicon cells → inverter → storage → efficiency → recap) and
+were asked for at `--duration 90`; with narration at a real speaking pace (146 wpm English, 148 wpm
+Urdu) they land at 63.6 s and 75.2 s. `--duration 45` gives a plan that fits a 30-60 s slot.
+
+**About the narration.** English is a neural voice (Kokoro-82M, Apache-2.0) running on CPU. Urdu is
+espeak-ng, because no Urdu neural voice exists in any mirror this build environment can reach — that is
+a documented limitation, not an accident, and `report.json` says so per track. Every track is mastered
+to -15 LUFS / -1.5 dBTP before muxing. See `docs/VOICES.md` for the engines, licences and the list of
+download routes that do not work here.
+
+Rendered here on 2 vCPU; see `docs/TEST_REPORT.md` for what is and is not verified.
 
 ## Formats and languages, genuinely re-composed
 

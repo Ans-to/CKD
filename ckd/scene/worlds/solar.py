@@ -391,6 +391,12 @@ class SolarWorld(World):
 
     def _el_battery(self, p: Painter, ctx: RenderContext, el: Dict) -> None:
         x, y, w, h = self.slot(ctx.stage, el.get("slot", "stage_right"))
+        # keep the cell's own proportions: the slot is 81x162 px in 9:16 and
+        # 256x162 in 16:9, so a slot-filling battery is either a needle or a brick
+        aspect = 0.62
+        bw = min(w, h * aspect)
+        bh = min(h, bw / aspect)
+        x, y, w, h = x + (w - bw) / 2, y + (h - bh) / 2, bw, bh
         fill_p = ease_in_out(ctx.progress("battery_fill"))
         fill = 0.18 + 0.78 * fill_p
         img, ox, oy = solar_props.battery(ctx.palette, p.ss, x, y, w, h, fill=fill)

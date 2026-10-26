@@ -46,12 +46,17 @@ One topic ("solar energy"), one six-beat plan, rendered with
 `--duration 90 --quality standard` (720p, 24 fps). Each row is the file now in `samples/`
 or `projects/solar-energy/out/`.
 
-| output | duration | size | streams | `verify_video()` |
-|---|---|---|---|---|
-| English 16:9 | 110.08 s | 1280×720 @ 24 | h264 / aac | `(True, [])` |
-| English 9:16 | 110.08 s | 404×720 @ 24 | h264 / aac | `(True, [])` |
-| Urdu 16:9 | 137.21 s | 1280×720 @ 24 | h264 / aac | `(True, [])` |
-| Urdu 9:16 | 137.21 s | 404×720 @ 24 | h264 / aac | `(True, [])` |
+| output | duration | size | streams | loudness of the *finished file* | `verify_video()` |
+|---|---|---|---|---|---|
+| English 16:9 | 63.63 s | 1280×720 @ 24 | h264 / aac | -15.7 LUFS / -1.4 dBTP | `(True, [])` |
+| English 9:16 | 63.63 s | 404×720 @ 24 | h264 / aac | -15.7 LUFS / -1.4 dBTP | `(True, [])` |
+| Urdu 16:9 | 75.21 s | 1280×720 @ 24 | h264 / aac | -15.6 LUFS / -1.3 dBTP | `(True, [])` |
+| Urdu 9:16 | 75.21 s | 404×720 @ 24 | h264 / aac | -15.6 LUFS / -1.3 dBTP | `(True, [])` |
+
+The loudness column is measured on the muxed MP4, not on the intermediate WAV: that distinction caught
+a real bug. ffmpeg's default mono→stereo upmix scales by 1/√2, so every finished video was 3 dB
+quieter than the track it was built from (-18.7 LUFS instead of -15.6). The mux now uses an explicit
+`pan=stereo|c0=c0|c1=c0`, and `test_mux_keeps_loudness` fails if the level ever moves again.
 
 `verify_video()` does a full-file decode (catches truncation/corruption) plus size/fps/codec/audio
 stream checks. The English 16:9 file decodes to a peak of −0.37 dBFS with no sample at full scale
@@ -60,18 +65,11 @@ stream checks. The English 16:9 file decodes to a peak of −0.37 dBFS with no s
 Subtitles: `samples/*.srt`, one cue per sentence, word times taken from the TTS event stream
 (`timing_kind: espeak-events` in this environment), plus `.ass` alongside the project files.
 
-**Duration honesty.** The plan was requested at `--duration 90` and came out at 110 s (English) and
-137 s (Urdu). The offline espeak voice speaks at ~1.3 words/s while the planner's table assumes the
-Piper neural voice (~2.6 words/s), so every plan written for the neural voice runs long here. The
-pipeline does not hide this: `story.warnings` and `report.json` carry
-
-```
-en: narration measured 110.1s against a 90s target (engine: espeak). ...
-ur: narration measured 137.2s against a 90s target (engine: espeak). ...
-```
-
-and the fitter trimmed one sentence from the `cells` beat to get closer. In Colab, where Piper is
-installed, the same plan fits the requested target; see `docs/VOICES.md`.
+**Duration honesty.** The plan was requested at `--duration 90` and came out at 63.6 s (English) and
+75.2 s (Urdu), because narration now speaks at a real pace (146 / 148 wpm) instead of the broken
+~78 wpm of the previous build. `--duration 45` produces a plan that fits a 30-60 s slot. The pipeline
+records the measured duration against the target in `story.warnings` and `report.json` rather than
+hiding the difference.
 
 ## 3. Visual QA
 
