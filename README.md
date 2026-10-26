@@ -90,6 +90,10 @@ preview(project)
 render(project)
 ```
 
+The platform is a notebook, so the pasted-script cell in
+`notebooks/CKD_Video_Studio.ipynb` (cell **3b**) is the same path without a terminal: paste into
+`SCRIPT`, run, then review/preview/render/download with the existing cells.
+
 `--topic` is not needed when `--script` supplies the words. Each `SCENE n — TITLE` becomes
 a scene, each `**[VISUAL DIRECTION]**` bullet becomes a shot (cut on *your* timecode),
 `**[ON-SCREEN TEXT]**` becomes a lower third, and the `CALL TO ACTION` block becomes a CTA
