@@ -29,7 +29,7 @@ python tools/contact_sheet.py samples/solar-en-16x9.mp4 out.png
 
 ```
 $ PYTHONPATH=. python3 -m pytest tests -q
-45 passed in 52.2s
+49 passed in 43.2s
 ```
 
 Four of those are new for the imported-script path (`tests/test_documentary_import.py`):
@@ -349,3 +349,14 @@ The four warnings the run printed are the point of the feature, not noise:
 6. **`--duration` fought the script.** An imported script has its own length, so the run now plans
    with `duration = 0` (no target) and the narration warning about a mismatch cannot fire. `--topic`
    is optional when `--script` is given.
+7. **The writer's supers sat on the scene for its whole length.** The lower third was pinned open
+   from 12 % to the end, so every frame of a 54-second scene carried the same three lines on top of
+   the factory, the tower and the phone. A super now comes in at 12 %, holds about ten seconds
+   (sized against the scene's *spoken* length, not its declared timecode window) and leaves.
+8. **Editing the script did not change the plan.** `script_hash()` hashed the script *path*, so
+   saving new words to `scripts/nokia.md` and re-running reused the previous `story.json` — the
+   render silently ignored the edit. The hash now includes the file's SHA-256, and the plan version
+   was bumped so existing projects re-import once.
+9. **A pasted script was lost on reopen.** `new_project_from_script()` wrote `script.md` *after*
+   `project.json` had been saved, so `open_project()` saw no script path and composed a generic
+   scaffold instead — a different video with a different script.

@@ -62,6 +62,9 @@ Line-level details that matter:
 - A visual-direction bullet keeps the *cut time* and loses the imperative verb
   ("Show an archival-style paper mill" → "archival-style paper mill"), so the on-screen
   statement is a label, not a command.
+- A lower third is a **super, not a subtitle**: it comes in a couple of seconds into the
+  scene, holds about ten seconds and leaves. It does not sit on the picture for the whole
+  scene (which is what the first version did, covering every prop in a 54-second scene).
 - Bullets are mapped to props by keyword: `phone` (keypad / touchscreen), `globe`,
   `chart`, `timeline`, `ecosystem`, `tower`, `factory`, `compare_phones`, or a
   `statement` card when nothing visual is named. Unknown subjects become statement cards —
@@ -89,7 +92,8 @@ result = render(project)               # resumable; scene clips are cached
 ```
 
 The pasted text is written to `projects/<name>/script.md`, so the run is reproducible and
-you can edit the script and re-render.
+you can edit the script and re-render. Editing the file (or pasting different text) changes
+the plan: the project's cache key includes the script's SHA-256, not just its filename.
 
 ## Use it in a terminal
 

@@ -58,6 +58,7 @@ bottom corner, captions just above the safe margin.
 | `script_hash` | topic, languages, duration, notes, llm, palette, seed, script version | changing any of them regenerates `story.json`; an edited story is kept only while the request is unchanged |
 | `narration_hash` | per-language text of every scene, voice settings | editing one scene re-synthesises that language only |
 | `scene_hash` | narration hash, the scene's element dict, index, format, quality, fps, captions, character, seed, output size, `RENDER_VERSION` | only changed scenes are re-encoded |
+| `script_hash` | topic, languages, duration, notes, palette, seed, `--script` path **and the script file's SHA-256**, `plan version` | editing the script re-imports it; an untouched script reuses its plan |
 | speech cache | text, language, engine, voice, speed | repeated phrases are free |
 
 Each scene writes `<name>.part.mp4` and is renamed to `<name>.mp4` only after `verify_video()` passes,
@@ -75,7 +76,27 @@ valid sidecar (`<name>.json`) or with a mismatched hash is simply re-rendered.
 
 A new *world* is a bigger job: subclass `World` in `ckd/scene/worlds/`, implement `slots()`,
 `background()`, `_el_*()` element drawers and (optionally) `foreground()`, then register it in
-`get_world()`.
+`get_world()`. `ckd/scene/worlds/business.py` is the reference for a *faceless* world: no
+character, subject-centred slots, and a `lower_third` element that draws the script's own
+on-screen text.
+
+## An imported script
+
+`--script` / `new_project_from_script()` replaces the composer with
+`ckd/content/script_import.py`:
+
+```
+documentary markdown ──parse_script()──► ScriptScene[] (title, time codes, VO, direction, supers)
+                     ──_shots_for()────► elements[] + timed actions ("shot3" at_frac 0.5)
+                     ──import_script()─► Story (world="business", palette="documentary",
+                                                 character.visible=False)
+```
+
+Each visual-direction bullet becomes one shot: `_classify()` maps it onto an element type by
+keyword, `0:05–0:12` prefixes become the shot's `at_frac`, and the bullet text (with the camera
+verb stripped) becomes the on-screen statement. Anything that asks for footage is recorded as a
+warning and drawn as the nearest schematic — the importer never claims otherwise. The plan then
+goes through exactly the same timing, narration, render and verify stages as a composed story.
 
 ## Deliberate non-goals
 

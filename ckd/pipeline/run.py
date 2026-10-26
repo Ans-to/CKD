@@ -38,7 +38,7 @@ from ..scene.stage import make_stage
 from ..scene.timing import assign_actions, build_captions, storyboard_timing
 from ..scene.worlds import get_world
 from ..text.render import TextRenderer
-from ..util.hashing import hash_json
+from ..util.hashing import hash_file, hash_json
 from ..util.logging import get_logger
 from ..voice.narration import Narrator, NarrationTrack, SpeechCache
 from .project import Project, open_project, slugify
@@ -64,7 +64,7 @@ ProgressFn = Callable[[str, float, str], None]
 # Bump when the *drawing* changes (composition, palette, timings). Scene caches from
 # an older value are treated as stale, because a cached clip would otherwise keep an
 # old look. Script/logic changes bump the "v" inside script_hash instead.
-RENDER_VERSION = 23
+RENDER_VERSION = 24
 
 
 def _noop(stage: str, frac: float, msg: str) -> None:  # pragma: no cover
@@ -100,10 +100,20 @@ class Pipeline:
     # ------------------------------------------------------------------ stages
     def script_hash(self) -> str:
         o = self.options
+        # the *contents* of an imported script matter, not its path: editing
+        # scripts/nokia.md and re-running has to produce a new plan, not reuse the
+        # old one because the filename did not change
+        script_path = getattr(o, "script_path", "") or ""
+        script_digest = ""
+        if script_path:
+            try:
+                script_digest = hash_file(script_path)[:16]
+            except OSError as exc:
+                LOG.warning("cannot read script %s (%s): the plan will be regenerated", script_path, exc)
         payload = {
             "topic": o.topic.strip().lower(), "langs": o.languages, "duration": o.duration,
             "notes": o.notes, "llm": o.llm, "palette": o.palette, "seed": o.seed,
-            "script": getattr(o, "script_path", ""), "v": 7,
+            "script": script_path, "script_sha": script_digest, "v": 8,
         }
         return hash_json(payload, prefix="script")
 

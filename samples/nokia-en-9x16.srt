@@ -11,11 +11,11 @@ millions of people carry your product in
 their pockets. A company that dominates the
 
 4
-00:00:10,794 --> 00:00:13,627
+00:00:10,794 --> 00:00:13,626
 global mobile phone market. A company whose
 
 5
-00:00:13,627 --> 00:00:17,964
+00:00:13,626 --> 00:00:17,964
 name becomes almost synonymous with mobile phones.
 
 6
@@ -27,15 +27,15 @@ Now imagine losing that empire… while the
 market itself is growing faster than ever.
 
 8
-00:00:24,785 --> 00:00:26,960
+00:00:24,785 --> 00:00:26,959
 This isn't the story of a company
 
 9
-00:00:26,960 --> 00:00:29,272
+00:00:26,959 --> 00:00:29,273
 that couldn't make phones. It's the story
 
 10
-00:00:29,272 --> 00:00:32,205
+00:00:29,273 --> 00:00:32,205
 of a company that helped define the
 
 11
@@ -67,31 +67,31 @@ originally operated as a paper mill. Over
 time, Nokia expanded into different industries, including
 
 18
-00:00:58,668 --> 00:01:01,864
+00:00:58,668 --> 00:01:01,863
 rubber, cables, and electronics. But its biggest
 
 19
-00:01:01,864 --> 00:01:07,069
+00:01:01,863 --> 00:01:07,068
 transformation came when telecommunications became one of
 
 20
-00:01:07,069 --> 00:01:10,671
+00:01:07,068 --> 00:01:10,670
 the most important technologies in the world.
 
 21
-00:01:10,168 --> 00:01:14,229
+00:01:10,168 --> 00:01:14,228
 During the 1990s and early 2000s, mobile
 
 22
-00:01:14,229 --> 00:01:19,957
+00:01:14,228 --> 00:01:19,956
 phones began changing how people communicated. Nokia
 
 23
-00:01:19,751 --> 00:01:23,725
+00:01:19,751 --> 00:01:23,724
 was perfectly positioned to take advantage of
 
 24
-00:01:23,725 --> 00:01:26,022
+00:01:23,724 --> 00:01:26,022
 that shift. By 2007, Nokia was the
 
 25
@@ -99,15 +99,15 @@ that shift. By 2007, Nokia was the
 world's leading mobile phone manufacturer by shipments.
 
 26
-00:01:31,747 --> 00:01:35,335
+00:01:31,746 --> 00:01:35,334
 But success can create a dangerous illusion.
 
 27
-00:01:34,809 --> 00:01:37,964
+00:01:34,808 --> 00:01:37,963
 The belief that what made you successful
 
 28
-00:01:37,964 --> 00:01:42,231
+00:01:37,963 --> 00:01:42,230
 yesterday will keep you successful tomorrow.
 
 29
@@ -123,15 +123,15 @@ Then came a turning point. In January
 simply another mobile phone. It presented a
 
 32
-00:01:51,817 --> 00:01:54,632
+00:01:51,817 --> 00:01:54,633
 different vision of what a phone could
 
 33
-00:01:54,632 --> 00:01:58,901
+00:01:54,633 --> 00:01:58,901
 become. A large touchscreen. A software-driven experience.
 
 34
-00:01:58,517 --> 00:02:01,327
+00:01:58,518 --> 00:02:01,327
 Later that year, Google and its partners
 
 35
@@ -147,11 +147,11 @@ smartphone revolution. The rules of the industry
 were being rewritten.
 
 38
-00:02:09,512 --> 00:02:12,359
+00:02:09,512 --> 00:02:12,358
 Nokia didn't ignore smartphones. That is an
 
 39
-00:02:12,359 --> 00:02:16,671
+00:02:12,358 --> 00:02:16,671
 important distinction. The company developed advanced
 
 40
@@ -159,11 +159,11 @@ important distinction. The company developed advanced
 devices, experimented with different software platforms, and
 
 41
-00:02:21,873 --> 00:02:25,883
+00:02:21,873 --> 00:02:25,882
 continued investing in mobile technology. But competing
 
 42
-00:02:25,883 --> 00:02:29,392
+00:02:25,882 --> 00:02:29,392
 in a changing market requires more than
 
 43
@@ -191,15 +191,15 @@ ecosystems. Nokia still had engineering expertise,
 manufacturing capabilities, and a recognizable brand. But
 
 49
-00:02:58,135 --> 00:03:02,768
+00:02:58,134 --> 00:03:02,767
 those strengths could not automatically compensate for
 
 50
-00:03:02,768 --> 00:03:06,726
+00:03:02,767 --> 00:03:06,725
 a weaker position in the emerging smartphone
 
 51
-00:03:06,726 --> 00:03:07,736
+00:03:06,725 --> 00:03:07,735
 ecosystem.
 
 52

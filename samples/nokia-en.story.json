@@ -193,7 +193,8 @@
        "1865 — Nokia's beginnings",
        "1990s — Mobile phones enter the mainstream",
        "2007 — Nokia leads the global mobile phone market"
-      ]
+      ],
+      "out": "supers_out"
      }
     }
    ],
@@ -227,6 +228,14 @@
     {
      "action": "shot6",
      "at_frac": 0.8333333333333331
+    },
+    {
+     "action": "supers",
+     "at_frac": 0.12
+    },
+    {
+     "action": "supers_out",
+     "at_frac": 0.3625
     }
    ],
    "notes": ""
@@ -295,7 +304,8 @@
        "THE COMPETITION CHANGED",
        "From devices…",
        "To ecosystems"
-      ]
+      ],
+      "out": "supers_out"
      }
     }
    ],
@@ -321,6 +331,14 @@
     {
      "action": "shot4",
      "at_frac": 0.75
+    },
+    {
+     "action": "supers",
+     "at_frac": 0.12
+    },
+    {
+     "action": "supers_out",
+     "at_frac": 0.5321
     }
    ],
    "notes": ""
@@ -400,7 +418,8 @@
       "lines_en": [
        "A strong product is not enough",
        "The ecosystem matters"
-      ]
+      ],
+      "out": "supers_out"
      }
     }
    ],
@@ -430,6 +449,14 @@
     {
      "action": "shot5",
      "at_frac": 0.8
+    },
+    {
+     "action": "supers",
+     "at_frac": 0.12
+    },
+    {
+     "action": "supers_out",
+     "at_frac": 0.401
     }
    ],
    "notes": ""

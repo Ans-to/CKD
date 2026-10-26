@@ -419,7 +419,26 @@ def _shots_for(scene: ScriptScene, index: int) -> Tuple[List[Dict], List[str], D
             notes.append(f"{scene.number}.{i + 1}: \"{_shorten(desc, 70)}\" -> {note}")
     if supers is not None:
         elements.append(supers)   # drawn last: supers sit on top of the picture
-        actions.insert(0, {"action": "supers", "at_frac": 0.16})
+        # A lower third is a *super*, not a subtitle: it comes in, holds for about
+        # ten seconds and leaves.  Left pinned open it sat on top of the scene for
+        # its entire length (62 s in the sample script), covering the props.
+        # Size the hold against the scene's *spoken* length, not the timecode: a
+        # writer's "1:40-2:50" window is often three times the narration it
+        # contains, and a super sized against it would flash for three seconds.
+        spoken = len(scene.narration.split()) / 2.65 + 2.0
+        if scene.t_start is not None and scene.t_end is not None and spoken < 6.0:
+            spoken = max(6.0, (scene.t_end - scene.t_start) * 0.5)
+        in_frac = 0.12
+        # about ten seconds of screen time, and always 12..45 % of the scene
+        hold_frac = min(0.45, max(0.12, 10.0 / max(6.0, spoken)))
+        out_frac = min(0.92, in_frac + hold_frac)
+        supers["params"]["in"] = "supers"
+        supers["params"]["out"] = "supers_out"
+        # appended (not inserted): the caller turns this dict into the scene's
+        # action list, and appending keeps every shot's "next cue" pointing at the
+        # following shot
+        frac_times["supers"] = round(in_frac, 4)
+        frac_times["supers_out"] = round(out_frac, 4)
     return elements, notes, frac_times
 
 

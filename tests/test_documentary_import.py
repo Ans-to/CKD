@@ -117,3 +117,52 @@ def test_pasted_script_survives_reopening_the_project(tmp_path):
     assert story.generator == "imported-script"
     assert len(story.scenes) == 1
     assert not any("knowledge pack" in w for w in story.warnings)
+
+
+def test_editing_the_script_file_changes_the_plan(tmp_path):
+    """Saving new words and re-rendering must not reuse the old plan.
+
+    `script_hash()` used to hash only the *path*, so an edited script.md produced
+    the previous story.json — the video silently ignored the edit.
+    """
+    from ckd.notebook_api import new_project_from_script
+    from ckd.content.script_import import read_script
+
+    path = tmp_path / "mine.md"
+    path.write_text("SCENE 1 — ONE\n\n**[VOICEOVER]**\n\nFirst version of the words here.\n",
+                    encoding="utf-8")
+    project = new_project_from_script(path, projects_dir=tmp_path, root=tmp_path,
+                                      formats=("landscape",), quality="draft")
+    first = project.pipeline.script_hash()
+
+    path.write_text("SCENE 1 — ONE\n\n**[VOICEOVER]**\n\nSecond version of the words here now.\n",
+                    encoding="utf-8")
+    # a fresh pipeline, exactly like re-running the command after editing
+    project2 = new_project_from_script(path, projects_dir=tmp_path, root=tmp_path,
+                                       formats=("landscape",), quality="draft")
+    assert project2.pipeline.script_hash() != first
+    story = project2.pipeline.build_story()
+    assert "Second version" in story.scenes[0].text_for("en")
+
+
+def test_lower_third_is_a_super_not_a_subtitle():
+    """It comes in, holds ~10 s and leaves instead of sitting on the whole scene."""
+    from ckd.content.script_import import import_script
+
+    text = ("SCENE 1 — CUTS\n\n**Time:** 0:00–2:00\n\n**[VOICEOVER]**\n\n"
+            + " ".join(["word"] * 120) + "\n\n**[VISUAL DIRECTION]**\n\n"
+            "- 0:00-0:30: A classic phone.\n- 0:30-1:00: A tower.\n"
+            "- 1:00-1:30: A factory.\n- 1:30-2:00: A globe.\n\n"
+            "**[ON-SCREEN TEXT]**\n\n1865 — beginnings\n2007 — market leader\n")
+    story = import_script(text)
+    scene = story.scenes[0]
+    lt = [e for e in scene.elements if e["type"] == "lower_third"]
+    assert lt and lt[-1]["params"]["in"] == "supers"
+    assert lt[-1]["params"]["out"] == "supers_out", "the super must have an exit"
+    times = {a["action"]: a["at_frac"] for a in scene.actions}
+    assert times["supers"] < times["supers_out"] <= 0.92
+    # measured against the scene's *spoken* length (120 words ~= 47 s), not the
+    # declared two-minute window: the super holds about ten seconds either way
+    spoken = 120 / 2.65 + 2.0
+    hold = (times["supers_out"] - times["supers"]) * spoken
+    assert 8.0 <= hold <= 12.0, hold
