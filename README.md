@@ -45,11 +45,12 @@ Two finished samples, rendered by the code in this repo (not mockups):
 | `samples/solar-en-9x16.mp4` | English 9:16, 404×720 | 63.6 s | same master | re-composed vertical layout, `srt`, frame sheet |
 | `samples/solar-ur-16x9.mp4` | Urdu 16:9, 1280×720 | 75.2 s | espeak (no neural Urdu voice), -15.6 LUFS / -1.3 dBTP | Nastaliq, RTL, Urdu numerals, `srt`, frame sheet |
 | `samples/solar-ur-9x16.mp4` | Urdu 9:16, 404×720 | 75.2 s | same master | Nastaliq, RTL, Urdu numerals, `srt`, frame sheet |
+| `samples/nokia-en-16x9.mp4` | imported script, 16:9, 1280×720 | 202.5 s | Kokoro `am_michael` | + `story.json`, `srt`, frame sheet |
+| `samples/nokia-en-9x16.mp4` | same script and master, 9:16, 720×1280 | 202.5 s | same master | re-composed vertical layout, `srt`, frame sheet |
 
-`scripts/nokia.md` is rendered into `samples/nokia-en-16x9.mp4` and `samples/nokia-en-9x16.mp4`
-(202 s each, Kokoro `am_michael`, 720×1280 portrait) — the same words, drawn as a faceless business
-documentary. The script declares "7-9 minutes"; the voice takes 2.1 minutes for its 338 words and the
-run says so instead of padding it.
+The two `nokia` files are made from `scripts/nokia.md` — the words are the script's, drawn as a
+faceless business documentary. The script declares "7-9 minutes"; the voice takes 2.1 minutes for its
+338 words, and the run says so in its warnings instead of padding the video.
 
 Two 28 s audio-only previews are in the same folder (`voice-preview-en.mp3`, `voice-preview-ur.mp3`)
 if you want to judge the narration without downloading a video.

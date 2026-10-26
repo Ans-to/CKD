@@ -1,0 +1,489 @@
+{
+ "topic": "HOW NOKIA LOST ITS EMPIRE",
+ "world": "business",
+ "palette": "documentary",
+ "title": {
+  "en": "HOW NOKIA LOST ITS EMPIRE",
+  "ur": ""
+ },
+ "scenes": [
+  {
+   "id": "s01_the_hook",
+   "purpose": "hook",
+   "narration": {
+    "en": "Imagine building a company so powerful that millions of people carry your product in their pockets. A company that dominates the global mobile phone market. A company whose name becomes almost synonymous with mobile phones. Now imagine losing that empire… while the market itself is growing faster than ever. This isn't the story of a company that couldn't make phones. It's the story of a company that helped define the future of communication… but struggled when the future changed. This is how Nokia lost its empire."
+   },
+   "headline": {
+    "en": "The hook"
+   },
+   "keywords": {
+    "en": []
+   },
+   "motif": "structure",
+   "elements": [
+    {
+     "type": "skyline",
+     "slot": "back"
+    },
+    {
+     "type": "phone",
+     "slot": "phone",
+     "params": {
+      "in": "shot1",
+      "out": "shot2",
+      "kind": "classic",
+      "ring": true
+     },
+     "shot": "Extreme close-up of a classic mobile phone ringing in a dark room."
+    },
+    {
+     "type": "phone",
+     "slot": "phone",
+     "params": {
+      "in": "shot2",
+      "out": "shot3",
+      "kind": "classic",
+      "ring": true
+     },
+     "shot": "Rapid montage of people using old Nokia phones in different cities."
+    },
+    {
+     "type": "phone",
+     "slot": "phone",
+     "params": {
+      "in": "shot3",
+      "out": "shot4",
+      "kind": "classic",
+      "ring": true
+     },
+     "shot": "A world map illuminates as mobile phone icons spread across continents."
+    },
+    {
+     "type": "phone",
+     "slot": "phone",
+     "params": {
+      "in": "shot4",
+      "out": "shot5",
+      "kind": "touch"
+     },
+     "shot": "A dramatic transition from classic mobile phones to modern smartphones."
+    },
+    {
+     "type": "phone",
+     "slot": "phone",
+     "params": {
+      "in": "shot5",
+      "kind": "classic",
+      "ring": true
+     },
+     "shot": "A Nokia phone sits alone on a dark table as the camera slowly pushes in."
+    }
+   ],
+   "beats": [],
+   "character": {
+    "visible": false
+   },
+   "headline_hold": 6.0,
+   "camera": "slow_push",
+   "actions": [
+    {
+     "action": "shot1",
+     "at_frac": 0.0
+    },
+    {
+     "action": "shot2",
+     "at_frac": 0.14285714285714285
+    },
+    {
+     "action": "shot3",
+     "at_frac": 0.34285714285714286
+    },
+    {
+     "action": "shot4",
+     "at_frac": 0.5714285714285714
+    },
+    {
+     "action": "shot5",
+     "at_frac": 0.8
+    }
+   ],
+   "notes": "Begin with a phone ringtone and a subtle cinematic pulse. Build tension gradually. Keep the narration clear and continuous."
+  },
+  {
+   "id": "s02_from_a_small_company_to_a_gl",
+   "purpose": "explain",
+   "narration": {
+    "en": "Nokia's story began long before smartphones existed. Founded in Finland in 1865, the company originally operated as a paper mill. Over time, Nokia expanded into different industries, including rubber, cables, and electronics. But its biggest transformation came when telecommunications became one of the most important technologies in the world. During the 1990s and early 2000s, mobile phones began changing how people communicated. Nokia was perfectly positioned to take advantage of that shift. By 2007, Nokia was the world's leading mobile phone manufacturer by shipments. But success can create a dangerous illusion. The belief that what made you successful yesterday will keep you successful tomorrow."
+   },
+   "headline": {
+    "en": "From a small company to a global giant"
+   },
+   "keywords": {
+    "en": []
+   },
+   "motif": "structure",
+   "elements": [
+    {
+     "type": "skyline",
+     "slot": "back"
+    },
+    {
+     "type": "factory",
+     "slot": "factory",
+     "params": {
+      "in": "shot1",
+      "out": "shot2"
+     },
+     "shot": "Show an archival-style industrial paper mill in 19th-century Finland."
+    },
+    {
+     "type": "factory",
+     "slot": "factory",
+     "params": {
+      "in": "shot2",
+      "out": "shot3"
+     },
+     "shot": "Transition to historical images of rubber manufacturing and electrical cables."
+    },
+    {
+     "type": "tower",
+     "slot": "tower",
+     "params": {
+      "in": "shot3",
+      "out": "shot4"
+     },
+     "shot": "Show the development of early mobile communication equipment."
+    },
+    {
+     "type": "phone",
+     "slot": "phone",
+     "params": {
+      "in": "shot4",
+      "out": "shot5",
+      "kind": "classic",
+      "ring": true
+     },
+     "shot": "Display classic mobile phones from the 1990s and early 2000s."
+    },
+    {
+     "type": "globe",
+     "slot": "wide",
+     "params": {
+      "in": "shot5",
+      "out": "shot6"
+     },
+     "shot": "Animate a global map with expanding distribution routes."
+    },
+    {
+     "type": "phone",
+     "slot": "phone",
+     "params": {
+      "in": "shot6",
+      "kind": "classic",
+      "ring": true
+     },
+     "shot": "Show a clean, labeled chart identifying Nokia's position in the mobile phone market in 2007."
+    },
+    {
+     "type": "lower_third",
+     "slot": "upper_supers",
+     "params": {
+      "in": "supers",
+      "lines_en": [
+       "1865 — Nokia's beginnings",
+       "1990s — Mobile phones enter the mainstream",
+       "2007 — Nokia leads the global mobile phone market"
+      ]
+     }
+    }
+   ],
+   "beats": [],
+   "character": {
+    "visible": false
+   },
+   "headline_hold": 5.0,
+   "camera": "drift",
+   "actions": [
+    {
+     "action": "shot1",
+     "at_frac": 0.0
+    },
+    {
+     "action": "shot2",
+     "at_frac": 0.1666666666666667
+    },
+    {
+     "action": "shot3",
+     "at_frac": 0.3333333333333334
+    },
+    {
+     "action": "shot4",
+     "at_frac": 0.5
+    },
+    {
+     "action": "shot5",
+     "at_frac": 0.6666666666666669
+    },
+    {
+     "action": "shot6",
+     "at_frac": 0.8333333333333331
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "id": "s03_the_world_changes",
+   "purpose": "explain",
+   "narration": {
+    "en": "Then came a turning point. In January 2007, Apple introduced the iPhone. It wasn't simply another mobile phone. It presented a different vision of what a phone could become. A large touchscreen. A software-driven experience. Later that year, Google and its partners announced Android, opening another front in the smartphone revolution. The rules of the industry were being rewritten."
+   },
+   "headline": {
+    "en": "The world changes"
+   },
+   "keywords": {
+    "en": []
+   },
+   "motif": "structure",
+   "elements": [
+    {
+     "type": "skyline",
+     "slot": "back"
+    },
+    {
+     "type": "phone",
+     "slot": "phone",
+     "params": {
+      "in": "shot1",
+      "out": "shot2",
+      "kind": "touch"
+     },
+     "shot": "Show a dark stage before the unveiling of a generic early touchscreen smartphone."
+    },
+    {
+     "type": "phone",
+     "slot": "phone",
+     "params": {
+      "in": "shot2",
+      "out": "shot3",
+      "kind": "touch"
+     },
+     "shot": "Cut to close-ups of fingers navigating a touchscreen."
+    },
+    {
+     "type": "compare_phones",
+     "slot": "wide",
+     "params": {
+      "in": "shot3",
+      "out": "shot4"
+     },
+     "shot": "Display a split-screen comparison between a traditional keypad phone and a touchscreen smartphone."
+    },
+    {
+     "type": "ecosystem",
+     "slot": "wide",
+     "params": {
+      "in": "shot4"
+     },
+     "shot": "Transition to a software ecosystem visualization showing users, developers, apps, and devices."
+    },
+    {
+     "type": "lower_third",
+     "slot": "upper_supers",
+     "params": {
+      "in": "supers",
+      "lines_en": [
+       "THE COMPETITION CHANGED",
+       "From devices…",
+       "To ecosystems"
+      ]
+     }
+    }
+   ],
+   "beats": [],
+   "character": {
+    "visible": false
+   },
+   "headline_hold": 5.0,
+   "camera": "slow_pull",
+   "actions": [
+    {
+     "action": "shot1",
+     "at_frac": 0.0
+    },
+    {
+     "action": "shot2",
+     "at_frac": 0.25
+    },
+    {
+     "action": "shot3",
+     "at_frac": 0.5
+    },
+    {
+     "action": "shot4",
+     "at_frac": 0.75
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "id": "s04_the_mistakes_that_mattered",
+   "purpose": "recap",
+   "narration": {
+    "en": "Nokia didn't ignore smartphones. That is an important distinction. The company developed advanced devices, experimented with different software platforms, and continued investing in mobile technology. But competing in a changing market requires more than recognizing that change is happening. It requires adapting quickly enough to remain relevant. Meanwhile, Apple's iOS and Google's Android were attracting developers and building increasingly influential application ecosystems. Nokia still had engineering expertise, manufacturing capabilities, and a recognizable brand. But those strengths could not automatically compensate for a weaker position in the emerging smartphone ecosystem."
+   },
+   "headline": {
+    "en": "The mistakes that mattered"
+   },
+   "keywords": {
+    "en": []
+   },
+   "motif": "structure",
+   "elements": [
+    {
+     "type": "skyline",
+     "slot": "back"
+    },
+    {
+     "type": "phone",
+     "slot": "phone",
+     "params": {
+      "in": "shot1",
+      "out": "shot2",
+      "kind": "classic",
+      "ring": true
+     },
+     "shot": "Show engineers examining mobile phone prototypes."
+    },
+    {
+     "type": "phone",
+     "slot": "phone",
+     "params": {
+      "in": "shot2",
+      "out": "shot3",
+      "kind": "touch",
+      "screen": "apps"
+     },
+     "shot": "Depict multiple software interfaces on separate devices."
+    },
+    {
+     "type": "ecosystem",
+     "slot": "wide",
+     "params": {
+      "in": "shot3",
+      "out": "shot4"
+     },
+     "shot": "Animate a complex network of competing operating systems."
+    },
+    {
+     "type": "ecosystem",
+     "slot": "wide",
+     "params": {
+      "in": "shot4",
+      "out": "shot5"
+     },
+     "shot": "Show developers building applications for different platforms."
+    },
+    {
+     "type": "phone",
+     "slot": "phone",
+     "params": {
+      "in": "shot5",
+      "kind": "touch"
+     },
+     "shot": "End with a Nokia-style handset in the foreground while rival smartphone silhouettes advance in the background."
+    },
+    {
+     "type": "lower_third",
+     "slot": "upper_supers",
+     "params": {
+      "in": "supers",
+      "lines_en": [
+       "A strong product is not enough",
+       "The ecosystem matters"
+      ]
+     }
+    }
+   ],
+   "beats": [],
+   "character": {
+    "visible": false
+   },
+   "headline_hold": 5.0,
+   "camera": "pan_right",
+   "actions": [
+    {
+     "action": "shot1",
+     "at_frac": 0.0
+    },
+    {
+     "action": "shot2",
+     "at_frac": 0.2
+    },
+    {
+     "action": "shot3",
+     "at_frac": 0.4
+    },
+    {
+     "action": "shot4",
+     "at_frac": 0.6
+    },
+    {
+     "action": "shot5",
+     "at_frac": 0.8
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "id": "cta",
+   "purpose": "cta",
+   "narration": {
+    "en": "If you enjoy documentaries about the rise and fall of the world's biggest companies, subscribe for more stories about the decisions that build empires—and the mistakes that put them at risk."
+   },
+   "headline": {
+    "en": ""
+   },
+   "keywords": {
+    "en": []
+   },
+   "motif": "structure",
+   "elements": [
+    {
+     "type": "skyline",
+     "slot": "back"
+    },
+    {
+     "type": "statement",
+     "slot": "wide",
+     "params": {
+      "in": "subscribe",
+      "en": "Subscribe"
+     }
+    }
+   ],
+   "beats": [],
+   "character": {
+    "visible": false
+   },
+   "headline_hold": 4.0,
+   "camera": "pull_out",
+   "actions": [
+    {
+     "action": "subscribe"
+    }
+   ],
+   "notes": ""
+  }
+ ],
+ "languages": [
+  "en"
+ ],
+ "generator": "imported-script",
+ "warnings": [
+  "This is a procedural renderer, not a stock-footage editor: every visual-direction bullet became a labelled motion graphic of the thing it names (phone, factory, globe, chart, ecosystem). No footage, no archival photographs and no real product photos are used or imitated.",
+  "The script asked for footage/archival/photographic shots, which this renderer cannot produce: 1.2: \"Rapid montage of people using old Nokia phones in different cities.\" -> rendered as a stylised motion graphic, not footage; 2.1: \"Show an archival-style industrial paper mill in 19th-century Finland.\" -> rendered as a stylised motion graphic, not footage",
+  "script declares 8.0 min of running time; its voice-over is about 2.1 min at 160 wpm (338 words). The narration is used verbatim, so the render follows the words, not the declared duration.",
+  "the script is 3.8x shorter than its declared duration: at 160 wpm, 8 minutes needs roughly 1280 spoken words and this script has 338. Nothing was invented to fill the gap - add writing to the script, or publish it at its true length."
+ ],
+ "source_pack": null
+}
