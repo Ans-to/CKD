@@ -57,8 +57,13 @@ if you want to judge the narration without downloading a video.
 
 ### See the output without downloading a video
 
-These are contact sheets sampled from the rendered files above (one tile per ~0.6 s step, with
-timestamps) — they render inline here because they are ordinary PNGs in the repo:
+**Moving preview** — a 12-second sample cut (7 shots from the real render, no re-drawing), loops
+inline on this page:
+
+![animated preview of the 16:9 imported-script render](samples/nokia-en-16x9-preview.gif)
+
+The full files are the MP4s in `samples/`; GitHub does not stream repository videos, so a moving
+preview has to be a GIF. Frame sheets (one tile per ~0.6 s step, with timestamps) show the rest:
 
 **`samples/nokia-en-16x9.mp4`** — imported script, 1280×720, 202.5 s. The three-line lower third
 appears only around 0:52–1:02, 1:52–2:08 and 2:20–2:30, then clears the picture.
@@ -71,8 +76,10 @@ portrait band). It is not a crop of the landscape frame.
 
 ![frame sheet of the 9:16 imported-script render](samples/nokia-en-9x16-frames.png)
 
+![animated preview of the 9:16 imported-script render](samples/nokia-en-9x16-preview.gif)
+
 The MP4s themselves are in `samples/`; open the file on GitHub and use **Download** (or the raw
-link) to play them — GitHub does not stream repo videos in the browser.
+link) to play them with sound — the GIFs are silent and cover 12 of the 202 seconds.
 
 Download any of them straight from GitHub ("Download raw file" on the file page, or the `raw.githubusercontent.com`
 URL) — they are ordinary MP4s with H.264 video and AAC audio, no special player needed.
