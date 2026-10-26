@@ -42,7 +42,12 @@ Two finished samples, rendered by the code in this repo (not mockups):
 | file | language / format | length | notes |
 |---|---|---|---|
 | `samples/solar-en-16x9.mp4` | English 16:9, 1280×720 | 110.1 s | + `story.json`, `report.json`, `srt`, frame sheet |
-| `samples/solar-ur-9x16.mp4` | Urdu 9:16, 404×720 | 137.2 s | Nastaliq, RTL, Urdu numerals, `srt` |
+| `samples/solar-en-9x16.mp4` | English 9:16, 404×720 | 110.1 s | re-composed vertical layout, `srt`, frame sheet |
+| `samples/solar-ur-16x9.mp4` | Urdu 16:9, 1280×720 | 137.2 s | Nastaliq, RTL, Urdu numerals, `srt`, frame sheet |
+| `samples/solar-ur-9x16.mp4` | Urdu 9:16, 404×720 | 137.2 s | Nastaliq, RTL, Urdu numerals, `srt`, frame sheet |
+
+Download any of them straight from GitHub ("Download raw file" on the file page, or the `raw.githubusercontent.com`
+URL) — they are ordinary MP4s with H.264 video and AAC audio, no special player needed.
 
 Both use the same six-beat plan (hook → silicon cells → inverter → storage → efficiency → recap) and
 were asked for at `--duration 90`. The offline espeak fallback in this container speaks at about half
