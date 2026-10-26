@@ -26,85 +26,122 @@
      "slot": "back"
     },
     {
-     "type": "phone",
-     "slot": "phone",
+     "type": "statement",
+     "slot": "wide",
      "params": {
-      "in": "shot1",
-      "out": "shot2",
-      "kind": "classic",
-      "ring": true
+      "in": "beat1",
+      "cut": true,
+      "out": "beat2",
+      "en": "Imagine building a company so powerful that millions of people carry your product in their pockets",
+      "ur": "",
+      "variant": 0
      },
-     "shot": "Extreme close-up of a classic mobile phone ringing in a dark room."
+     "sentence": "Imagine building a company so powerful that millions of people carry your product in…"
     },
     {
      "type": "phone",
      "slot": "phone",
      "params": {
-      "in": "shot2",
-      "out": "shot3",
+      "in": "beat2",
+      "cut": true,
+      "out": "beat3",
       "kind": "classic",
       "ring": true
      },
-     "shot": "Rapid montage of people using old Nokia phones in different cities."
+     "sentence": "A company that dominates the global mobile phone market."
     },
     {
-     "type": "phone",
-     "slot": "phone",
+     "type": "statement",
+     "slot": "wide",
      "params": {
-      "in": "shot3",
-      "out": "shot4",
-      "kind": "classic",
-      "ring": true
+      "in": "beat3",
+      "cut": true,
+      "out": "beat4",
+      "en": "A company whose name becomes almost synonymous with mobile phones",
+      "ur": "",
+      "variant": 1
      },
-     "shot": "A world map illuminates as mobile phone icons spread across continents."
+     "sentence": "A company whose name becomes almost synonymous with mobile phones."
     },
     {
-     "type": "phone",
-     "slot": "phone",
+     "type": "statement",
+     "slot": "wide",
      "params": {
-      "in": "shot4",
-      "out": "shot5",
-      "kind": "touch"
+      "in": "beat4",
+      "cut": true,
+      "out": "beat5",
+      "en": "Imagine losing that empire… while the market itself is growing faster than ever",
+      "ur": "",
+      "variant": 2
      },
-     "shot": "A dramatic transition from classic mobile phones to modern smartphones."
+     "sentence": "Now imagine losing that empire… while the market itself is growing faster than ever."
     },
     {
-     "type": "phone",
-     "slot": "phone",
+     "type": "statement",
+     "slot": "wide",
      "params": {
-      "in": "shot5",
-      "kind": "classic",
-      "ring": true
+      "in": "beat5",
+      "cut": true,
+      "out": "beat6",
+      "en": "This isn't the story of a company that couldn't make phones",
+      "ur": "",
+      "variant": 0
      },
-     "shot": "A Nokia phone sits alone on a dark table as the camera slowly pushes in."
+     "sentence": "This isn't the story of a company that couldn't make phones."
+    },
+    {
+     "type": "statement",
+     "slot": "wide",
+     "params": {
+      "in": "beat6",
+      "cut": true,
+      "out": "beat7",
+      "en": "It's the story of a company that helped define the future of communication… but struggled when the future…",
+      "ur": "",
+      "variant": 1
+     },
+     "sentence": "It's the story of a company that helped define the future of communication… but struggled…"
+    },
+    {
+     "type": "statement",
+     "slot": "wide",
+     "params": {
+      "in": "beat7",
+      "cut": true,
+      "en": "This is how Nokia lost its empire",
+      "ur": "",
+      "variant": 2
+     },
+     "sentence": "This is how Nokia lost its empire."
     }
    ],
    "beats": [],
    "character": {
     "visible": false
    },
-   "headline_hold": 6.0,
+   "headline_hold": 0.85,
    "camera": "slow_push",
    "actions": [
     {
-     "action": "shot1",
-     "at_frac": 0.0
+     "action": "beat1"
     },
     {
-     "action": "shot2",
-     "at_frac": 0.14285714285714285
+     "action": "beat2"
     },
     {
-     "action": "shot3",
-     "at_frac": 0.34285714285714286
+     "action": "beat3"
     },
     {
-     "action": "shot4",
-     "at_frac": 0.5714285714285714
+     "action": "beat4"
     },
     {
-     "action": "shot5",
-     "at_frac": 0.8
+     "action": "beat5"
+    },
+    {
+     "action": "beat6"
+    },
+    {
+     "action": "beat7"
     }
    ],
    "notes": "Begin with a phone ringtone and a subtle cinematic pulse. Build tension gradually. Keep the narration clear and continuous."
@@ -128,73 +165,126 @@
      "slot": "back"
     },
     {
-     "type": "factory",
-     "slot": "factory",
+     "type": "statement",
+     "slot": "wide",
      "params": {
-      "in": "shot1",
-      "out": "shot2"
+      "in": "beat1",
+      "cut": true,
+      "out": "beat2",
+      "en": "Nokia's story began long before smartphones existed",
+      "ur": "",
+      "variant": 0
      },
-     "shot": "Show an archival-style industrial paper mill in 19th-century Finland."
+     "sentence": "Nokia's story began long before smartphones existed."
     },
     {
      "type": "factory",
      "slot": "factory",
      "params": {
-      "in": "shot2",
-      "out": "shot3"
+      "in": "beat2",
+      "cut": true,
+      "out": "beat3"
      },
-     "shot": "Transition to historical images of rubber manufacturing and electrical cables."
+     "sentence": "Founded in Finland in 1865, the company originally operated as a paper mill."
+    },
+    {
+     "type": "statement",
+     "slot": "wide",
+     "params": {
+      "in": "beat3",
+      "cut": true,
+      "out": "beat4",
+      "en": "Over time, Nokia expanded into different industries, including rubber, cables, and electronics",
+      "ur": "",
+      "variant": 1
+     },
+     "sentence": "Over time, Nokia expanded into different industries, including rubber, cables, and…"
+    },
+    {
+     "type": "statement",
+     "slot": "wide",
+     "params": {
+      "in": "beat4",
+      "cut": true,
+      "out": "beat5",
+      "en": "Its biggest transformation came when telecommunications became one of the most important technologies in the…",
+      "ur": "",
+      "variant": 2
+     },
+     "sentence": "But its biggest transformation came when telecommunications became one of the most…"
     },
     {
      "type": "tower",
      "slot": "tower",
      "params": {
-      "in": "shot3",
-      "out": "shot4"
+      "in": "beat5",
+      "cut": true,
+      "out": "beat6"
      },
-     "shot": "Show the development of early mobile communication equipment."
+     "sentence": "During the 1990s and early 2000s, mobile phones began changing how people communicated."
     },
     {
-     "type": "phone",
-     "slot": "phone",
-     "params": {
-      "in": "shot4",
-      "out": "shot5",
-      "kind": "classic",
-      "ring": true
-     },
-     "shot": "Display classic mobile phones from the 1990s and early 2000s."
-    },
-    {
-     "type": "globe",
+     "type": "statement",
      "slot": "wide",
      "params": {
-      "in": "shot5",
-      "out": "shot6"
+      "in": "beat6",
+      "cut": true,
+      "out": "beat7",
+      "en": "Nokia was perfectly positioned to take advantage of that shift",
+      "ur": "",
+      "variant": 0
      },
-     "shot": "Animate a global map with expanding distribution routes."
+     "sentence": "Nokia was perfectly positioned to take advantage of that shift."
     },
     {
-     "type": "phone",
-     "slot": "phone",
+     "type": "statement",
+     "slot": "wide",
      "params": {
-      "in": "shot6",
-      "kind": "classic",
-      "ring": true
+      "in": "beat7",
+      "cut": true,
+      "out": "beat8",
+      "en": "By 2007, Nokia was the world's leading mobile phone manufacturer by shipments",
+      "ur": "",
+      "variant": 1
      },
-     "shot": "Show a clean, labeled chart identifying Nokia's position in the mobile phone market in 2007."
+     "sentence": "By 2007, Nokia was the world's leading mobile phone manufacturer by shipments."
+    },
+    {
+     "type": "statement",
+     "slot": "wide",
+     "params": {
+      "in": "beat8",
+      "cut": true,
+      "out": "beat9",
+      "en": "Success can create a dangerous illusion",
+      "ur": "",
+      "variant": 2
+     },
+     "sentence": "But success can create a dangerous illusion."
+    },
+    {
+     "type": "statement",
+     "slot": "wide",
+     "params": {
+      "in": "beat9",
+      "cut": true,
+      "en": "The belief that what made you successful yesterday will keep you successful tomorrow",
+      "ur": "",
+      "variant": 0
+     },
+     "sentence": "The belief that what made you successful yesterday will keep you successful tomorrow."
     },
     {
      "type": "lower_third",
      "slot": "upper_supers",
      "params": {
       "in": "supers",
+      "out": "supers_out",
       "lines_en": [
        "1865 — Nokia's beginnings",
        "1990s — Mobile phones enter the mainstream",
        "2007 — Nokia leads the global mobile phone market"
-      ],
-      "out": "supers_out"
+      ]
      }
     }
    ],
@@ -202,32 +292,35 @@
    "character": {
     "visible": false
    },
-   "headline_hold": 5.0,
+   "headline_hold": 0.85,
    "camera": "drift",
    "actions": [
     {
-     "action": "shot1",
-     "at_frac": 0.0
+     "action": "beat1"
     },
     {
-     "action": "shot2",
-     "at_frac": 0.1666666666666667
+     "action": "beat2"
     },
     {
-     "action": "shot3",
-     "at_frac": 0.3333333333333334
+     "action": "beat3"
     },
     {
-     "action": "shot4",
-     "at_frac": 0.5
+     "action": "beat4"
     },
     {
-     "action": "shot5",
-     "at_frac": 0.6666666666666669
+     "action": "beat5"
     },
     {
-     "action": "shot6",
-     "at_frac": 0.8333333333333331
+     "action": "beat6"
+    },
+    {
+     "action": "beat7"
+    },
+    {
+     "action": "beat8"
+    },
+    {
+     "action": "beat9"
     },
     {
      "action": "supers",
@@ -259,53 +352,119 @@
      "slot": "back"
     },
     {
-     "type": "phone",
-     "slot": "phone",
-     "params": {
-      "in": "shot1",
-      "out": "shot2",
-      "kind": "touch"
-     },
-     "shot": "Show a dark stage before the unveiling of a generic early touchscreen smartphone."
-    },
-    {
-     "type": "phone",
-     "slot": "phone",
-     "params": {
-      "in": "shot2",
-      "out": "shot3",
-      "kind": "touch"
-     },
-     "shot": "Cut to close-ups of fingers navigating a touchscreen."
-    },
-    {
-     "type": "compare_phones",
+     "type": "statement",
      "slot": "wide",
      "params": {
-      "in": "shot3",
-      "out": "shot4"
+      "in": "beat1",
+      "cut": true,
+      "out": "beat2",
+      "en": "Came a turning point",
+      "ur": "",
+      "variant": 1
      },
-     "shot": "Display a split-screen comparison between a traditional keypad phone and a touchscreen smartphone."
+     "sentence": "Then came a turning point."
     },
     {
-     "type": "ecosystem",
+     "type": "statement",
      "slot": "wide",
      "params": {
-      "in": "shot4"
+      "in": "beat2",
+      "cut": true,
+      "out": "beat3",
+      "en": "In January 2007, Apple introduced the iPhone",
+      "ur": "",
+      "variant": 2
      },
-     "shot": "Transition to a software ecosystem visualization showing users, developers, apps, and devices."
+     "sentence": "In January 2007, Apple introduced the iPhone."
+    },
+    {
+     "type": "statement",
+     "slot": "wide",
+     "params": {
+      "in": "beat3",
+      "cut": true,
+      "out": "beat4",
+      "en": "It wasn't simply another mobile phone",
+      "ur": "",
+      "variant": 0
+     },
+     "sentence": "It wasn't simply another mobile phone."
+    },
+    {
+     "type": "statement",
+     "slot": "wide",
+     "params": {
+      "in": "beat4",
+      "cut": true,
+      "out": "beat5",
+      "en": "It presented a different vision of what a phone could become",
+      "ur": "",
+      "variant": 1
+     },
+     "sentence": "It presented a different vision of what a phone could become."
+    },
+    {
+     "type": "statement",
+     "slot": "wide",
+     "params": {
+      "in": "beat5",
+      "cut": true,
+      "out": "beat6",
+      "en": "A large touchscreen",
+      "ur": "",
+      "variant": 2
+     },
+     "sentence": "A large touchscreen."
+    },
+    {
+     "type": "statement",
+     "slot": "wide",
+     "params": {
+      "in": "beat6",
+      "cut": true,
+      "out": "beat7",
+      "en": "A software-driven experience",
+      "ur": "",
+      "variant": 0
+     },
+     "sentence": "A software-driven experience."
+    },
+    {
+     "type": "statement",
+     "slot": "wide",
+     "params": {
+      "in": "beat7",
+      "cut": true,
+      "out": "beat8",
+      "en": "Later that year, Google and its partners announced Android, opening another front in the smartphone revolution",
+      "ur": "",
+      "variant": 1
+     },
+     "sentence": "Later that year, Google and its partners announced Android, opening another front in the…"
+    },
+    {
+     "type": "statement",
+     "slot": "wide",
+     "params": {
+      "in": "beat8",
+      "cut": true,
+      "en": "The rules of the industry were being rewritten",
+      "ur": "",
+      "variant": 2
+     },
+     "sentence": "The rules of the industry were being rewritten."
     },
     {
      "type": "lower_third",
      "slot": "upper_supers",
      "params": {
       "in": "supers",
+      "out": "supers_out",
       "lines_en": [
        "THE COMPETITION CHANGED",
        "From devices…",
        "To ecosystems"
-      ],
-      "out": "supers_out"
+      ]
      }
     }
    ],
@@ -313,24 +472,32 @@
    "character": {
     "visible": false
    },
-   "headline_hold": 5.0,
+   "headline_hold": 0.85,
    "camera": "slow_pull",
    "actions": [
     {
-     "action": "shot1",
-     "at_frac": 0.0
+     "action": "beat1"
     },
     {
-     "action": "shot2",
-     "at_frac": 0.25
+     "action": "beat2"
     },
     {
-     "action": "shot3",
-     "at_frac": 0.5
+     "action": "beat3"
     },
     {
-     "action": "shot4",
-     "at_frac": 0.75
+     "action": "beat4"
+    },
+    {
+     "action": "beat5"
+    },
+    {
+     "action": "beat6"
+    },
+    {
+     "action": "beat7"
+    },
+    {
+     "action": "beat8"
     },
     {
      "action": "supers",
@@ -362,64 +529,115 @@
      "slot": "back"
     },
     {
-     "type": "phone",
-     "slot": "phone",
+     "type": "statement",
+     "slot": "wide",
      "params": {
-      "in": "shot1",
-      "out": "shot2",
-      "kind": "classic",
-      "ring": true
+      "in": "beat1",
+      "cut": true,
+      "out": "beat2",
+      "en": "Nokia didn't ignore smartphones",
+      "ur": "",
+      "variant": 0
      },
-     "shot": "Show engineers examining mobile phone prototypes."
+     "sentence": "Nokia didn't ignore smartphones."
     },
     {
-     "type": "phone",
-     "slot": "phone",
+     "type": "statement",
+     "slot": "wide",
      "params": {
-      "in": "shot2",
-      "out": "shot3",
-      "kind": "touch",
-      "screen": "apps"
+      "in": "beat2",
+      "cut": true,
+      "out": "beat3",
+      "en": "That is an important distinction",
+      "ur": "",
+      "variant": 1
      },
-     "shot": "Depict multiple software interfaces on separate devices."
+     "sentence": "That is an important distinction."
     },
     {
      "type": "ecosystem",
      "slot": "wide",
      "params": {
-      "in": "shot3",
-      "out": "shot4"
+      "in": "beat3",
+      "cut": true,
+      "out": "beat4"
      },
-     "shot": "Animate a complex network of competing operating systems."
+     "sentence": "The company developed advanced devices, experimented with different software platforms…"
     },
     {
-     "type": "ecosystem",
+     "type": "statement",
      "slot": "wide",
      "params": {
-      "in": "shot4",
-      "out": "shot5"
+      "in": "beat4",
+      "cut": true,
+      "out": "beat5",
+      "en": "Competing in a changing market requires more than recognizing that change is happening",
+      "ur": "",
+      "variant": 2
      },
-     "shot": "Show developers building applications for different platforms."
+     "sentence": "But competing in a changing market requires more than recognizing that change is…"
     },
     {
-     "type": "phone",
-     "slot": "phone",
+     "type": "statement",
+     "slot": "wide",
      "params": {
-      "in": "shot5",
-      "kind": "touch"
+      "in": "beat5",
+      "cut": true,
+      "out": "beat6",
+      "en": "It requires adapting quickly enough to remain relevant",
+      "ur": "",
+      "variant": 0
      },
-     "shot": "End with a Nokia-style handset in the foreground while rival smartphone silhouettes advance in the background."
+     "sentence": "It requires adapting quickly enough to remain relevant."
+    },
+    {
+     "type": "statement",
+     "slot": "wide",
+     "params": {
+      "in": "beat6",
+      "cut": true,
+      "out": "beat7",
+      "en": "Meanwhile",
+      "ur": "",
+      "variant": 1
+     },
+     "sentence": "Meanwhile, Apple's iOS and Google's Android were attracting developers and building…"
+    },
+    {
+     "type": "statement",
+     "slot": "wide",
+     "params": {
+      "in": "beat7",
+      "cut": true,
+      "out": "beat8",
+      "en": "Nokia still had engineering expertise, manufacturing capabilities, and a recognizable brand",
+      "ur": "",
+      "variant": 2
+     },
+     "sentence": "Nokia still had engineering expertise, manufacturing capabilities, and a recognizable…"
+    },
+    {
+     "type": "statement",
+     "slot": "wide",
+     "params": {
+      "in": "beat8",
+      "cut": true,
+      "en": "Those strengths could not automatically compensate for a weaker position in the emerging smartphone ecosystem",
+      "ur": "",
+      "variant": 0
+     },
+     "sentence": "But those strengths could not automatically compensate for a weaker position in the…"
     },
     {
      "type": "lower_third",
      "slot": "upper_supers",
      "params": {
       "in": "supers",
+      "out": "supers_out",
       "lines_en": [
        "A strong product is not enough",
        "The ecosystem matters"
-      ],
-      "out": "supers_out"
+      ]
      }
     }
    ],
@@ -427,28 +645,32 @@
    "character": {
     "visible": false
    },
-   "headline_hold": 5.0,
+   "headline_hold": 0.85,
    "camera": "pan_right",
    "actions": [
     {
-     "action": "shot1",
-     "at_frac": 0.0
+     "action": "beat1"
     },
     {
-     "action": "shot2",
-     "at_frac": 0.2
+     "action": "beat2"
     },
     {
-     "action": "shot3",
-     "at_frac": 0.4
+     "action": "beat3"
     },
     {
-     "action": "shot4",
-     "at_frac": 0.6
+     "action": "beat4"
     },
     {
-     "action": "shot5",
-     "at_frac": 0.8
+     "action": "beat5"
+    },
+    {
+     "action": "beat6"
+    },
+    {
+     "action": "beat7"
+    },
+    {
+     "action": "beat8"
     },
     {
      "action": "supers",
@@ -483,20 +705,24 @@
      "type": "statement",
      "slot": "wide",
      "params": {
-      "in": "subscribe",
-      "en": "Subscribe"
-     }
+      "in": "beat1",
+      "cut": true,
+      "en": "If you enjoy documentaries about the rise and fall of the world's biggest companies",
+      "ur": "",
+      "variant": 1
+     },
+     "sentence": "If you enjoy documentaries about the rise and fall of the world's biggest companies…"
     }
    ],
    "beats": [],
    "character": {
     "visible": false
    },
-   "headline_hold": 4.0,
+   "headline_hold": 0.0,
    "camera": "pull_out",
    "actions": [
     {
-     "action": "subscribe"
+     "action": "beat1"
     }
    ],
    "notes": ""
@@ -507,8 +733,9 @@
  ],
  "generator": "imported-script",
  "warnings": [
-  "This is a procedural renderer, not a stock-footage editor: every visual-direction bullet became a labelled motion graphic of the thing it names (phone, factory, globe, chart, ecosystem). No footage, no archival photographs and no real product photos are used or imitated.",
-  "The script asked for footage/archival/photographic shots, which this renderer cannot produce: 1.2: \"Rapid montage of people using old Nokia phones in different cities.\" -> rendered as a stylised motion graphic, not footage; 2.1: \"Show an archival-style industrial paper mill in 19th-century Finland.\" -> rendered as a stylised motion graphic, not footage",
+  "33 spoken sentences, one picture each; 4 are drawn subjects and 29 are typographic cards. A picture is never shown twice in a video, so once the script's subjects are used up the remaining sentences are set as text. Add more distinct subjects to [VISUAL DIRECTION] (different places, objects, diagrams) for more drawn subjects and fewer cards. Typographic cards show a phrase from their matching spoken sentence; the narration and subtitles remain verbatim.",
+  "This is a procedural renderer, not a stock-footage editor: matched visual-direction bullets become labelled motion graphics of their named subjects (phone, factory, globe, chart, ecosystem). Unmatched bullets are listed separately and are not forced under unrelated narration. No footage, archival photographs or real product photos are used.",
+  "The script asked for footage/archival/photographic shots, which this renderer cannot produce: 2: \"Founded in Finland in 1865, the company originally operated…\" -> rendered as a stylised motion graphic, not footage",
   "script declares 8.0 min of running time; its voice-over is about 2.1 min at 160 wpm (338 words). The narration is used verbatim, so the render follows the words, not the declared duration.",
   "the script is 3.8x shorter than its declared duration: at 160 wpm, 8 minutes needs roughly 1280 spoken words and this script has 338. Nothing was invented to fill the gap - add writing to the script, or publish it at its true length."
  ],
