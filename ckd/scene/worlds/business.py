@@ -623,27 +623,117 @@ class BusinessWorld(World):
 
     # -- big statement -------------------------------------------------------
     def _el_statement(self, p: Painter, ctx: RenderContext, el: Dict, a: float) -> None:
-        vertical = ctx.stage.format == "vertical"
-        slot = el.get("slot", "wide")
-        if vertical and slot == "wide":
-            slot = "statement_low"
-        x, y, w, h = self.slot(ctx.stage, slot)
+        """A typographic beat: one spoken sentence, set as picture.
+
+        With one picture per sentence and no picture ever repeated, most beats of
+        a documentary are type.  A single centred layout repeated thirty times
+        reads as a slideshow, so there are three compositions - centred with a
+        rule, left-aligned against an accent bar, and a held panel - each with a
+        faint motif behind it.  Short sentences are set big; long ones shrink to
+        fit rather than being clipped.
+        """
+        from ...gfx.primitives import fit_text
+        from ...text.shaping import TextStyle
+
+        vertical = ctx.stage.format != "landscape"
+        W, H = ctx.stage.width, ctx.stage.height
+        if vertical:
+            # In 9:16 a typographic beat owns the middle of the frame: the other
+            # slots are bands sized for a prop plus a caption, and a sentence set
+            # in a 10%-tall strip shrinks to something nobody can read on a phone.
+            x, y, w, h = W * 0.06, H * 0.17, W * 0.88, H * 0.44
+        else:
+            # Stop above the super band, which docks over the caption band at the
+            # bottom: a card and the writer's on-screen text must not fight.
+            sx, _sy, sw, _sh = self.slot(ctx.stage, el.get("slot", "wide"))
+            x, y, w, h = sx, H * 0.06, sw, H * 0.58
         text = ctx.label(el)
         if not text:
             return
-        size = (min(ctx.stage.px(31), w * 0.055) if vertical
-                else min(ctx.stage.headline_size() * 1.15, w * 0.13))
-        cy = y + h * (0.50 if vertical else 0.46)
-        box = self.label(p, ctx, x + w / 2, cy, text, size=size, bg=vertical,
-                         color=ctx.col("text"), alpha=a, max_width=w * 0.86)
-        uw = w * 0.12 * ease_out(clamp(ctx.t / 0.8))
-        if vertical:
-            # a rule under a three-line panel lands on the last line; over it does not
-            ry = box[1] - ctx.stage.px(12)
+        variant = int(_params(el).get("variant", 0) or 0) % 3
+        st = ctx.stage
+        cx, cy = x + w / 2, y + h * 0.5
+        accent = ctx.col("accent")
+        cool = ctx.col("cool")
+        rise = (1 - ease_out(min(1.0, a))) * st.px(10)
+        cy += rise
+
+        big = (min(st.px(64), w * 0.125) if vertical
+               else min(st.px(74), w * 0.145))
+        role = "headline"
+        max_w = w * (0.80 if not vertical else 0.86)
+        color = ctx.col("text")
+
+        if variant == 0:
+            self._motif_arcs(p, ctx, cx, cy, w, h, a)
+            lay, style = fit_text(ctx.renderer, ctx.language, text,
+                                  TextStyle(size=big, language=ctx.language, role=role,
+                                            align="center"),
+                                  max_w, h * 0.62, max_lines=4)
+            x0 = cx - lay.width / 2
+            y0 = cy - lay.height / 2
+            ctx.renderer.draw_layout(p, lay, style, (x0, y0), with_alpha(color, a))
+            uw = w * 0.10 * ease_out(clamp(ctx.t / 0.8))
+            ry = y0 + lay.height + st.px(20)
+            p.rect(cx - uw, ry, cx + uw, ry + max(1.5, st.px(2.4)),
+                   fill=with_alpha(accent, 0.9 * a))
+        elif variant == 1:
+            self._motif_rules(p, ctx, x, y, w, h, a)
+            lay, style = fit_text(ctx.renderer, ctx.language, text,
+                                  TextStyle(size=big * 0.94, language=ctx.language, role=role,
+                                            align="left"),
+                                  w * 0.72, h * 0.64, max_lines=4)
+            x0 = x + w * 0.10
+            y0 = cy - lay.height / 2
+            bar = x0 - st.px(16)
+            p.rect(bar, y0 - st.px(6), bar + max(2.0, st.px(4)), y0 + lay.height + st.px(6),
+                   fill=with_alpha(accent, 0.95 * a))
+            ctx.renderer.draw_layout(p, lay, style, (x0, y0), with_alpha(color, a))
         else:
-            ry = y + h * 0.66
-        p.rect(x + w / 2 - uw, ry, x + w / 2 + uw, ry + ctx.stage.px(2.5),
-               fill=with_alpha(ctx.col("accent"), 0.9 * a))
+            self._motif_dots(p, ctx, x, y, w, h, a)
+            lay, style = fit_text(ctx.renderer, ctx.language, text,
+                                  TextStyle(size=big * 0.88, language=ctx.language, role=role,
+                                            align="center"),
+                                  w * 0.70, h * 0.60, max_lines=4)
+            pad_x, pad_y = st.px(34), st.px(24)
+            panel = (cx - lay.width / 2 - pad_x, cy - lay.height / 2 - pad_y,
+                     cx + lay.width / 2 + pad_x, cy + lay.height / 2 + pad_y)
+            p.rect(panel[0], panel[1], panel[2], panel[3],
+                   fill=with_alpha(ctx.col("ink"), 0.62 * a),
+                   outline=with_alpha(cool, 0.30 * a), width=max(1.0, st.px(1.2)),
+                   radius=st.px(10))
+            ctx.renderer.draw_layout(p, lay, style,
+                                     (cx - lay.width / 2, cy - lay.height / 2), with_alpha(color, a))
+
+    # -- card motifs: three quiet backdrops so the type never looks repeated --
+    @staticmethod
+    def _motif_arcs(p: Painter, ctx: RenderContext, cx: float, cy: float,
+                    w: float, h: float, a: float) -> None:
+        st = ctx.stage
+        for i in range(3):
+            r = w * (0.10 + i * 0.055)
+            p.ellipse(cx, cy, r, r * 0.62, outline=with_alpha(ctx.col("cool"), (0.10 - i * 0.02) * a),
+                      width=max(1.0, st.px(1.2)))
+
+    @staticmethod
+    def _motif_rules(p: Painter, ctx: RenderContext, x: float, y: float,
+                     w: float, h: float, a: float) -> None:
+        st = ctx.stage
+        for i in range(7):
+            lx = x + w * (0.04 + i * 0.135)
+            p.rect(lx, y + h * 0.18, lx + max(1.0, st.px(1.2)), y + h * 0.82,
+                   fill=with_alpha(ctx.col("cool"), 0.07 * a))
+
+    @staticmethod
+    def _motif_dots(p: Painter, ctx: RenderContext, x: float, y: float,
+                    w: float, h: float, a: float) -> None:
+        st = ctx.stage
+        r = max(1.2, st.px(1.6))
+        for row in range(3):
+            for col in range(9):
+                dx = x + w * (0.08 + col * 0.105)
+                dy = y + h * (0.24 + row * 0.26)
+                p.ellipse(dx, dy, r, r, fill=with_alpha(ctx.col("cool"), 0.13 * a))
 
     # -- on-screen text (the script's ON-SCREEN TEXT block) ------------------
     def _el_lower_third(self, p: Painter, ctx: RenderContext, el: Dict, a: float) -> None:

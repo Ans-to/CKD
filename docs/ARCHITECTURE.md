@@ -87,16 +87,20 @@ on-screen text.
 
 ```
 documentary markdown ──parse_script()──► ScriptScene[] (title, time codes, VO, direction, supers)
-                     ──_shots_for()────► elements[] + timed actions ("shot3" at_frac 0.5)
+                     ──_shots_for()────► one element/action per spoken sentence ("beat3")
                      ──import_script()─► Story (world="business", palette="documentary",
                                                  character.visible=False)
 ```
 
-Each visual-direction bullet becomes one shot: `_classify()` maps it onto an element type by
-keyword, `0:05–0:12` prefixes become the shot's `at_frac`, and the bullet text (with the camera
-verb stripped) becomes the on-screen statement. Anything that asks for footage is recorded as a
-warning and drawn as the nearest schematic — the importer never claims otherwise. The plan then
-goes through exactly the same timing, narration, render and verify stages as a composed story.
+The voice-over is split into the same sentence units used by narration synthesis. `_sentence_plan()`
+semantically aligns direction bullets to those sentences in order; `_classify()` maps each chosen
+subject to a schematic element. Each sentence gets one action (`beat1`, `beat2`, …), and the timing
+stage cuts at the measured start of the corresponding spoken clause. Timecodes are planning notes,
+not cut times. Subjects already shown in the video are never reused; when no distinct drawn subject
+remains, the sentence becomes a composed typographic card with narration-derived text. Unmatched
+direction bullets and footage requests are recorded as warnings, never silently turned into
+unrelated imagery. The plan then goes through the same narration, render and verify stages as a
+composed story.
 
 ## Deliberate non-goals
 

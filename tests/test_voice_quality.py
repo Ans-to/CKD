@@ -120,17 +120,20 @@ def test_import_script_keeps_narration_verbatim():
     text = (
         "HOW NOKIA LOST ITS EMPIRE\n\n**Target duration:** 7-9 minutes\n\n"
         "SCENE 1 — THE HOOK\n\n**Time:** 0:00–0:35\n\n**[VOICEOVER]**\n\n"
-        "Imagine building a company so powerful.\n\nA company that dominates the market.\n\n"
+        "Imagine building a company so powerful that millions carry its classic phone.\n\n"
+        "A company that dominates the global mobile phone market across the world.\n\n"
         "**[VISUAL DIRECTION]**\n\n- 0:00-0:05: A classic mobile phone ringing in a dark room.\n"
-        "- 0:05-0:12: A world map illuminates.\n\n**[ON-SCREEN TEXT]**\n\n2007 — market leader\n\n"
+        "- 0:05-0:12: A world map illuminates as mobile phone icons spread across the world.\n\n"
+        "**[ON-SCREEN TEXT]**\n\n2007 — market leader\n\n"
         "SCENE 2 — THE FALL\n\n**Time:** 0:35–1:10\n\n**[VOICEOVER]**\n\nThen the market changed.\n\n"
         "**[VISUAL DIRECTION]**\n\n- Show a financial chart of market share.\n"
     )
     story = import_script(text)
     assert story.world == "business" and story.palette == "documentary"
     assert len(story.scenes) == 2
-    assert story.scenes[0].narration["en"] == \
-        "Imagine building a company so powerful. A company that dominates the market."
+    assert story.scenes[0].narration["en"] == (
+        "Imagine building a company so powerful that millions carry its classic phone. "
+        "A company that dominates the global mobile phone market across the world.")
     assert story.scenes[0].character.get("visible") is False, "documentaries are faceless"
     types = [el["type"] for el in story.scenes[0].elements]
     assert "phone" in types and "globe" in types
@@ -145,7 +148,8 @@ def test_import_script_keeps_narration_verbatim():
 def test_import_script_never_invents_figures():
     from ckd.content.script_import import import_script
 
-    text = ("SCENE 1 — NUMBERS\n\n**[VOICEOVER]**\n\nThe deal was done.\n\n"
+    text = ("SCENE 1 — NUMBERS\n\n**[VOICEOVER]**\n\n"
+            "The transaction was completed, but its value remained undisclosed.\n\n"
             "**[VISUAL DIRECTION]**\n\n- Show a financial chart of the transaction value.\n")
     story = import_script(text)
     chart = [el for el in story.scenes[0].elements if el["type"] == "chart"]
@@ -153,20 +157,77 @@ def test_import_script_never_invents_figures():
     assert not chart[0]["params"].get("values"), "no series may be invented"
 
 
-def test_documentary_shots_cut_on_the_writers_timecodes():
+def test_beats_cut_on_the_spoken_sentences_not_the_timecodes():
+    """A writer's timecode is a plan; the picture must follow the voice.
+
+    The script below gives three numbered shots over 30 s, but the narration is
+    two sentences and the voice reads them in about nine seconds.  The render
+    follows the sentences: one picture per sentence, each cut landing on the
+    moment the next sentence is spoken.
+    """
     from ckd.content.script_import import import_script
     from ckd.scene.timing import assign_actions
-    from ckd.voice.narration import SceneAudio
+    from ckd.voice.narration import ClauseAudio, SceneAudio
 
-    text = ("SCENE 1 — CUTS\n\n**[VOICEOVER]**\n\nOne two three four five six seven eight.\n\n"
+    text = ("SCENE 1 — CUTS\n\n**[VOICEOVER]**\n\n"
+            "One two three four five six seven eight. Nine ten eleven twelve.\n\n"
             "**[VISUAL DIRECTION]**\n\n- 0:00-0:05: The first thing.\n"
-            "- 0:05-0:15: The second thing.\n- 0:15-0:30: The third thing.\n")
+            "- 0:05-0:15: The second thing.\n- 0:15-0:30: The third thing.\n\n"
+            "**[ON-SCREEN TEXT]**\n\nA writer's lower third\n")
     story = import_script(text)
-    na = SceneAudio(index=0, scene_id="s01", start=0.0, duration=30.0, frames=720, clauses=[],
-                    audio=np.zeros(10, dtype=np.float32))
-    acts = assign_actions(story.scenes[0], na, scene_duration=30.0)
-    by_id = {a.id: (round(a.start, 2), round(a.end, 2)) for a in acts}
-    assert by_id["shot1"][0] == 0.0
-    assert 4.9 <= by_id["shot2"][0] <= 5.1, by_id
-    assert 14.9 <= by_id["shot3"][0] <= 15.1, by_id
-    assert by_id["shot3"][1] == 30.0
+    scene = story.scenes[0]
+    beats = [a for a in scene.actions if a["action"].startswith("beat")]
+    assert len(beats) == 2, "one beat per spoken sentence"
+    assert all("at_frac" not in a for a in beats), "beats are not pinned by the writer"
+    assert scene.headline_hold <= 1.0, "scene title must clear before the first dialogue visual"
+
+    clauses = [ClauseAudio(text="one", start=0.3, end=3.0, words=[]),
+               ClauseAudio(text="two", start=9.0, end=12.0, words=[])]
+    na = SceneAudio(index=0, scene_id="s01", start=0.0, duration=15.0, frames=360,
+                    clauses=clauses, audio=np.zeros(10, dtype=np.float32))
+    acts = {a.id: (a.start, a.end) for a in assign_actions(scene, na, scene_duration=15.0)}
+    assert acts["beat1"][0] <= clauses[0].start, acts
+    assert abs(acts["beat2"][0] - clauses[1].start) <= 0.35, acts
+    assert abs(acts["beat1"][1] - acts["beat2"][0]) < 1e-6, "cut, no gap"
+    assert acts["beat1"][1] > acts["supers"][0], "a super overlays; it must not end the visual beat"
+    assert abs(acts["supers"][1] - acts["supers_out"][0]) < 1e-6
+
+
+def test_cta_also_gets_one_visual_per_spoken_sentence():
+    from ckd.content.script_import import import_script
+
+    text = ("SCENE 1 — ENDING\n\n**[VOICEOVER]**\n\n"
+            "That is the story. The lesson remains.\n\n"
+            "OPTIONAL CALL TO ACTION\n\nFollow for more. Share this video.")
+    story = import_script(text)
+    cta = next(scene for scene in story.scenes if scene.id == "cta")
+    beats = [a for a in cta.actions if a["action"].startswith("beat")]
+    cards = [e for e in cta.elements if e["type"] == "statement"]
+    assert len(beats) == 2
+    assert len(cards) == 2
+    assert [card["params"]["en"] for card in cards] == ["Follow for more", "Share this video"]
+
+
+def test_a_picture_is_never_drawn_twice_in_one_video():
+    """One picture per sentence, and no picture repeated anywhere in the reel."""
+    from ckd.content.script_import import _visual_key, import_script
+
+    text = ("SCENE 1 — PHONES\n\n**[VOICEOVER]**\n\n"
+            "A classic phone. It rang in the dark. Another mobile phone.\n\n"
+            "**[VISUAL DIRECTION]**\n\n- A classic phone.\n- A phone.\n"
+            "- A mobile phone.\n\n"
+            "SCENE 2 — MORE PHONES\n\n**[VOICEOVER]**\n\n"
+            "A classic phone again. It was still ringing.\n\n"
+            "**[VISUAL DIRECTION]**\n\n- A classic phone.\n- A phone.\n")
+    story = import_script(text)
+    seen = set()
+    for scene in story.scenes:
+        subjects = [e for e in scene.elements
+                    if e["type"] not in ("skyline", "statement", "lower_third")]
+        for el in subjects:
+            key = _visual_key(el["type"], el["params"])
+            assert key not in seen, f"{key} drawn twice"
+            seen.add(key)
+        cards = [e for e in scene.elements if e["type"] == "statement"]
+        for card in cards:
+            assert card["params"]["en"], "a card must carry the sentence's own words"

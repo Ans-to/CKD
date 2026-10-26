@@ -64,7 +64,7 @@ ProgressFn = Callable[[str, float, str], None]
 # Bump when the *drawing* changes (composition, palette, timings). Scene caches from
 # an older value are treated as stale, because a cached clip would otherwise keep an
 # old look. Script/logic changes bump the "v" inside script_hash instead.
-RENDER_VERSION = 24
+RENDER_VERSION = 26
 
 
 def _noop(stage: str, frac: float, msg: str) -> None:  # pragma: no cover
@@ -113,7 +113,7 @@ class Pipeline:
         payload = {
             "topic": o.topic.strip().lower(), "langs": o.languages, "duration": o.duration,
             "notes": o.notes, "llm": o.llm, "palette": o.palette, "seed": o.seed,
-            "script": script_path, "script_sha": script_digest, "v": 8,
+            "script": script_path, "script_sha": script_digest, "v": 10,
         }
         return hash_json(payload, prefix="script")
 

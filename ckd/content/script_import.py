@@ -41,9 +41,11 @@ What is honoured
 ----------------
 * narration verbatim (nothing is rewritten, summarised or re-worded);
 * scene order, scene titles and on-screen text;
-* the timecodes in the visual direction, when they are present, so a cut lands
-  where the writer asked for it rather than one-per-sentence;
-* the declared duration, used as the planning target.
+* one new visual beat per spoken sentence, cut on measured sentence timing;
+* the visual direction as the authoritative vocabulary and ordered shot list,
+  semantically aligned to the sentence it describes (not blindly assigned by
+  bullet index);
+* the declared duration, used as a planning target, never to pad the narration.
 
 What is *not* honoured, honestly
 --------------------------------
@@ -52,9 +54,9 @@ The direction text asks for things a procedural renderer cannot produce:
 people".  Those bullets are mapped to the nearest thing this renderer actually
 has -- a labelled motion graphic of the *subject* the bullet names (a phone, a
 factory, a globe, a chart, an ecosystem) -- and the substitution is recorded in
-`story.warnings`, one line per scene, so nobody mistakes the result for footage.
-Bullets that name something with no graphic equivalent at all become a clean
-title/statement card instead of a fake photograph.
+`story.warnings`, so nobody mistakes the result for footage. A picture is used
+once per video; sentences without a distinct matching subject become animated
+typographic cards containing a phrase from the narration, not a fake photograph.
 
 The importer never invents facts.  Numbers that appear in the script appear on
 screen; nothing is added.
@@ -63,7 +65,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Sequence, Tuple
+from typing import Dict, List, Optional, Sequence, Set, Tuple
 
 from .schema import Scene, Story
 
@@ -282,54 +284,61 @@ def parse_script(text: str) -> ParsedScript:
 _RULES: Sequence[Tuple[Tuple[str, ...], str, Dict]] = (
     (("split-screen", "split screen", "comparison between", "versus", "vs."),
      "compare_phones", {}),
-    (("touchscreen smartphone", "touchscreen", "modern smartphone", "smartphone"),
-     "phone", {"kind": "touch"}),
-    (("keypad", "classic mobile", "classic phone", "old nokia", "nokia phone",
-      "mobile phone", "handset", "phone ringing", "phones"),
-     "phone", {"kind": "classic"}),
-    (("world map", "global map", "across continents", "global", "worldwide", "cities",
-      "global telecommunications", "global network", "distribution routes", "routes",
-      "across the world"),
-     "globe", {}),
     (("financial chart", "chart", "graph", "financial graphic", "timeline moving",
-      "market share", "value"),
+      "market share"),
      "chart", {}),
     (("timeline", "decision points", "product lifecycle"),
      "timeline", {}),
-    (("application ecosystem", "ecosystem", "operating systems", "apps", "developers",
+    (("world map", "global map", "across continents", "continents", "worldwide",
+      "distribution routes", "routes", "across the world", "global"),
+     "globe", {}),
+    (("application ecosystem", "ecosystem", "operating systems", "developers",
       "platform"),
      "ecosystem", {}),
     (("cell tower", "towers", "fiber", "data infrastructure", "network infrastructure",
       "telecommunications infrastructure", "network of cell", "communication equipment",
       "radio equipment", "network equipment", "base station", "signals"),
      "tower", {}),
-    (("factory", "paper mill", "manufacturing", "industrial", "rubber"),
+    (("factory", "paper mill", "manufacturing", "industrial", "rubber", "cables"),
      "factory", {}),
     (("headquarters", "office", "executive", "business leader", "conference table",
       "laboratory", "workspace", "engineers"),
      "statement", {}),
-    (("fingers", "browser", "page", "icons", "app store", "interface", "screen"),
+    (("touchscreen smartphone", "touchscreen", "modern smartphone", "smartphone"),
+     "phone", {"kind": "touch"}),
+    (("fingers", "browser", "page", "icons", "app store", "interface", "screen", "apps"),
      "phone", {"kind": "touch", "screen": "apps"}),
+    (("keypad", "classic mobile", "classic phone", "old nokia", "nokia phone",
+      "mobile phone", "handset", "phones", "phone"),
+     "phone", {"kind": "classic"}),
 )
-
-_SUBJECT_HINTS = (
-    "phone", "handset", "mobile", "chart", "map", "globe", "tower", "factory",
-    "timeline", "ecosystem", "screen", "browser", "makers", "engineers",
-)
-
 
 def _classify(bullet: str) -> Tuple[str, Dict, str]:
-    """Return (element type, params, honest note about what was substituted)."""
+    """Return (element type, params, honest note about what was substituted).
+
+    A direction line often names two things ("a world map as phone icons spread
+    across continents"); the rule with the most matching words wins instead of
+    whichever rule happens to be listed first, so the picture answers the
+    subject the line is *about*.
+    """
     low = bullet.lower()
+    best: Optional[Tuple[int, str, Dict]] = None
     for keys, kind, params in _RULES:
-        if any(k in low for k in keys):
-            note = ""
-            if any(w in low for w in ("footage", "archival", "photograph", "montage",
-                                      "stock", "realistic", "cinematic")):
-                note = "rendered as a stylised motion graphic, not footage"
-            return kind, dict(params), note
-    if any(w in low for w in ("text", "title", "statement", "quote", "label")):
-        return "statement", {}, ""
+        hits = sum(1 for k in keys if k in low)
+        if hits and (best is None or hits > best[0]):
+            best = (hits, kind, dict(params))
+    if best is not None:
+        kind, params = best[1], best[2]
+        note = ""
+        if any(w in low for w in ("footage", "archival", "photograph", "montage",
+                                  "stock", "realistic", "cinematic")):
+            note = "rendered as a stylised motion graphic, not footage"
+        if kind == "phone":
+            if "ring" in low:
+                params["ring"] = True
+            if any(w in low for w in ("apps", "interface", "icons", "software")):
+                params.setdefault("screen", "apps")
+        return kind, params, note
     return "statement", {}, ""
 
 
@@ -343,103 +352,286 @@ def _strip_lead(text: str) -> Tuple[Optional[float], Optional[float], str]:
     return start, end, m.group(5).strip()
 
 
-def _shots_for(scene: ScriptScene, index: int) -> Tuple[List[Dict], List[str], Dict[str, float]]:
-    """Build elements + action list for one scene from its visual direction.
+def _visual_key(kind: str, params: Dict) -> str:
+    """Identity of a visual *type* for the strict no-repeat rule.
 
-    Returns (elements, notes, shot_times) where shot_times maps action id to a
-    fraction of the scene (0..1).
+    Phone variants still read as phone shots; changing a ring flag or screen
+    colour does not make a repeated phone a new picture.  A typographic card is
+    unique by its own narration-derived words, so cards are keyed by that copy.
+    """
+    if kind == "statement":
+        return "statement:" + str(params.get("en", ""))
+    return kind
+
+
+def _normalise(kind: str, params: Dict) -> Dict:
+    """Fill renderer defaults before emitting an element."""
+    params = {k: v for k, v in params.items() if k not in ("in", "out")}
+    if kind == "phone":
+        if "touch" in str(params.get("kind")):
+            params.setdefault("screen", "blank")
+        else:
+            params = {"kind": "classic", "ring": bool(params.get("ring", False))}
+    return params
+
+
+def _card_text(sentence: str) -> str:
+    """The words of a typographic card: the sentence's own key phrase.
+
+    Never the visual-direction bullet - a card must say what the narrator is
+    saying at that moment, or it is out of context by definition.  A sentence too
+    long to set large is cut at a clause boundary (cards are read, not skimmed),
+    never at a character count in the middle of a thought.
+    """
+    text = re.sub(r"\s+", " ", clean_direction(sentence)).strip().rstrip(".")
+    # a card that opens with "But" or "So" reads like a fragment of something else
+    text = re.sub(r"^(?:But|And|So|Now|Then|Yet|Still)\s+", "", text, flags=re.I).strip()
+    if len(text) > 110:
+        parts = [x.strip(" ,;:") for x in re.split(r"(?<=[,;:])\s+|\s+[\u2014\u2013]\s+", text)]
+        parts = [x for x in parts if x]
+        # the clause carrying the most meaning, preferring one that fits whole
+        fitting = [x for x in parts if len(x) <= 110]
+        pick = max(fitting, key=lambda x: len(_tokens(x))) if fitting else max(parts, key=len)
+        text = pick
+    if len(text) > 110:
+        text = text[:110].rsplit(" ", 1)[0].rstrip(" ,;:") + "\u2026"
+    return text[:1].upper() + text[1:] if text else text
+
+
+_STOP = {
+    "the", "and", "that", "with", "from", "this", "they", "them", "their", "there",
+    "into", "over", "when", "what", "were", "was", "are", "for", "but", "not",
+    "you", "your", "its", "it's", "has", "have", "had", "will", "would", "could",
+    "than", "then", "also", "which", "while", "about", "after", "before", "more",
+    "most", "some", "such", "only", "very", "just", "like", "even", "made", "make",
+    "began", "become", "became", "been", "being", "does", "did", "doing", "can",
+}
+
+
+def _tokens(text: str) -> Set[str]:
+    out: Set[str] = set()
+    for raw in re.findall(r"[A-Za-z][A-Za-z'\-]+", text.lower()):
+        if len(raw) < 4 or raw in _STOP:
+            continue
+        out.add(raw.rstrip("s") if len(raw) > 4 else raw)
+    return out
+
+
+_FAMILY = {
+    "phone": "device", "compare_phones": "device", "ecosystem": "network",
+    "tower": "network", "factory": "industry", "globe": "data",
+    "timeline": "data", "chart": "data", "stat": "data", "label": "data",
+}
+
+
+def _family(kind: str) -> str:
+    return _FAMILY.get(kind, "abstract")
+
+
+def _overlap(sentence: str, bullet: str) -> float:
+    """How much a sentence and a direction bullet are talking about the same thing."""
+    a, b = _tokens(sentence), _tokens(bullet)
+    if not a or not b:
+        return 0.0
+    return float(len(a & b))
+
+
+def _sentence_plan(scene: ScriptScene, used: Set[str], notes: List[str], *,
+                   card_offset: int = 0) -> List[Tuple[str, Dict, str]]:
+    """One visual per *spoken* sentence, matched to the words at that moment.
+
+    The writer's direction bullets stay authoritative for *what* is drawn; the
+    question this function answers is *which sentence* each bullet belongs to.
+    Handing bullets out in file order, one sentence at a time, is what put a
+    paper mill on the line about smartphones - the lists drift apart as soon as
+    one sentence expands into three.  So bullets are aligned to sentences the
+    way two transcriptions of the same speech are aligned: in order (a bullet
+    never jumps backwards), one bullet per sentence at most, and only where the
+    words actually agree.
+
+    Per sentence, after alignment:
+
+    1. use the bullet aligned to it;
+    2. failing that, use a new subject the sentence itself names (years ->
+       timeline, "touchscreen" -> a touch handset, "the world" -> a globe);
+    3. failing that, set a phrase from the sentence as type. An unmatched bullet
+       is reported, never forced under unrelated dialogue.
+
+    A visual type is never drawn twice in the same video, so a subject already
+    on the reel is passed over even if the writer asks for it again.
+    """
+    from ..voice.base import split_clauses
+
+    sentences = split_clauses(scene.narration or "") or [scene.title or "\u2026"]
+    queue: List[Tuple[str, str, Dict]] = []
+    for bullet in (scene.visuals or []):
+        desc = _strip_lead(bullet)[2]
+        kind, params, note = _classify(desc)
+        queue.append((desc, kind, _normalise(kind, params) | {"__note": note}))
+
+    def clean(kind: str, params: Dict) -> Dict:
+        return {k: v for k, v in params.items() if k != "__note"}
+
+    def available(kind: str, params: Dict) -> bool:
+        if kind == "statement":
+            return True  # each card's text is its unique visual
+        key = _visual_key(kind, clean(kind, params))
+        return not key or key not in used
+
+    # -- align sentences to bullets (Needleman-Wunsch over words) -------------
+    kinds = [_classify(t) for t in sentences]
+    n, m = len(sentences), len(queue)
+    score = [[0.0] * m for _ in range(n)]
+    for i, sentence in enumerate(sentences):
+        s_kind = kinds[i][0]
+        for j, (desc, kind, params) in enumerate(queue):
+            if not available(kind, params):
+                continue  # already on the reel: this video shows it once
+            v = _overlap(sentence, desc)
+            if s_kind != "statement" and _family(s_kind) == _family(kind):
+                v += 1.0  # a device sentence may take a device bullet
+            # two shared words (or one plus a recognisable subject) is agreement;
+            # a single shared word is a coincidence like "market" or "company"
+            score[i][j] = v if v >= 2.0 else 0.0
+
+    dp = [[0.0] * (m + 1) for _ in range(n + 1)]
+    move = [[0] * (m + 1) for _ in range(n + 1)]  # 0 skip sentence, 1 skip bullet, 2 match
+    for i in range(n - 1, -1, -1):
+        for j in range(m - 1, -1, -1):
+            best, how = dp[i + 1][j], 0
+            if dp[i][j + 1] > best + 1e-9:
+                best, how = dp[i][j + 1], 1
+            if score[i][j] > 0 and score[i][j] + dp[i + 1][j + 1] > best + 1e-9:
+                best, how = score[i][j] + dp[i + 1][j + 1], 2
+            dp[i][j], move[i][j] = best, how
+
+    aligned: Dict[int, int] = {}
+    i = j = 0
+    while i < n and j < m:
+        how = move[i][j]
+        if how == 2:
+            aligned[i] = j
+            i += 1
+            j += 1
+        elif how == 1:
+            j += 1
+        else:
+            i += 1
+
+    # -- choose the picture for every sentence, in order ----------------------
+    claimed: Set[int] = set()
+    plan: List[Tuple[str, Dict, str]] = []
+    card_count = 0
+    for i, sentence in enumerate(sentences):
+        s_kind, s_params, _ = _classify(sentence)
+        s_params = _normalise(s_kind, s_params)
+
+        def take(kind: str, params: Dict, note: str
+                 ) -> Optional[Tuple[str, Dict, str]]:
+            """Accept a picture only if the video has not shown it already."""
+            params = clean(kind, params)
+            if not available(kind, params):
+                return None
+            if kind != "statement":
+                used.add(_visual_key(kind, params))
+            return (kind, params, note)
+
+        choice: Optional[Tuple[str, Dict, str]] = None
+        if i in aligned:
+            bullet_i = aligned[i]
+            _desc, kind, params = queue[bullet_i]
+            choice = take(kind, params, params.get("__note", ""))
+            if choice is not None:
+                claimed.add(bullet_i)
+        if choice is None and s_kind != "statement":
+            choice = take(s_kind, s_params, "")
+        if choice is None:
+            choice = ("statement", {}, "")
+        kind, params, note = choice
+        if kind == "statement":
+            params = {**params, "en": _card_text(sentence), "ur": "",
+                      "variant": (card_offset + card_count) % 3}
+            card_count += 1
+        plan.append((kind, params, note))
+        if note:
+            notes.append(f"{scene.number}: \"{_shorten(sentence, 60)}\" -> {note}")
+
+    unmatched = [q[0] for bj, q in enumerate(queue) if bj not in claimed]
+    if unmatched:
+        notes.append(
+            f"{scene.number}: {len(unmatched)} direction bullet(s) had nothing in "
+            f"the spoken text to match and were not drawn: "
+            + " | ".join(_shorten(u, 50) for u in unmatched))
+    return plan
+
+
+def _shots_for(scene: ScriptScene, index: int, used: Set[str], *,
+               card_offset: int = 0) -> Tuple[List[Dict], List[str], Dict]:
+    """Build one scene's elements from its spoken sentences + visual direction.
+
+    Returns (elements, notes, control) where `control` carries the number of
+    sentence beats, the times for the on-screen-text super, and how many
+    typographic cards the no-repeat rule forced.
     """
     elements: List[Dict] = [{"type": "skyline", "slot": "back"}]
     notes: List[str] = []
-    bullets = scene.visuals or []
-    shots: List[Tuple[Optional[float], Optional[float], str]] = []
-    for b in bullets:
-        shots.append(_strip_lead(b))
-
-    # fall back to the scene's own timecode range when bullets carry none
-    times = [s for s in shots if s[0] is not None]
-    if not times and scene.t_start is not None and scene.t_end is not None:
-        n = max(1, len(shots))
-        span = max(1.0, scene.t_end - scene.t_start)
-        shots = [(scene.t_start + span * i / n, scene.t_start + span * (i + 1) / n, s[2])
-                 for i, s in enumerate(shots)]
-    if not shots:
-        # no direction at all: one statement card built from the on-screen text
-        text = " ".join(scene.onscreen[:2]) if scene.onscreen else scene.title
-        shots = [(None, None, text)]
-
-    # normalise to fractions of this scene
-    base = min([s[0] for s in shots if s[0] is not None] or [0.0])
-    end = max([s[1] for s in shots if s[1] is not None] or [base + len(shots)])
-    span = max(1.0, end - base)
-
-    actions: List[Dict] = []
-    frac_times: Dict[str, float] = {}
-    supers = None
-    if scene.onscreen:
-        lines = [_sentence(clean_direction(x), 54) for x in scene.onscreen if x.strip()][:3]
-        if lines:
-            supers = {"type": "lower_third", "slot": "upper_supers",
-                      "params": {"in": "supers", "lines_en": lines}}
-    for i, (s0, s1, desc) in enumerate(shots):
-        kind, params, note = _classify(desc)
-        aid = f"shot{i + 1}"
-        # each shot is `in` on its own action and `out` on the next one
-        el = {"type": kind, "slot": _slot_for(kind, i, len(shots)), "params": {"in": aid}}
-        if i + 1 < len(shots):
-            el["params"]["out"] = f"shot{i + 2}"
-        el["shot"] = desc  # kept for review; the renderer ignores unknown keys
-        if kind == "phone":
-            if "touch" not in str(params.get("kind")):
-                params = {"kind": "classic", "ring": True}
+    plan = _sentence_plan(scene, used, notes, card_offset=card_offset)
+    n = len(plan)
+    cards = 0
+    for i, (kind, params, _note) in enumerate(plan):
+        aid = f"beat{i + 1}"
+        # each beat is `in` on its own cue and `out` on the next one
+        el: Dict = {"type": kind, "slot": _slot_for(kind, i, n), "params": {"in": aid}}
+        if i + 1 < n:
+            el["params"]["out"] = f"beat{i + 2}"
+        # kept for review: which sentence this picture is answering
+        el["sentence"] = _shorten(scene_narration_sentence(scene, i), 90)
         if kind == "chart":
             # a chart with no data would have to invent a trend.  Fall back to the
             # years the script itself mentions, drawn as a timeline.
-            years = re.findall(r"\b(1[89]\d{2}|20\d{2}|1990s|2000s)\b", scene.narration + " " + " ".join(scene.onscreen))
+            years = re.findall(r"\b(1[89]\d{2}|20\d{2}|1990s|2000s)\b",
+                               scene.narration + " " + " ".join(scene.onscreen))
             if len(years) >= 2:
                 kind = "timeline"
                 el["type"] = "timeline"
                 params = {"years": list(dict.fromkeys(years))[:5],
                           "notes": ["" for _ in dict.fromkeys(years)][:5],
-                          "en": _sentence(clean_direction(desc), 48)}
+                          "en": _sentence(clean_direction(scene_narration_sentence(scene, i)), 48)}
             else:
-                params.update({"mode": "empty"})
+                params = {**params, "mode": "empty"}
         if kind == "statement":
-            copy = clean_direction(desc)
-            params.update({"en": _sentence(copy, 58), "ur": ""})
+            cards += 1
         el["params"].update(params)
         elements.append(el)
-        if s0 is not None and s1 is not None:
-            frac = max(0.0, min(0.98, (s0 - base) / span))
-        else:
-            frac = i / max(1, len(shots))
-        actions.append({"action": aid, "at_frac": round(frac, 4)})
-        frac_times[aid] = frac
-        if note:
-            notes.append(f"{scene.number}.{i + 1}: \"{_shorten(desc, 70)}\" -> {note}")
-    if supers is not None:
-        elements.append(supers)   # drawn last: supers sit on top of the picture
-        # A lower third is a *super*, not a subtitle: it comes in, holds for about
-        # ten seconds and leaves.  Left pinned open it sat on top of the scene for
-        # its entire length (62 s in the sample script), covering the props.
-        # Size the hold against the scene's *spoken* length, not the timecode: a
-        # writer's "1:40-2:50" window is often three times the narration it
-        # contains, and a super sized against it would flash for three seconds.
-        spoken = len(scene.narration.split()) / 2.65 + 2.0
-        if scene.t_start is not None and scene.t_end is not None and spoken < 6.0:
-            spoken = max(6.0, (scene.t_end - scene.t_start) * 0.5)
-        in_frac = 0.12
-        # about ten seconds of screen time, and always 12..45 % of the scene
-        hold_frac = min(0.45, max(0.12, 10.0 / max(6.0, spoken)))
-        out_frac = min(0.92, in_frac + hold_frac)
-        supers["params"]["in"] = "supers"
-        supers["params"]["out"] = "supers_out"
-        # appended (not inserted): the caller turns this dict into the scene's
-        # action list, and appending keeps every shot's "next cue" pointing at the
-        # following shot
-        frac_times["supers"] = round(in_frac, 4)
-        frac_times["supers_out"] = round(out_frac, 4)
-    return elements, notes, frac_times
+
+    control: Dict = {"beats": n, "cards": cards, "total": n}
+    if scene.onscreen:
+        lines = [_sentence(clean_direction(x), 54) for x in scene.onscreen if x.strip()][:3]
+        if lines:
+            super_el = {"type": "lower_third", "slot": "upper_supers",
+                        "params": {"in": "supers", "out": "supers_out", "lines_en": lines}}
+            elements.append(super_el)   # drawn last: supers sit on top of the picture
+            # A lower third is a *super*, not a subtitle: it comes in, holds about
+            # ten seconds and leaves.  Size the hold against the scene's *spoken*
+            # length, not the writer's timecode window, which is often three times
+            # the narration it contains.
+            spoken = len(scene.narration.split()) / 2.65 + 2.0
+            if scene.t_start is not None and scene.t_end is not None and spoken < 6.0:
+                spoken = max(6.0, (scene.t_end - scene.t_start) * 0.5)
+            hold_frac = min(0.45, max(0.12, 10.0 / max(6.0, spoken)))
+            in_frac = 0.12
+            control["supers"] = (in_frac, min(0.92, in_frac + hold_frac))
+    return elements, notes, control
+
+
+def scene_narration_sentence(scene: ScriptScene, index: int) -> str:
+    """The sentence that beat `index` is answering (for review and story.json)."""
+    from ..voice.base import split_clauses
+
+    sentences = split_clauses(scene.narration or "")
+    if 0 <= index < len(sentences):
+        return sentences[index]
+    return scene.title or ""
 
 
 def _slot_for(kind: str, i: int, n: int) -> str:
@@ -506,9 +698,26 @@ def import_script(text: str, *, languages: Sequence[str] = ("en",),
     scenes: List[Scene] = []
     warnings: List[str] = list(ps.warnings)
     substituted: List[str] = []
+    # pictures already on the reel: a visual appears at most once per video
+    used: Set[str] = set()
+    cards = beats = 0
     for i, sc in enumerate(ps.scenes):
-        elements, notes, shot_fracs = _shots_for(sc, i)
-        substituted.extend(notes)
+        elements, notes, control = _shots_for(sc, i, used, card_offset=cards)
+        for note in notes:
+            if "rendered as a stylised motion graphic, not footage" in note:
+                substituted.append(note)
+            else:
+                warnings.append(note)
+        cards += int(control.get("cards", 0))
+        beats += int(control.get("total", 0))
+        # one beat per spoken sentence, in order, with no time pinned: the timing
+        # stage maps beat n onto spoken sentence n, so the picture changes exactly
+        # when the narration moves on
+        actions: List[Dict] = [{"action": f"beat{b + 1}"} for b in range(int(control["beats"]))]
+        if control.get("supers"):
+            a, b = control["supers"]
+            actions.append({"action": "supers", "at_frac": round(a, 4)})
+            actions.append({"action": "supers_out", "at_frac": round(b, 4)})
         headline = {"en": _headline(sc.title) or f"Part {sc.number}"}
         narration: Dict[str, str] = {}
         for lang in languages:
@@ -529,15 +738,21 @@ def import_script(text: str, *, languages: Sequence[str] = ("en",),
             "motif": "structure",
             "elements": elements,
             "beats": [],
-            # the shot times come from the writer's own timecodes, not from the
-            # sentence count: that is what "0:05-0:12" means
-            "actions": [{"action": k, "at_frac": v} for k, v in shot_fracs.items()],
+            "actions": actions,
             "character": {"visible": False},          # faceless documentary
-            "headline_hold": 5.0 if i else 6.0,       # title card, then out of the way
+            "headline_hold": 0.85,                   # clear title before sentence-driven visuals
             "camera": ["slow_push", "drift", "slow_pull", "pan_right"][i % 4],
             "notes": sc.audio_note,
         }))
     if include_cta and ps.cta is not None and ps.cta.narration:
+        elements, notes, control = _shots_for(ps.cta, len(ps.scenes), used, card_offset=cards)
+        for note in notes:
+            if "rendered as a stylised motion graphic, not footage" in note:
+                substituted.append(note)
+            else:
+                warnings.append(note)
+        cards += int(control.get("cards", 0))
+        beats += int(control.get("total", 0))
         scenes.append(Scene.from_dict({
             "id": "cta",
             "purpose": "cta",
@@ -545,14 +760,11 @@ def import_script(text: str, *, languages: Sequence[str] = ("en",),
             "headline": {"en": ""},
             "keywords": {"en": []},
             "motif": "structure",
-            "elements": [
-                {"type": "skyline", "slot": "back"},
-                {"type": "statement", "slot": "wide",
-                 "params": {"in": "subscribe", "en": "Subscribe"}},
-            ],
-            "actions": [{"action": "subscribe"}],
+            "elements": elements,
+            "actions": [{"action": f"beat{b + 1}"}
+                        for b in range(int(control["beats"]))],
             "character": {"visible": False},
-            "headline_hold": 4.0,
+            "headline_hold": 0.0,
             "camera": "pull_out",
         }))
     story = Story(
@@ -567,11 +779,21 @@ def import_script(text: str, *, languages: Sequence[str] = ("en",),
     )
     if ps.subtitle:
         story.warnings.append(f"subtitle from the script: {ps.subtitle}")
+    if beats:
+        story.warnings.append(
+            f"{beats} spoken sentences, one picture each; {beats - cards} are drawn "
+            f"subjects and {cards} are typographic cards. A picture is never shown "
+            "twice in a video, so once the script's subjects are used up the "
+            "remaining sentences are set as text. Add more distinct subjects to "
+            "[VISUAL DIRECTION] (different places, objects, diagrams) for more "
+            "drawn subjects and fewer cards. Typographic cards show a phrase from "
+            "their matching spoken sentence; the narration and subtitles remain "
+            "verbatim.")
     story.warnings.append(
-        "This is a procedural renderer, not a stock-footage editor: every visual-direction "
-        "bullet became a labelled motion graphic of the thing it names (phone, factory, globe, "
-        "chart, ecosystem). No footage, no archival photographs and no real product photos are "
-        "used or imitated.")
+        "This is a procedural renderer, not a stock-footage editor: matched visual-direction "
+        "bullets become labelled motion graphics of their named subjects (phone, factory, globe, "
+        "chart, ecosystem). Unmatched bullets are listed separately and are not forced under "
+        "unrelated narration. No footage, archival photographs or real product photos are used.")
     if substituted:
         story.warnings.append(
             "The script asked for footage/archival/photographic shots, which this renderer "

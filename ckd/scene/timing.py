@@ -57,9 +57,10 @@ def assign_actions(scene: Scene, narration: SceneAudio, *, scene_duration: float
     if not actions:
         return out
     # An action may pin itself to a fraction of the scene (`at_frac`) or to an
-    # absolute second (`at`).  Imported documentary scripts use this to cut to a
-    # new shot on its own cue instead of one shot per spoken sentence.
-    if any(("at_frac" in a or "at" in a) for a in actions):
+    # absolute second (`at`); one that does not is a per-sentence beat.  Both
+    # kinds are scheduled here, because a beat must hold until the *next* cut
+    # rather than fade at the end of its own sentence.
+    if clauses or any(("at_frac" in a or "at" in a) for a in actions):
         starts: List[Optional[float]] = []
         for act in actions:
             if "at" in act:
@@ -68,16 +69,26 @@ def assign_actions(scene: Scene, narration: SceneAudio, *, scene_duration: float
                 starts.append(max(0.0, min(1.0, float(act["at_frac"]))) * scene_duration)
             else:
                 starts.append(None)
-        # an unpinned action rides along with the shot that precedes it
-        last = 0.0
+        # An unpinned action is a per-sentence beat: it fires when the *next
+        # spoken sentence* begins, counted among the unpinned actions only, so a
+        # pinned super in the same scene does not steal a sentence's slot.
+        k = 0
         for i in range(len(starts)):
             if starts[i] is None:
-                starts[i] = last
-            else:
-                last = starts[i]
+                if k < len(clauses):
+                    starts[i] = max(0.0, clauses[k].start - lead)
+                else:
+                    starts[i] = scene_duration
+                k += 1
         for i, act in enumerate(actions):
+            # A pinned super is an overlay, not a shot cut.  Sentence beats hold
+            # until the next sentence beat; pinned actions (e.g. supers/supers_out)
+            # hold until the next pinned cue.  Letting a super end beat1 made the
+            # picture disappear for the rest of a long sentence.
+            is_pinned = "at" in act or "at_frac" in act
             nxt = next((starts[j] for j in range(i + 1, len(starts))
-                        if starts[j] is not None and starts[j] > starts[i]), scene_duration)
+                        if ("at" in actions[j] or "at_frac" in actions[j]) == is_pinned
+                        and starts[j] is not None and starts[j] > starts[i]), scene_duration)
             begin = float(starts[i])
             finish = min(scene_duration, max(begin + 0.2, nxt))
             out.append(ActionState(act.get("action", f"action_{i}"), begin, finish))

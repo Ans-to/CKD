@@ -159,7 +159,7 @@ def test_lower_third_is_a_super_not_a_subtitle():
     lt = [e for e in scene.elements if e["type"] == "lower_third"]
     assert lt and lt[-1]["params"]["in"] == "supers"
     assert lt[-1]["params"]["out"] == "supers_out", "the super must have an exit"
-    times = {a["action"]: a["at_frac"] for a in scene.actions}
+    times = {a["action"]: a["at_frac"] for a in scene.actions if "at_frac" in a}
     assert times["supers"] < times["supers_out"] <= 0.92
     # measured against the scene's *spoken* length (120 words ~= 47 s), not the
     # declared two-minute window: the super holds about ten seconds either way

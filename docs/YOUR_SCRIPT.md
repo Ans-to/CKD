@@ -51,7 +51,7 @@ What is recognised:
 | `SCENE n — TITLE` | one scene each; the title becomes the headline of that scene |
 | `**Time:** 0:35–1:40` | the scene's declared window (used for planning, not to stretch narration) |
 | `**[VOICEOVER]**` | spoken **verbatim**, sentence punctuation preserved |
-| `**[VISUAL DIRECTION]**` bullets | one shot each; timecodes (`0:05–0:12:`) cut the shot at exactly that second |
+| `**[VISUAL DIRECTION]**` bullets | authoritative visual vocabulary, matched by meaning to the spoken sentence; one visual beat per sentence |
 | `**[ON-SCREEN TEXT]**` | writer's supers, drawn as a lower third on a scrim |
 | `**[AUDIO]**` | kept as a production note in `story.json` (`notes`), never invented into sound |
 | `CALL TO ACTION` | an extra scene with the CTA voice-over and a subscribe statement |
@@ -59,16 +59,22 @@ What is recognised:
 
 Line-level details that matter:
 
-- A visual-direction bullet keeps the *cut time* and loses the imperative verb
-  ("Show an archival-style paper mill" → "archival-style paper mill"), so the on-screen
-  statement is a label, not a command.
+- A visual-direction bullet keeps its subject and loses the imperative verb
+  ("Show an archival-style paper mill" → a labelled paper-mill schematic), but it is
+  matched to the sentence it describes rather than blindly assigned to the next sentence.
+- The picture changes at every spoken sentence boundary. Timecodes remain planning notes;
+  actual cuts follow measured narration timing, so a declared 8-minute script with 2 minutes
+  of speech does not hold shots over silence.
 - A lower third is a **super, not a subtitle**: it comes in a couple of seconds into the
   scene, holds about ten seconds and leaves. It does not sit on the picture for the whole
   scene (which is what the first version did, covering every prop in a 54-second scene).
-- Bullets are mapped to props by keyword: `phone` (keypad / touchscreen), `globe`,
-  `chart`, `timeline`, `ecosystem`, `tower`, `factory`, `compare_phones`, or a
-  `statement` card when nothing visual is named. Unknown subjects become statement cards —
-  never invented diagrams.
+- Direction bullets are matched to sentences by shared subject and kept in script order;
+  sentences not covered by a bullet use their own subject when the renderer can draw it.
+  A drawn picture is never reused elsewhere in the video. Once distinct subjects are used up,
+  the sentence becomes a designed typographic card with a phrase from that sentence. This is
+  the trade-off for the strict no-repeat rule: add genuinely different places, objects or
+  labelled schematics to `[VISUAL DIRECTION]` for more drawn pictures. The render never makes
+  an invented factual diagram.
 - A requested chart with **no numbers in your script** renders as an empty chart frame
   captioned *"no figures in the script"*. The renderer never invents data points.
 
@@ -125,10 +131,9 @@ These warnings are generated, not decoration:
 
 ## Timing, honestly
 
-- **Your timecodes win.** `0:05–0:12` cuts the shot at 5.0 s into the scene. Scenes
-  without timecodes distribute their shots evenly over the scene's measured narration.
-  Shots cross-fade in 0.45 s and out in 0.35 s, so a cut is a cut and not a double
-  exposure of two props.
+- **The narration drives the cuts.** Every sentence gets a new beat, and the next beat starts
+  when its sentence starts in the measured voice track. Timecodes and the declared duration
+  do not pad or retime speech. Shots cross-fade in 0.45 s and out in 0.35 s.
 - **Scene length comes from the voice**, not from `**Time:**`. A scene declared 0:35–1:40
   whose words take 62 seconds is 62 seconds long. The render follows the words.
 - **Word-level timing is estimated for Kokoro**, measured from TTS events for espeak.

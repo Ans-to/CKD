@@ -124,9 +124,12 @@ The platform is a notebook, so the pasted-script cell in
 `SCRIPT`, run, then review/preview/render/download with the existing cells.
 
 `--topic` is not needed when `--script` supplies the words. Each `SCENE n — TITLE` becomes
-a scene, each `**[VISUAL DIRECTION]**` bullet becomes a shot (cut on *your* timecode),
-`**[ON-SCREEN TEXT]**` becomes a lower third, and the `CALL TO ACTION` block becomes a CTA
-scene. See `docs/YOUR_SCRIPT.md` for the format in detail.
+a scene, and every spoken sentence gets a new visual beat timed to the narration. Direction
+bullets are matched to the sentence they describe; timecodes remain planning notes, not cut
+points. A subject is not reused in the same video: when no new drawable subject matches, a
+designed typographic card uses a phrase from that sentence. `**[ON-SCREEN TEXT]**` becomes a
+lower third, and the `CALL TO ACTION` block follows the same per-sentence visual rule. See
+`docs/YOUR_SCRIPT.md` for the format in detail.
 
 Two things it will not do, and says so in the log and in `story.json`:
 

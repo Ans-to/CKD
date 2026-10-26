@@ -29,7 +29,7 @@ python tools/contact_sheet.py samples/solar-en-16x9.mp4 out.png
 
 ```
 $ PYTHONPATH=. python3 -m pytest tests -q
-49 passed in 43.2s
+51 passed (full suite, latest run)
 ```
 
 Four of those are new for the imported-script path (`tests/test_documentary_import.py`):
@@ -39,7 +39,7 @@ phone, the lower third never reaches the caption band in either format, and cons
 shots stop ghosting over each other (the shot fade is now in seconds, not in fractions of an
 action). `tests/test_voice_quality.py` also gained three cases: narration is imported
 verbatim, a requested chart without numbers never grows a series, and shot cuts land on the
-script's own timecodes.
+measured sentence boundaries rather than declared timecodes.
 
 The `test_glyph_raster_size_follows_style_when_one_renderer_mixes_sizes` case is a
 regression test for a real bug found during visual QA: a single `TextRenderer`
@@ -343,9 +343,11 @@ The four warnings the run printed are the point of the feature, not noise:
 4. **Vertical lower thirds dropped a line and landed on the caption band.** The panel now keeps all
    three of the writer's supers, grows upwards from the caption band, and is drawn on a solid panel
    (0.93) over a soft halo — at 0.66, lit factory windows read straight through the text.
-5. **The "0:05-0:12" timecodes were parsed but not used for cuts.** Shot actions carried no timing,
-   so cuts fell on sentence boundaries; pinned `at_frac` actions were also ignored whenever the
-   narration had no clauses. Both are fixed and covered by tests.
+5. **The "0:05-0:12" timecodes were parsed but not used for cuts.** This was an earlier defect:
+   imported shot actions had no timing, and pinned `at_frac` actions were ignored in scenes without
+   narration clauses. Timing is now explicit: imported documentary visuals intentionally cut on the
+   measured spoken sentence boundaries, not on declared visual timecodes, and pinned supers still
+   use their scene fractions. Tests cover both paths.
 6. **`--duration` fought the script.** An imported script has its own length, so the run now plans
    with `duration = 0` (no target) and the narration warning about a mismatch cannot fire. `--topic`
    is optional when `--script` is given.
@@ -360,3 +362,15 @@ The four warnings the run printed are the point of the feature, not noise:
 9. **A pasted script was lost on reopen.** `new_project_from_script()` wrote `script.md` *after*
    `project.json` had been saved, so `open_project()` saw no script path and composed a generic
    scaffold instead — a different video with a different script.
+
+
+## 10. Sentence-synchronous documentary visuals
+
+The documentary importer now creates one visual action per spoken sentence. The action timing
+uses the measured start of the matching narration clause, so each new sentence gets a new picture
+and writer timecodes cannot make the picture drift away from the words. Visual-direction bullets
+are semantically aligned to the sentence they describe and remain the permitted subject vocabulary.
+A distinct visual may appear only once in a video; when no new drawable subject remains, a designed
+typographic card uses a phrase from the matching narration. The scene title clears before the first
+visual beat. Tests cover sentence timing, no-repeat subject keys, and title clearance; the full suite
+passes with 51 tests.
