@@ -55,8 +55,29 @@ faceless business documentary. The script declares "7-9 minutes"; the voice take
 Two 28 s audio-only previews are in the same folder (`voice-preview-en.mp3`, `voice-preview-ur.mp3`)
 if you want to judge the narration without downloading a video.
 
+### See the output without downloading a video
+
+These are contact sheets sampled from the rendered files above (one tile per ~0.6 s step, with
+timestamps) — they render inline here because they are ordinary PNGs in the repo:
+
+**`samples/nokia-en-16x9.mp4`** — imported script, 1280×720, 202.5 s. The three-line lower third
+appears only around 0:52–1:02, 1:52–2:08 and 2:20–2:30, then clears the picture.
+
+![frame sheet of the 16:9 imported-script render](samples/nokia-en-16x9-frames.png)
+
+**`samples/nokia-en-9x16.mp4`** — the same words re-composed for 720×1280 (statements dock between
+the hero and the supers, the ecosystem diagram gets its own taller slot, captions wrap to the
+portrait band). It is not a crop of the landscape frame.
+
+![frame sheet of the 9:16 imported-script render](samples/nokia-en-9x16-frames.png)
+
+The MP4s themselves are in `samples/`; open the file on GitHub and use **Download** (or the raw
+link) to play them — GitHub does not stream repo videos in the browser.
+
 Download any of them straight from GitHub ("Download raw file" on the file page, or the `raw.githubusercontent.com`
 URL) — they are ordinary MP4s with H.264 video and AAC audio, no special player needed.
+
+![frame sheet of the solar-energy 16:9 sample](samples/solar-en-16x9-frames.png)
 
 All four use the same six-beat plan (hook → silicon cells → inverter → storage → efficiency → recap) and
 were asked for at `--duration 90`; with narration at a real speaking pace (146 wpm English, 148 wpm
