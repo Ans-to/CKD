@@ -167,6 +167,10 @@ class Pipeline:
             )
             self.project.write_json(story_path, story.to_dict())
         validate_story(story, languages=self.options.languages)
+        # keep the request in the project file: `resume` and `open_project()` read
+        # options back from here, and an imported script must still be importable
+        # in a later session
+        self.project.state["options"] = self.options.to_dict()
         self.project.state["script_hash"] = self.script_hash()
         self.project.state["story_id"] = hash_json(story.to_dict())[:12]
         self.project.state["world"] = story.world

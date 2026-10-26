@@ -56,8 +56,11 @@ class RenderOptions:
             raise ValueError(f"fps must be one of {FPS_CHOICES}")
         if self.quality not in QUALITY_PRESETS:
             raise ValueError(f"quality must be one of {tuple(QUALITY_PRESETS)}")
-        if not (10.0 <= float(self.duration) <= 900.0):
-            raise ValueError("duration must be between 10 and 900 seconds")
+        # 0 is not "zero seconds": it means the source owns its own length (an
+        # imported script is spoken verbatim, so there is no target to hit)
+        if float(self.duration) != 0.0 and not (10.0 <= float(self.duration) <= 900.0):
+            raise ValueError("duration must be 0 (use the script's own length) "
+                             "or between 10 and 900 seconds")
 
     # -------------------------------------------------------------- computed
     @property

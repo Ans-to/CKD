@@ -195,6 +195,11 @@ def _repair_json(raw: str, exc: json.JSONDecodeError) -> str:
 
 def validate_story(story: Story, *, languages: Sequence[str] = SUPPORTED_LANGUAGES,
                    min_scenes: int = 3, max_scenes: int = 14) -> None:
+    # an imported script has the structure its author gave it: a two-scene
+    # documentary is a valid documentary, and refusing it would only invite the
+    # importer to invent filler scenes to pass validation
+    if getattr(story, "generator", "") == "imported-script":
+        min_scenes = 1
     problems: List[str] = []
     if not story.topic.strip():
         problems.append("topic is empty")

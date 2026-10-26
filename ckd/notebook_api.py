@@ -180,6 +180,73 @@ def new_project_from_script(
     from .content.script_import import parse_script
 
     text = script if isinstance(script, str) and "\n" in script else None
+    script_path = ""
+    if text is None:
+        path = Path(script)
+        if not path.exists():
+            raise NotebookError(f"script file not found: {path}")
+        text = path.read_text(encoding="utf-8")
+        name = name or path.stem
+        script_path = str(path)
+    if quality not in QUALITY_PRESETS:
+        raise NotebookError(f"quality must be one of {sorted(QUALITY_PRESETS)}")
+    parsed = parse_script(text)
+    if not parsed.scenes:
+        raise NotebookError("no 'SCENE n — TITLE' blocks found in the script")
+    name = name or parsed.title or "documentary"
+    project_dir = Path(projects_dir) / _slug(name)
+    if not script_path:
+        # the cell *is* the script: write it next to the project first, so the
+        # options saved in project.json point at a file that exists (otherwise a
+        # later `open_project()` silently falls back to inventing a script)
+        project_dir.mkdir(parents=True, exist_ok=True)
+        out = project_dir / "script.md"
+        out.write_text(text, encoding="utf-8")
+        script_path = str(out)
+    opts = RenderOptions(
+        topic=name,
+        languages=list(languages),
+        formats=list(formats),
+        duration=float(parsed.target_seconds or 60.0),
+        quality=quality,
+        fps=int(fps),
+        include_captions=bool(captions),
+        include_character=bool(character),
+        voice_en=voice_en,
+        voice_ur=voice_ur,
+        script_path=script_path,
+        script_text=text is not None and "\n" in text,
+    )
+    setup_logging()
+    pipe = Pipeline(options=opts, root=root, project_dir=project_dir)
+    pipe.build_story()
+    return Project(pipeline=pipe, options=opts)
+
+
+def new_project_from_script(
+    script: str | Path,
+    *,
+    languages: Iterable[str] = ("en",),
+    formats: Iterable[str] = ("landscape",),
+    quality: str = "standard",
+    fps: int = 24,
+    captions: bool = True,
+    character: bool = False,
+    voice_en: str = "auto",
+    voice_ur: str = "auto",
+    projects_dir: str | Path = "projects",
+    root: str | Path = ".",
+    name: str = "",
+) -> Project:
+    """Render a script you already wrote, instead of inventing one from a topic.
+
+    `script` is either a path to a .md/.txt file or the script text itself, in the
+    documentary format (SCENE n — TITLE / **[VOICEOVER]** / **[VISUAL DIRECTION]** /
+    **[ON-SCREEN TEXT]** / optional CALL TO ACTION).  The words are spoken verbatim.
+    """
+    from .content.script_import import parse_script
+
+    text = script if isinstance(script, str) and "\n" in script else None
     if text is None:
         path = Path(script)
         if not path.exists():

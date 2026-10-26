@@ -94,3 +94,26 @@ def test_ecosystem_labels_stay_inside_the_frame():
         assert x >= 0 and x + sw <= w + 0.5, (fmt, x, sw, w)
         assert y >= stage.headline_area[1], (fmt, y)
         assert y + sh <= stage.caption_area[1], (fmt, y + sh)
+
+
+def test_pasted_script_survives_reopening_the_project(tmp_path):
+    """A reopened project must still render the imported script.
+
+    The first version wrote `script.md` *after* the project had been saved, so a
+    later `open_project()` saw no script path and quietly composed a generic
+    scaffold instead — a different video, with a different script.
+    """
+    from ckd.notebook_api import new_project_from_script, open_project
+
+    text = ("A SMALL DOCUMENTARY\n\n**Target duration:** 30 seconds\n\n"
+            "SCENE 1 — HOOK\n\n**[VOICEOVER]**\n\nOne two three four five six seven.\n\n"
+            "**[VISUAL DIRECTION]**\n\n- A classic mobile phone ringing.\n")
+    project = new_project_from_script(text, name="roundtrip", projects_dir=tmp_path,
+                                      root=tmp_path, formats=("landscape",), quality="draft")
+    assert project.options.duration == 0.0, "an imported script plans with no target"
+    reopened = open_project(project.pipeline.project.root)
+    assert reopened.options.script_path == project.options.script_path
+    story = reopened.pipeline.build_story()
+    assert story.generator == "imported-script"
+    assert len(story.scenes) == 1
+    assert not any("knowledge pack" in w for w in story.warnings)
