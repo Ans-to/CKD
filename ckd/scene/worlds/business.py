@@ -53,6 +53,21 @@ def _shot(ctx: RenderContext, el: Dict) -> float:
     params = el.get("params") or {}
     a = 1.0
     key_in = params.get("in")
+    if params.get("cut"):
+        # Documentary beats change exactly at the next sentence.  Cross-fading
+        # two typographic cards made both full sentences illegible at the cut.
+        # Keep a very short pre-roll for the incoming graphic, then hard-clear
+        # the outgoing shot at that same cue so two meanings never overlap.
+        if key_in:
+            since = ctx.since(str(key_in))
+            if since < 1e5:
+                a = clamp(since / 0.12)
+        key_out = params.get("out")
+        if key_out:
+            since = ctx.since(str(key_out))
+            if 0.0 <= since < 1e5:
+                return 0.0
+        return clamp(a)
     if key_in:
         since = ctx.since(str(key_in))
         # an unknown action id means "no timing": show the element rather than

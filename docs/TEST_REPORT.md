@@ -29,7 +29,7 @@ python tools/contact_sheet.py samples/solar-en-16x9.mp4 out.png
 
 ```
 $ PYTHONPATH=. python3 -m pytest tests -q
-51 passed (full suite, latest run)
+52 passed (full suite, latest run)
 ```
 
 Four of those are new for the imported-script path (`tests/test_documentary_import.py`):
@@ -372,5 +372,6 @@ and writer timecodes cannot make the picture drift away from the words. Visual-d
 are semantically aligned to the sentence they describe and remain the permitted subject vocabulary.
 A distinct visual may appear only once in a video; when no new drawable subject remains, a designed
 typographic card uses a phrase from the matching narration. The scene title clears before the first
-visual beat. Tests cover sentence timing, no-repeat subject keys, and title clearance; the full suite
-passes with 51 tests.
+visual beat; documentary cuts do not cross-fade two full sentences over one another. Tests cover
+sentence timing, no-repeat subject keys, title clearance and non-overlapping card cuts; the full suite
+passes with 52 tests.

@@ -193,6 +193,18 @@ def test_beats_cut_on_the_spoken_sentences_not_the_timecodes():
     assert abs(acts["supers"][1] - acts["supers_out"][0]) < 1e-6
 
 
+def test_sentence_card_cut_does_not_crossfade_two_full_sentences():
+    from types import SimpleNamespace
+    from ckd.scene.worlds.business import _shot
+
+    at_cut = 0.03
+    ctx = SimpleNamespace(since=lambda action: at_cut if action == "beat2" else 1.0)
+    outgoing = {"type": "statement", "params": {"in": "beat1", "out": "beat2", "cut": True}}
+    incoming = {"type": "statement", "params": {"in": "beat2", "cut": True}}
+    assert _shot(ctx, outgoing) == 0.0, "old sentence must be gone at the new cue"
+    assert 0.0 < _shot(ctx, incoming) < 1.0, "new sentence may animate in without overlap"
+
+
 def test_cta_also_gets_one_visual_per_spoken_sentence():
     from ckd.content.script_import import import_script
 

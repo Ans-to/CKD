@@ -581,7 +581,8 @@ def _shots_for(scene: ScriptScene, index: int, used: Set[str], *,
     for i, (kind, params, _note) in enumerate(plan):
         aid = f"beat{i + 1}"
         # each beat is `in` on its own cue and `out` on the next one
-        el: Dict = {"type": kind, "slot": _slot_for(kind, i, n), "params": {"in": aid}}
+        el: Dict = {"type": kind, "slot": _slot_for(kind, i, n),
+                    "params": {"in": aid, "cut": True}}
         if i + 1 < n:
             el["params"]["out"] = f"beat{i + 2}"
         # kept for review: which sentence this picture is answering
