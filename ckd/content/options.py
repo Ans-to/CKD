@@ -30,6 +30,8 @@ class RenderOptions:
     voice_ur: str = "auto"
     allow_espeak_fallback: bool = True
     master_audio: bool = True  # dialogue mastering (-15 LUFS / -1.5 dBTP)
+    script_path: str = ""  # render a written script instead of generating one
+    script_text: bool = False  # script_path was written from pasted text, not chosen
     llm: str = "none"  # none | gguf path
     seed: int = 7
     notes: str = ""  # optional user outline / extra facts

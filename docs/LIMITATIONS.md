@@ -33,6 +33,35 @@ words, a local TTS voice reads them. It is designed for short, factual, structur
 - **Not a long-form tool.** The curated packs are written for roughly 45–90 seconds. Asking for 5
   minutes produces a warning, not five minutes of content.
 
+## Imported documentary scripts
+
+`--script` / `new_project_from_script()` reads a written script and speaks it verbatim, so
+the limitation moves: the words are the author's, the pictures are still drawn by this
+renderer.
+
+- **Visual direction is not footage.** "Archival photo of the 1865 paper mill", "rapid
+  montage of people in different cities", "close-up of fingers on a touchscreen" each become
+  a stylised motion graphic of the **kind of object** named — a factory silhouette, a
+  phone, a hand-free schematic. No archival material is used, imitated, aged or faked, and no
+  real company's product is reproduced. If your script's power depends on real photographs,
+  this renderer cannot carry that scene, and the log names those bullets explicitly.
+- **Declared duration is a target, not a contract.** Words are spoken at a fixed rate; a
+  script shaped for 8 minutes with 338 words produces a ~2-minute video plus a warning that
+  says how many words 8 minutes would need. Nothing is padded with stock, loops or filler
+  narration.
+- **Numbers are never invented.** A chart requested without values renders an empty frame
+  captioned "no figures in the script". A timeline falls back to the years that appear in
+  the narration and on-screen text, and labels itself as such.
+- **Language coverage is what you wrote.** The importer does not translate. English-only
+  scripts run `--langs en`; requesting Urdu makes validation fail loudly instead of shipping
+  a silent or machine-mangled track.
+- **Shots without a named subject become statement cards.** A bullet like "a dramatic
+  transition from classic phones to smartphones" that matches no prop renders as a typographic
+  card over the scene backdrop — legible and honest, but not a shot.
+- **Timecode cuts are exact; word-level emphasis is estimated.** Shot boundaries follow your
+  `0:05–0:12` markers. Caption word emphasis under Kokoro is interpolated, not measured, and
+  `report.json` labels it.
+
 ## Language specifics
 
 - **Urdu** is shaped with HarfBuzz using Nastaliq (Noto Nastaliq Urdu) as the display face and Naskh

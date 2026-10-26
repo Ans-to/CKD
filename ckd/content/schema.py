@@ -18,10 +18,15 @@ PURPOSES = ("hook", "explain", "example", "recap", "cta")
 
 
 def aspect_size(fmt: str, height: int = 720) -> tuple[int, int]:
-    """Render size for a format. Height is the target and is rounded to even."""
+    """Render size for a format: `height` is the *short* side, rounded to even.
+
+    So `standard` (720) means 1280x720 landscape, 720x1280 portrait - the short
+    side is the expensive dimension, and a portrait video should not silently be
+    a third of the resolution of its landscape twin.
+    """
     height = int(height) // 2 * 2
     if fmt == "vertical":
-        return (height * 9 // 16) // 2 * 2, height
+        return height, (height * 16 // 9) // 2 * 2
     if fmt == "square":
         return height, height
     return (height * 16 // 9) // 2 * 2, height
@@ -51,6 +56,9 @@ class Scene:
     elements: List[Dict[str, Any]] = field(default_factory=list)
     beats: List[Beat] = field(default_factory=list)
     character: Dict[str, Any] = field(default_factory=dict)
+    # seconds a headline stays on screen before fading (0 = keep for the scene).
+    # Documentary scripts want a title card that gets out of the way.
+    headline_hold: float = 0.0
     camera: str = "push_in"
     actions: List[Dict[str, Any]] = field(default_factory=list)
     notes: str = ""
@@ -83,6 +91,7 @@ class Scene:
             elements=list(d.get("elements") or []),
             beats=beats,
             character=dict(d.get("character") or {}),
+            headline_hold=float(d.get("headline_hold", 0.0) or 0.0),
             camera=str(d.get("camera", "push_in")),
             actions=list(d.get("actions") or []),
             notes=str(d.get("notes", "")),

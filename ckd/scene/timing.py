@@ -56,6 +56,32 @@ def assign_actions(scene: Scene, narration: SceneAudio, *, scene_duration: float
     out: List[ActionState] = []
     if not actions:
         return out
+    # An action may pin itself to a fraction of the scene (`at_frac`) or to an
+    # absolute second (`at`).  Imported documentary scripts use this to cut to a
+    # new shot on its own cue instead of one shot per spoken sentence.
+    if any(("at_frac" in a or "at" in a) for a in actions):
+        starts: List[Optional[float]] = []
+        for act in actions:
+            if "at" in act:
+                starts.append(max(0.0, float(act["at"])))
+            elif "at_frac" in act:
+                starts.append(max(0.0, min(1.0, float(act["at_frac"]))) * scene_duration)
+            else:
+                starts.append(None)
+        # an unpinned action rides along with the shot that precedes it
+        last = 0.0
+        for i in range(len(starts)):
+            if starts[i] is None:
+                starts[i] = last
+            else:
+                last = starts[i]
+        for i, act in enumerate(actions):
+            nxt = next((starts[j] for j in range(i + 1, len(starts))
+                        if starts[j] is not None and starts[j] > starts[i]), scene_duration)
+            begin = float(starts[i])
+            finish = min(scene_duration, max(begin + 0.2, nxt))
+            out.append(ActionState(act.get("action", f"action_{i}"), begin, finish))
+        return out
     if not clauses:
         n = len(actions)
         for i, a in enumerate(actions):

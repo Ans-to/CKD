@@ -111,3 +111,62 @@ def test_mux_keeps_loudness(tmp_path):
     before, _ = measure_lufs(tone, sr)
     after, _ = measure_lufs(got, sr)
     assert abs(before - after) < 0.4, f"mux changed loudness {before:.2f} -> {after:.2f} LUFS"
+
+
+# ---------------------------------------------------------------- script import
+def test_import_script_keeps_narration_verbatim():
+    from ckd.content.script_import import import_script
+
+    text = (
+        "HOW NOKIA LOST ITS EMPIRE\n\n**Target duration:** 7-9 minutes\n\n"
+        "SCENE 1 — THE HOOK\n\n**Time:** 0:00–0:35\n\n**[VOICEOVER]**\n\n"
+        "Imagine building a company so powerful.\n\nA company that dominates the market.\n\n"
+        "**[VISUAL DIRECTION]**\n\n- 0:00-0:05: A classic mobile phone ringing in a dark room.\n"
+        "- 0:05-0:12: A world map illuminates.\n\n**[ON-SCREEN TEXT]**\n\n2007 — market leader\n\n"
+        "SCENE 2 — THE FALL\n\n**Time:** 0:35–1:10\n\n**[VOICEOVER]**\n\nThen the market changed.\n\n"
+        "**[VISUAL DIRECTION]**\n\n- Show a financial chart of market share.\n"
+    )
+    story = import_script(text)
+    assert story.world == "business" and story.palette == "documentary"
+    assert len(story.scenes) == 2
+    assert story.scenes[0].narration["en"] == \
+        "Imagine building a company so powerful. A company that dominates the market."
+    assert story.scenes[0].character.get("visible") is False, "documentaries are faceless"
+    types = [el["type"] for el in story.scenes[0].elements]
+    assert "phone" in types and "globe" in types
+    # the writer's supers are kept, and drawn last so they sit on top
+    assert types[-1] == "lower_third"
+    assert any("No footage" in w for w in story.warnings), story.warnings
+    # a multi-language run must refuse rather than invent Urdu
+    ur_story = import_script(text, languages=("en", "ur"))
+    assert not ur_story.scenes[0].narration.get("ur")
+
+
+def test_import_script_never_invents_figures():
+    from ckd.content.script_import import import_script
+
+    text = ("SCENE 1 — NUMBERS\n\n**[VOICEOVER]**\n\nThe deal was done.\n\n"
+            "**[VISUAL DIRECTION]**\n\n- Show a financial chart of the transaction value.\n")
+    story = import_script(text)
+    chart = [el for el in story.scenes[0].elements if el["type"] == "chart"]
+    assert chart, "a chart was requested"
+    assert not chart[0]["params"].get("values"), "no series may be invented"
+
+
+def test_documentary_shots_cut_on_the_writers_timecodes():
+    from ckd.content.script_import import import_script
+    from ckd.scene.timing import assign_actions
+    from ckd.voice.narration import SceneAudio
+
+    text = ("SCENE 1 — CUTS\n\n**[VOICEOVER]**\n\nOne two three four five six seven eight.\n\n"
+            "**[VISUAL DIRECTION]**\n\n- 0:00-0:05: The first thing.\n"
+            "- 0:05-0:15: The second thing.\n- 0:15-0:30: The third thing.\n")
+    story = import_script(text)
+    na = SceneAudio(index=0, scene_id="s01", start=0.0, duration=30.0, frames=720, clauses=[],
+                    audio=np.zeros(10, dtype=np.float32))
+    acts = assign_actions(story.scenes[0], na, scene_duration=30.0)
+    by_id = {a.id: (round(a.start, 2), round(a.end, 2)) for a in acts}
+    assert by_id["shot1"][0] == 0.0
+    assert 4.9 <= by_id["shot2"][0] <= 5.1, by_id
+    assert 14.9 <= by_id["shot3"][0] <= 15.1, by_id
+    assert by_id["shot3"][1] == 30.0

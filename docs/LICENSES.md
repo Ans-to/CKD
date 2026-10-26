@@ -56,6 +56,12 @@ The three knowledge packs are original prose written for this project. They cont
 and no statistics that need attribution. Illustrations are drawn from geometric primitives and carry
 no third-party assets. Any topic you add is your responsibility.
 
+`scripts/nokia.md` is a sample script supplied by the project's author for testing the
+imported-script path; it is original prose about a public company's history, contains no quoted
+material or images, and the video made from it uses no company logo, product photograph or
+trademark rendering. Every phone drawn by `ckd/scene/worlds/business_props.py` is a generic
+shape, never a specific model.
+
 ## Music
 
 There is none. If you add a track, its licence is on you — the pipeline has no music stage.

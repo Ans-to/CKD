@@ -29,6 +29,7 @@ class Stage:
     palette: Dict[str, str] = field(default_factory=dict)
     scale: float = 1.0  # relative typography scale (1.0 == 720p height baseline)
     character_side: str = "left"  # which side the presenter stands on (layout-aware)
+    character_hidden: bool = False  # faceless documentary mode
 
     def __post_init__(self) -> None:
         if self.format == "vertical":
@@ -76,6 +77,12 @@ class Stage:
         character.  Vertical videos put the character at the bottom, so the
         world keeps the full width above it.
         """
+        if self.character_hidden:
+            # faceless: the subject owns the frame
+            if self.format == "vertical":
+                return (0.0, self.height * 0.235, float(self.width), self.height * 0.44)
+            return (self.width * 0.02, self.height * 0.215,
+                    self.width * 0.96, self.height * 0.575)
         if self.format == "vertical":
             return (0.0, self.height * 0.245, float(self.width), self.height * 0.295)
         # start below the headline band: a tall prop must never grow into the text

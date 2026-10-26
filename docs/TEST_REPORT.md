@@ -29,8 +29,17 @@ python tools/contact_sheet.py samples/solar-en-16x9.mp4 out.png
 
 ```
 $ PYTHONPATH=. python3 -m pytest tests -q
-37 passed in 36.1s
+45 passed in 52.2s
 ```
+
+Four of those are new for the imported-script path (`tests/test_documentary_import.py`):
+a 9:16 render keeps the short side (`aspect_size("vertical", 720) == (720, 1280)` rather than
+`404×720`), vertical statements dock between the hero and the supers instead of behind the
+phone, the lower third never reaches the caption band in either format, and consecutive
+shots stop ghosting over each other (the shot fade is now in seconds, not in fractions of an
+action). `tests/test_voice_quality.py` also gained three cases: narration is imported
+verbatim, a requested chart without numbers never grows a series, and shot cuts land on the
+script's own timecodes.
 
 The `test_glyph_raster_size_follows_style_when_one_renderer_mixes_sizes` case is a
 regression test for a real bug found during visual QA: a single `TextRenderer`
@@ -291,3 +300,52 @@ already at the ceiling). The working combination lowers the crest factor to ~16 
   `estimated` rather than pretending otherwise.
 - Both sample videos are longer than the 30-60 s default because the six-beat plan was requested at
   `--duration 90`; `--duration 45` produces a plan that fits.
+
+## 9. Imported documentary script — end-to-end
+
+A second, independent end-to-end run: the script in `scripts/nokia.md` (written in the timecoded
+documentary format: 4 scenes + a CTA, 338 spoken words, a declared "7-9 minutes") rendered through
+the normal CLI, not through a test harness.
+
+```
+$ PYTHONPATH=. python3 -m ckd render --script scripts/nokia.md --langs en \
+      --formats landscape,vertical --quality standard --voice-en kokoro:am_michael
+project: projects/nokia
+  OK en_landscape: projects/nokia/out/en_landscape.mp4 (202.5s 1280x720 24.0fps)
+  OK en_vertical:  projects/nokia/out/en_vertical.mp4  (202.5s 720x1280 24.0fps)
+```
+
+| output | duration | size | narration | warnings |
+|---|---|---|---|---|
+| `scripts/nokia.md` → 16:9 | 202.5 s | 1280×720 | Kokoro `am_michael`, 0.9× rate, `estimated` word timings | 4 (see below) |
+| `scripts/nokia.md` → 9:16 | 202.5 s | 720×1280 | same master | same |
+
+The four warnings the run printed are the point of the feature, not noise:
+
+1. procedural renderer, not a stock-footage editor (always, for an imported script);
+2. two visual-direction bullets asked for footage/archival material and cannot be produced;
+3. the script declares 8.0 min, its words are 2.1 min at 160 wpm;
+4. 8 minutes would need ~1280 words and this script has 338 — nothing was invented to fill it.
+
+### 9.1 Defects found by watching this render
+
+1. **Shots ghosted over each other.** The shot fade was `progress × 1.6` of the action, so a
+   10-second shot took six seconds to fade in. Three phone shots in a row were all half-visible
+   and the frame read as a double exposure. Fades are now 0.45 s in / 0.35 s out, and an element
+   whose action id is unknown is drawn rather than silently dropped.
+2. **Statements were invisible in 9:16.** Importer statements use the `wide` slot, which in portrait
+   is centred on the hero, so "Development of early mobile communication equipment" was drawn
+   *behind* the phone. Vertical statements now use a `statement_low` slot between the hero and the
+   supers, and carry a panel instead of bare text.
+3. **The 9:16 render was 404×720.** `aspect_size()` treated the requested height as the frame height
+   for both formats, so a portrait render was a third of the area of its landscape twin. Height is now
+   the *short* side: 720p is 1280×720 and 720×1280.
+4. **Vertical lower thirds dropped a line and landed on the caption band.** The panel now keeps all
+   three of the writer's supers, grows upwards from the caption band, and is drawn on a solid panel
+   (0.93) over a soft halo — at 0.66, lit factory windows read straight through the text.
+5. **The "0:05-0:12" timecodes were parsed but not used for cuts.** Shot actions carried no timing,
+   so cuts fell on sentence boundaries; pinned `at_frac` actions were also ignored whenever the
+   narration had no clauses. Both are fixed and covered by tests.
+6. **`--duration` fought the script.** An imported script has its own length, so the run now plans
+   with `duration = 0` (no target) and the narration warning about a mismatch cannot fire. `--topic`
+   is optional when `--script` is given.

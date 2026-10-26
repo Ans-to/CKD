@@ -64,7 +64,7 @@ ProgressFn = Callable[[str, float, str], None]
 # Bump when the *drawing* changes (composition, palette, timings). Scene caches from
 # an older value are treated as stale, because a cached clip would otherwise keep an
 # old look. Script/logic changes bump the "v" inside script_hash instead.
-RENDER_VERSION = 21
+RENDER_VERSION = 23
 
 
 def _noop(stage: str, frac: float, msg: str) -> None:  # pragma: no cover
@@ -84,7 +84,12 @@ class Pipeline:
     force: Sequence[str] = field(default_factory=tuple)  # e.g. ("scenes", "video")
 
     def __post_init__(self) -> None:
-        base = Path(self.project_dir) if self.project_dir else Path(self.root) / slugify(self.options.topic)
+        if not self.project_dir:
+            # an imported script names its own project: the topic is optional
+            name = self.options.topic or Path(getattr(self.options, "script_path", "") or "video").stem
+            base = Path(self.root) / slugify(name or "video")
+        else:
+            base = Path(self.project_dir)
         self.project = open_project(base, self.options)
         self.cache = Path(self.cache_dir) if self.cache_dir else Path(self.root) / "_cache"
         self.cache.mkdir(parents=True, exist_ok=True)
@@ -97,7 +102,8 @@ class Pipeline:
         o = self.options
         payload = {
             "topic": o.topic.strip().lower(), "langs": o.languages, "duration": o.duration,
-            "notes": o.notes, "llm": o.llm, "palette": o.palette, "seed": o.seed, "v": 5,
+            "notes": o.notes, "llm": o.llm, "palette": o.palette, "seed": o.seed,
+            "script": getattr(o, "script_path", ""), "v": 7,
         }
         return hash_json(payload, prefix="script")
 
@@ -137,6 +143,21 @@ class Pipeline:
             except Exception as exc:  # noqa: BLE001
                 LOG.warning("could not reuse saved script: %s", exc)
                 story = None
+        script_path = getattr(self.options, "script_path", "") or ""
+        if story is None and script_path:
+            from ..content.script_import import import_script, read_script
+
+            story = import_script(read_script(script_path),
+                                  languages=self.options.languages,
+                                  palette=self.options.palette
+                                  if self.options.palette not in ("auto", "", None)
+                                  else "documentary")
+            self.project.write_json(story_path, story.to_dict())
+            # the script owns its own length: the narration is spoken verbatim, so
+            # a --duration target is a planning hint, not a contract
+            self.options.duration = 0.0
+            self.progress(stage, 0.5, f"Imported script: {len(story.scenes)} scenes "
+                                      f"(rendered at the speed of the writing)")
         if story is None:
             story = compose_story(
                 self.options.topic, languages=self.options.languages,
@@ -214,7 +235,7 @@ class Pipeline:
                 except Exception as exc:  # noqa: BLE001
                     LOG.warning("%s narration reuse failed (%s); regenerating", lang, exc)
             track = narrator.build(story, lang, fps=self.options.fps,
-                                   max_seconds=self.options.duration)
+                                   max_seconds=(self.options.duration or None))
             from ..voice.base import write_wav
             from ..voice.mastering import master_voice
 
@@ -241,7 +262,7 @@ class Pipeline:
         # instead of shipping a video that quietly misses the requested length.
         target = float(self.options.duration)
         for lang, track in tracks.items():
-            if target <= 0:
+            if target <= 0 or getattr(self.options, "script_path", ""):
                 continue
             ratio = track.duration / target
             if ratio > 1.2 or ratio < 0.7:

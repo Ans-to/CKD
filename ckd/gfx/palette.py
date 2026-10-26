@@ -109,6 +109,28 @@ PALETTES: Dict[str, Dict[str, str]] = {
         "text": "#f8f2ff",
         "muted": "#bfb0d8",
     },
+    "documentary": {
+        # a business documentary palette: charcoal-navy, warm amber, muted teal.
+        # Deliberately low-saturation so a 8-minute video does not vibrate.
+        "bg_top": "#080d16",
+        "bg_bottom": "#1a2433",
+        "sky_glow": "#2f4d6b",
+        "ground": "#070b12",
+        "ground_far": "#111c29",
+        "ink": "#04070c",
+        "paper": "#f2ede2",
+        "accent": "#e0a94f",
+        "accent2": "#c96a5c",
+        "accent3": "#7fc9bb",
+        "cool": "#6f9fc4",
+        "metal": "#c2cad4",
+        "metal_dark": "#5e6b7a",
+        "glass": "#a6d3e6",
+        "plant": "#6fae8e",
+        "shadow": "#02050a",
+        "text": "#f4efe4",
+        "muted": "#93a3b6",
+    },
     "daylight": {
         "bg_top": "#bfe6ff",
         "bg_bottom": "#eaf7ff",

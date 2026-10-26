@@ -42,6 +42,14 @@ Any topic words work. Three topics have hand-written, reviewed scenes: **solar e
 **how wifi works**, **bridge engineering**. Anything else gets a generic scaffold, and the report
 labels it as such — it is honest about being generic rather than pretending otherwise.
 
+### Already have a script?
+
+You do not have to use a topic at all. Run cell **3b** instead: paste your documentary script
+into `SCRIPT` (or pass the filename of one you uploaded) and `new_project_from_script()`
+speaks it verbatim. The rest of the notebook is unchanged — review, storyboard, render,
+download. Read `docs/YOUR_SCRIPT.md` first: this renderer draws **graphics, never footage**,
+and it will say so in the warnings for every script it imports.
+
 ## 4 · Read the script (do not skip this)
 
 Cell 4 prints every scene: headline, narration in each language, and which visual elements it uses.

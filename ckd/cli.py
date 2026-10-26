@@ -40,6 +40,7 @@ def _options(args) -> RenderOptions:
         voice_ur=getattr(args, "voice_ur", "auto"),
         allow_espeak_fallback=not getattr(args, "no_fallback", False),
         master_audio=not getattr(args, "no_master", False),
+        script_path=getattr(args, "script", "") or "",
         llm=getattr(args, "llm", "none"),
         seed=int(getattr(args, "seed", 7)),
         notes=getattr(args, "notes", ""),
@@ -73,7 +74,8 @@ def main(argv: list[str] | None = None) -> int:
     p_script.add_argument("--out", default="story.json")
 
     def add_render_args(p):
-        p.add_argument("--topic", required=True)
+        p.add_argument("--topic", default="",
+                       help="subject to write a story about (omit when --script supplies the words)")
         p.add_argument("--langs", default="en")
         p.add_argument("--formats", default="landscape")
         p.add_argument("--duration", type=float, default=45)
@@ -90,6 +92,9 @@ def main(argv: list[str] | None = None) -> int:
         p.add_argument("--seed", type=int, default=7)
         p.add_argument("--notes", default="")
         p.add_argument("--palette", default="auto")
+        p.add_argument("--script", default="",
+                       help="render a written script (.md/.txt in the documentary format) "
+                            "instead of inventing one from the topic")
         p.add_argument("--project-dir", default="projects")
         p.add_argument("--force", default="", help="comma list: scenes,video")
 
@@ -107,6 +112,18 @@ def main(argv: list[str] | None = None) -> int:
     p_res.add_argument("--force", default="")
 
     args = ap.parse_args(argv)
+
+    if args.cmd in ("preview", "render") and not args.topic and not args.script:
+        ap.error(f"{args.cmd} needs --topic (a subject to write about) or --script (a written script)")
+    if args.cmd in ("preview", "render") and getattr(args, "script", ""):
+        # fail here, with a sentence, rather than with a traceback from deep inside
+        # the pipeline: a typo in the path is the most likely mistake
+        script_file = Path(args.script)
+        if not script_file.exists():
+            ap.error(f"--script {args.script}: no such file")
+        if not script_file.is_file():
+            ap.error(f"--script {args.script}: is a directory, not a script")
+        args.script = str(script_file)
 
     if args.cmd == "info":
         info = system_info()
@@ -153,12 +170,18 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     if args.cmd == "render":
+        from .content.schema import StoryValidationError
         from .pipeline.run import Pipeline
 
         opts = _options(args)
         pipe = Pipeline(options=opts, root=Path(args.project_dir), progress=_progress,
                         force=tuple(_split(getattr(args, "force", ""))))
-        res = pipe.run(compile_only=args.compile_only)
+        try:
+            res = pipe.run(compile_only=args.compile_only)
+        except StoryValidationError as exc:
+            print("\nthe plan was refused before any frame was rendered:\n", file=sys.stderr)
+            print(f"{exc}", file=sys.stderr)
+            return 2
         print("\nproject:", res["project"])
         if not args.compile_only:
             for key, meta in res.get("videos", {}).items():

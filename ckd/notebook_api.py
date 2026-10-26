@@ -156,6 +156,72 @@ def new_project(
     return Project(pipeline=pipe, options=opts)
 
 
+def new_project_from_script(
+    script: str | Path,
+    *,
+    languages: Iterable[str] = ("en",),
+    formats: Iterable[str] = ("landscape",),
+    quality: str = "standard",
+    fps: int = 24,
+    captions: bool = True,
+    character: bool = False,
+    voice_en: str = "auto",
+    voice_ur: str = "auto",
+    projects_dir: str | Path = "projects",
+    root: str | Path = ".",
+    name: str = "",
+) -> Project:
+    """Render a script you already wrote, instead of inventing one from a topic.
+
+    `script` is either a path to a .md/.txt file or the script text itself, in the
+    documentary format (SCENE n — TITLE / **[VOICEOVER]** / **[VISUAL DIRECTION]** /
+    **[ON-SCREEN TEXT]** / optional CALL TO ACTION).  The words are spoken verbatim.
+    """
+    from .content.script_import import parse_script
+
+    text = script if isinstance(script, str) and "\n" in script else None
+    if text is None:
+        path = Path(script)
+        if not path.exists():
+            raise NotebookError(f"script file not found: {path}")
+        text = path.read_text(encoding="utf-8")
+        name = name or path.stem
+        script_path = str(path)
+    else:
+        script_path = ""
+    if quality not in QUALITY_PRESETS:
+        raise NotebookError(f"quality must be one of {sorted(QUALITY_PRESETS)}")
+    parsed = parse_script(text)
+    if not parsed.scenes:
+        raise NotebookError("no 'SCENE n — TITLE' blocks found in the script")
+    name = name or parsed.title or "documentary"
+    opts = RenderOptions(
+        topic=name,
+        languages=list(languages),
+        formats=list(formats),
+        duration=float(parsed.target_seconds or 60.0),
+        quality=quality,
+        fps=int(fps),
+        include_captions=bool(captions),
+        include_character=bool(character),
+        voice_en=voice_en,
+        voice_ur=voice_ur,
+        script_path=script_path,
+        script_text=script_path == "",
+    )
+    setup_logging()
+    pipe = Pipeline(options=opts, root=root, project_dir=Path(projects_dir) / _slug(name))
+    if opts.script_text:
+        # the cell *is* the script: write it next to the project so the run is
+        # reproducible and the words can be edited and re-rendered
+        out = pipe.project.root / "script.md"
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(text, encoding="utf-8")
+        opts.script_path = str(out)
+    pipe.build_story()
+    return Project(pipeline=pipe, options=opts)
+
+
 def open_project(project_dir: str | Path, *, root: str | Path = ".") -> Project:
     """Reopen an existing project (after an interruption, or in a new session)."""
     path = Path(project_dir)

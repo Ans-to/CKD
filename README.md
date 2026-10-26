@@ -46,6 +46,11 @@ Two finished samples, rendered by the code in this repo (not mockups):
 | `samples/solar-ur-16x9.mp4` | Urdu 16:9, 1280×720 | 75.2 s | espeak (no neural Urdu voice), -15.6 LUFS / -1.3 dBTP | Nastaliq, RTL, Urdu numerals, `srt`, frame sheet |
 | `samples/solar-ur-9x16.mp4` | Urdu 9:16, 404×720 | 75.2 s | same master | Nastaliq, RTL, Urdu numerals, `srt`, frame sheet |
 
+`scripts/nokia.md` is rendered into `samples/nokia-en-16x9.mp4` and `samples/nokia-en-9x16.mp4`
+(202 s each, Kokoro `am_michael`, 720×1280 portrait) — the same words, drawn as a faceless business
+documentary. The script declares "7-9 minutes"; the voice takes 2.1 minutes for its 338 words and the
+run says so instead of padding it.
+
 Two 28 s audio-only previews are in the same folder (`voice-preview-en.mp3`, `voice-preview-ur.mp3`)
 if you want to judge the narration without downloading a video.
 
@@ -64,6 +69,42 @@ download routes that do not work here.
 
 Rendered here on 2 vCPU; see `docs/TEST_REPORT.md` for what is and is not verified.
 
+## Have a script already? Render that instead
+
+Bring a fully written documentary script (hook / middle / recap scenes, timecoded visual
+direction, on-screen text, optional CTA) and the engine will speak **your words verbatim**
+and draw a faceless business documentary from them:
+
+```bash
+python -m ckd preview --script scripts/nokia.md --formats landscape,vertical
+python -m ckd render  --script scripts/nokia.md --formats landscape,vertical \
+                      --quality standard --voice-en kokoro:am_michael
+```
+
+```python
+from ckd.notebook_api import new_project_from_script, preview, render
+
+project = new_project_from_script(open("nokia.md").read())   # or a path
+print(project.story().warnings)      # read these first
+preview(project)
+render(project)
+```
+
+`--topic` is not needed when `--script` supplies the words. Each `SCENE n — TITLE` becomes
+a scene, each `**[VISUAL DIRECTION]**` bullet becomes a shot (cut on *your* timecode),
+`**[ON-SCREEN TEXT]**` becomes a lower third, and the `CALL TO ACTION` block becomes a CTA
+scene. See `docs/YOUR_SCRIPT.md` for the format in detail.
+
+Two things it will not do, and says so in the log and in `story.json`:
+
+- **It draws no footage.** Visual direction is mapped onto labelled motion graphics of the
+  thing named (phone, factory, globe, chart, ecosystem). Nothing imitates an archival photo
+  or a real product shot.
+- **It does not pad.** Your declared `Target duration` is read and reported; if the
+  voice-over is 2.1 min for a declared 8 min, the video is 2.1 min and the warning tells you
+  how many words the duration would need. Charts requested without numbers render an empty
+  frame captioned "no figures in the script" — no data is invented.
+
 ## Formats and languages, genuinely re-composed
 
 | | 16:9 landscape | 9:16 vertical |
@@ -72,6 +113,7 @@ Rendered here on 2 vCPU; see `docs/TEST_REPORT.md` for what is and is not verifi
 | world | one band between headline and captions, presenter at the frame edge | two zones: a wide prop band across the top **plus** the free quadrant beside the presenter |
 | character | bottom corner, 56 % of frame height | bottom corner, 27.5 % |
 | captions | bottom band, pill auto-fitted inside the safe area | band above the safe margin |
+| size at `--quality standard` | 1280×720 | 720×1280 (same short side, not a third of it) |
 
 The prop slots are different geometry per format — a 9:16 frame is composed again
 (two zones, different label placement), it is never a crop of the 16:9 frame.
@@ -99,7 +141,7 @@ ckd/                 the engine (no notebook code inside it)
   content/           schema, options, knowledge packs, composer, optional local LLM
   text/              fonts, HarfBuzz shaping, RTL line breaking, text rendering
   gfx/               supersampled painter, palettes, character rig, primitives
-  scene/             stage geometry, timing, renderer, worlds/{solar,wifi,bridge,generic}
+  scene/             stage geometry, timing, renderer, worlds/{solar,wifi,bridge,business,generic}
   voice/             TTS engines, registry, narration with word timings
   render/            ffmpeg encode / concat / mux / probe / verify
   pipeline/          project state, run orchestration, subtitles, LLM adapter
@@ -107,6 +149,7 @@ ckd/                 the engine (no notebook code inside it)
   cli.py             `python -m ckd ...`
 notebooks/           the Colab notebook
 assets/fonts/        bundled OFL fonts (see docs/LICENSES.md)
+scripts/             scripts/nokia.md — a full documentary script used as an example
 samples/             a real rendered video + its plan/report/contact sheet
 configs/             example option files
 tests/               pytest suite (install, content, text, render, pipeline)
@@ -117,6 +160,7 @@ tools/               contact_sheet.py, make_zip.py, fetch_fonts.py
 ## Documentation
 
 - `docs/GETTING_STARTED.md` — phone-friendly walkthrough (Colab, one topic, one video)
+- `docs/YOUR_SCRIPT.md` — render a documentary script you wrote (format, warnings, limits)
 - `docs/PRIVATE_REPO.md` — using this from a private GitHub repo without leaking a token
 - `docs/ARCHITECTURE.md` — how a frame is built, cache layout, where to add a topic
 - `docs/TROUBLESHOOTING.md` — resume after a disconnect, common failures, fixes

@@ -53,6 +53,12 @@ def camera_at(kind: str, phase: float, stage: Stage) -> CameraState:
         return CameraState(1.045, stage.width * 0.030 * (e - 0.5), 0)
     if kind == "tilt_up":
         return CameraState(1.04, 0, stage.height * 0.026 * (e - 0.35))
+    if kind == "slow_push":
+        e = ease_in_out(phase) ** 1.6
+        return CameraState(1.0 + 0.045 * e, -stage.width * 0.008 * e, -stage.height * 0.005 * e)
+    if kind == "slow_pull":
+        e = ease_in_out(phase) ** 1.6
+        return CameraState(1.045 - 0.045 * e, stage.width * 0.008 * (1 - e), 0)
     if kind == "drift":
         return CameraState(1.02, math.sin(phase * math.pi * 1.2) * stage.width * 0.008,
                            math.cos(phase * math.pi) * stage.height * 0.006)
@@ -109,7 +115,8 @@ class SceneRenderer:
         # per-scene stage: the character side changes the world layout, and stages
         # are shared between scenes, so never mutate the incoming stage.
         side = "left"
-        if spec.include_character:
+        hidden = (spec.scene.character or {}).get("visible") is False
+        if spec.include_character and not hidden:
             slot = (spec.scene.character or {}).get("slot", "char_left")
             side = "right" if str(slot).endswith("right") else "left"
             # the presenter must not stand in front of the props: if the scene puts
@@ -121,7 +128,8 @@ class SceneRenderer:
                 side = "left"
             elif leftish > rightish:
                 side = "right"
-        self.stage = replace(spec.stage, character_side=side)
+        self.stage = replace(spec.stage, character_side=side,
+                             character_hidden=hidden or not spec.include_character)
         spec = replace(spec, stage=self.stage)
         self.spec = spec
         self.world = spec.world
@@ -199,7 +207,7 @@ class SceneRenderer:
                 self.world.draw_element(p, ctx, el)
 
         # ---- character (outside camera so it 'stands' in the frame)
-        if self.spec.include_character:
+        if self.spec.include_character and (self.spec.scene.character or {}).get("visible") is not False:
             self._draw_character(p, ctx, t)
 
         # ---- typography
@@ -277,6 +285,11 @@ class SceneRenderer:
         # vertically centre the block inside its area so ascenders never clip
         oy = ay + max(0.0, (ah - lay.height) / 2)
         reveal = clamp(t / 0.75)
+        # a documentary title card gets out of the way instead of sitting on the
+        # frame for eight minutes
+        hold = float(getattr(self.spec.scene, "headline_hold", 0.0) or 0.0)
+        if hold > 0:
+            reveal *= 1.0 - clamp((t - hold) / 0.6)
         total_words = max(1, len(lay.words))
         keyword_flags = [flag for _w, flag in self.headline_words]
         boxes = []
@@ -303,23 +316,31 @@ class SceneRenderer:
         # underline sweep under the last headline line
         if lay.lines:
             ln = lay.lines[-1]
-            uw = ln.width * ease_out(clamp((t - 0.35) / 0.55))
+            uw = ln.width * ease_out(clamp((t - 0.35) / 0.55)) * clamp(reveal * 1.2)
             uy = oy + ln.baseline + size * 0.20
             ux0 = ox + (ln.words[0].x if ln.words else 0)
             if uw > 2:
                 p.rect(ux0, uy, ux0 + uw, uy + max(3.0, size * 0.075),
                        fill=with_alpha(st.palette["accent"], 0.9), radius=size * 0.04)
         # purpose kicker
-        kicker = self._kicker_text()
+        kicker = self._kicker_text() if reveal > 0.05 else ""
         if kicker:
             # keep the strip inside the safe area: it used to sit above the frame edge
             # sit it at the far edge of the content area, level with the first line,
             # instead of above the headline (where it used to clip the frame top)
             if st.format == "vertical":
-                # the vertical headline spans the full width, so the chip cannot share
-                # its first line: park it just above the caption band instead
-                ky = st.caption_area[1] - st.px(26)
+                # the vertical headline spans the content width, so the chip only
+                # shares a line when that line actually leaves room for it
                 kx = st.width - st.safe_x
+                last = lay.lines[-1] if lay.lines else None
+                room = 0.0
+                if last is not None and last.words:
+                    room = kx - (last.words[0].x + last.width)
+                if last is not None and room > st.px(132):
+                    ky = oy + last.baseline - st.kicker_size() * 1.02
+                else:
+                    ky = min(oy + lay.height + st.px(8),
+                             st.world_area[1] - st.kicker_size() * 2.6)
                 self.world.kicker(p, ctx, kicker, kx, ky, align="right")
             elif self.spec.language == "ur":
                 # mirror the LTR chip: top-left for right-to-left headlines
@@ -360,6 +381,16 @@ class SceneRenderer:
         max_h = max(size * 1.2, ch * 0.92 - pad_y * 1.25)
         lay, style = _autosize(self.renderer, text, style, max_w, max_h,
                               min_size=size * 0.62, max_lines=3)
+        # Centre the *ink*, not the box: layout solves alignment inside max_width,
+        # so a short cue in a wide band drifts and every cue sits at a slightly
+        # different x.  Re-laying out at the measured ink width makes the box fit
+        # the text exactly, so consecutive cues share one stable centre line.
+        if lay.lines:
+            tight = min(max_w, max(1.0, lay.width + style.size * 0.05))
+            lay2, style2 = _autosize(self.renderer, text, style, tight, max_h,
+                                     min_size=size * 0.62, max_lines=3)
+            if len(lay2.lines) == len(lay.lines) and lay2.width <= tight + 0.5:
+                lay, style = lay2, style2
         size = style.size
         pad_x = size * 0.85
         pad_y = size * 0.55
@@ -392,10 +423,13 @@ class SceneRenderer:
             clean = pw.word.text.strip("،,.:;!?؟۔").lower()
             if not active and clean in kw:
                 color = st.palette["accent"]
-            scale = 1.0 + (0.06 if active else 0.0)
+            # Karaoke emphasis without growing the glyph: a word that scales up
+            # in place eats the 9 px space after it and the caption reads as one
+            # run-together blob.  Lift it instead, and let colour do the work.
+            lift = -size * 0.06 * (1.0 if active else 0.0)
             self.renderer.draw_word(
                 p, pw.word, style, ox + pw.x, oy + pw.baseline, color,
-                scale=scale, alpha=alpha, dy=dy,
+                scale=1.0, alpha=alpha, dy=dy + lift,
                 outline=None, outline_width=0.0,
                 shadow=(0, size * 0.045, size * 0.055, 0.40 * alpha),
             )
