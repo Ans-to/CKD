@@ -140,7 +140,10 @@ def mux_audio(video: str | Path, audio: str | Path, out_path: str | Path,
         "-map", "0:v:0", "-map", "1:a:0",
         "-c:v", "copy",
         "-c:a", "aac", "-b:a", "160k", "-ar", "48000", "-ac", "2",
-        "-af", f"afade=t=out:st={max(0.0, duration - fade):.3f}:d={fade:.3f}",
+        # Explicit upmix: ffmpeg's default mono->stereo rematrix scales by
+        # 1/sqrt(2), which quietly drops the whole track by 3 dB after mastering.
+        "-af", f"pan=stereo|c0=c0|c1=c0,"
+               f"afade=t=out:st={max(0.0, duration - fade):.3f}:d={fade:.3f}",
         "-t", f"{duration:.3f}",
         "-movflags", "+faststart",
         str(tmp),

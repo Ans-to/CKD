@@ -80,3 +80,34 @@ def test_master_voice_is_skippable_and_reports_failure(monkeypatch):
     res = mastering.master_voice(audio[: sr // 10], sr)
     assert not res.applied and res.warning
     assert len(res.audio) == sr // 10
+
+
+def test_mux_keeps_loudness(tmp_path):
+    """Muxing must not change the level: ffmpeg's default mono->stereo upmix
+    scales by 1/sqrt(2) and silently costs 3 dB after mastering."""
+    import subprocess
+
+    import imageio_ffmpeg
+
+    from ckd.render.ffmpeg import mux_audio
+    from ckd.voice.base import read_wav, write_wav
+    from ckd.voice.mastering import measure_lufs
+
+    exe = imageio_ffmpeg.get_ffmpeg_exe()
+    sr = 24000
+    t = np.arange(sr * 3) / sr
+    tone = (0.25 * np.sin(2 * np.pi * 440 * t)).astype(np.float32)
+    wav = tmp_path / "tone.wav"
+    write_wav(wav, tone, sr)
+    silent = tmp_path / "silent.mp4"
+    subprocess.run([exe, "-y", "-v", "error", "-f", "lavfi", "-i",
+                    f"color=c=black:s=320x240:r=24:d=3", "-pix_fmt", "yuv420p",
+                    str(silent)], check=True)
+    out = tmp_path / "muxed.mp4"
+    mux_audio(silent, wav, out, fade_out=0.05, duration=3.0)
+    raw = subprocess.run([exe, "-v", "quiet", "-i", str(out), "-vn", "-ac", "1",
+                          "-ar", str(sr), "-f", "s16le", "-"], capture_output=True).stdout
+    got = np.frombuffer(raw, dtype=np.int16).astype(np.float32) / 32768.0
+    before, _ = measure_lufs(tone, sr)
+    after, _ = measure_lufs(got, sr)
+    assert abs(before - after) < 0.4, f"mux changed loudness {before:.2f} -> {after:.2f} LUFS"

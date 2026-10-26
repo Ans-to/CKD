@@ -1,99 +1,99 @@
 1
-00:00:00,220 --> 00:00:05,266
+00:00:00,220 --> 00:00:03,308
 Every day, sunlight lands on your roof.
 
 2
-00:00:05,426 --> 00:00:07,356
+00:00:03,012 --> 00:00:05,402
 Most of it turns into heat and
 
 3
-00:00:07,356 --> 00:00:12,773
+00:00:05,402 --> 00:00:08,224
 drifts away. A solar panel catches that
 
 4
-00:00:12,773 --> 00:00:14,667
+00:00:08,224 --> 00:00:10,542
 light and turns part of it into
 
 5
-00:00:14,667 --> 00:00:19,855
+00:00:10,542 --> 00:00:11,772
 electricity.
 
 6
-00:00:20,428 --> 00:00:25,488
+00:00:11,720 --> 00:00:14,793
 Inside the panel sit many silicon cells.
 
 7
-00:00:25,649 --> 00:00:28,753
+00:00:14,497 --> 00:00:17,539
 When light particles, called photons, hit the
 
 8
-00:00:28,753 --> 00:00:36,442
+00:00:17,539 --> 00:00:20,500
 silicon, they knock electrons loose.
 
 9
-00:00:37,012 --> 00:00:39,904
+00:00:20,512 --> 00:00:24,022
 The panel produces direct current, which always
 
 10
-00:00:39,904 --> 00:00:46,575
+00:00:24,022 --> 00:00:26,998
 flows one way. Your home needs alternating
 
 11
-00:00:46,575 --> 00:00:49,139
+00:00:26,998 --> 00:00:30,538
 current that changes direction many times a
 
 12
-00:00:49,139 --> 00:00:57,950
+00:00:30,538 --> 00:00:32,903
 second. An inverter makes that change.
 
 13
-00:00:58,512 --> 00:01:00,049
+00:00:32,928 --> 00:00:35,357
 Power you do not use right away
 
 14
-00:01:00,049 --> 00:01:01,708
+00:00:35,357 --> 00:00:38,114
 is either stored in a battery or
 
 15
-00:01:01,708 --> 00:01:08,025
+00:00:38,114 --> 00:00:39,933
 sent into the grid. That way the
 
 16
-00:01:08,025 --> 00:01:12,722
+00:00:39,933 --> 00:00:42,554
 lights still work after sunset.
 
 17
-00:01:13,262 --> 00:01:15,604
+00:00:42,595 --> 00:00:45,474
 A typical panel turns roughly one fifth
 
 18
-00:01:15,604 --> 00:01:18,225
+00:00:45,474 --> 00:00:48,992
 of the sunlight hitting it into electricity;
 
 19
-00:01:18,225 --> 00:01:27,046
+00:00:48,992 --> 00:00:51,328
 the rest becomes heat. More panels, and
 
 20
-00:01:27,046 --> 00:01:28,807
+00:00:51,328 --> 00:00:53,326
 a clear view of the sky, give
 
 21
-00:01:28,807 --> 00:01:33,240
+00:00:53,326 --> 00:00:54,547
 you more power.
 
 22
-00:01:33,803 --> 00:01:37,034
+00:00:54,512 --> 00:00:57,798
 Light in, electrons moving, an inverter shaping
 
 23
-00:01:37,034 --> 00:01:39,496
+00:00:57,798 --> 00:01:00,754
 the current, and a battery holding it:
 
 24
-00:01:39,496 --> 00:01:41,228
+00:01:00,754 --> 00:01:03,265
 that is how a solar panel powers
 
 25
-00:01:41,228 --> 00:01:49,731
+00:01:03,265 --> 00:01:03,941
 a home.

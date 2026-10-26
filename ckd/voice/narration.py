@@ -119,9 +119,15 @@ class SpeechCache:
         self.root = Path(root)
         self.root.mkdir(parents=True, exist_ok=True)
 
+    # Bump when synthesis itself changes: the cache key used to be a function of
+    # the text and voice only, so a fixed engine happily replayed the broken audio
+    # it had cached before the fix.  v2 = espeak buffer fix + Kokoro engine.
+    SYNTH_VERSION = 2
+
     def _key(self, text: str, lang: str, engine: str, voice: str, speed: float) -> str:
-        return hash_json({"t": text, "l": lang, "e": engine, "v": voice, "s": round(speed, 3)},
-                         prefix="speech-v1")
+        return hash_json({"t": text, "l": lang, "e": engine, "v": voice,
+                          "s": round(speed, 3), "n": self.SYNTH_VERSION},
+                         prefix="speech-v2")
 
     def get(self, text: str, lang: str, engine: str, voice: str, speed: float) -> Optional[SynthesisResult]:
         key = self._key(text, lang, engine, voice, speed)
