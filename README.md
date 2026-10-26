@@ -41,22 +41,27 @@ Two finished samples, rendered by the code in this repo (not mockups):
 
 | file | language / format | length | notes |
 |---|---|---|---|
-| `samples/solar-en-16x9.mp4` | English 16:9, 1280×720 | 74.8 s | + `story.json`, `report.json`, `srt`, frame sheet |
-| `samples/solar-ur-9x16.mp4` | Urdu 9:16, 404×720 | 91.6 s | Nastaliq, RTL, Urdu numerals |
+| `samples/solar-en-16x9.mp4` | English 16:9, 1280×720 | 110.1 s | + `story.json`, `report.json`, `srt`, frame sheet |
+| `samples/solar-ur-9x16.mp4` | Urdu 9:16, 404×720 | 137.2 s | Nastaliq, RTL, Urdu numerals, `srt` |
 
-Both were asked for at `--duration 60`. The offline espeak fallback speaks slower than the planner
-assumes, so the narration came out at 75 s / 92 s — that is recorded in `story.warnings` and
-`report.json` rather than hidden. Rendered here on 2 vCPU; see `docs/TEST_REPORT.md` for what is and
-is not verified.
+Both use the same six-beat plan (hook → silicon cells → inverter → storage → efficiency → recap) and
+were asked for at `--duration 90`. The offline espeak fallback in this container speaks at about half
+the rate the planner assumes for the Piper neural voice, so the narration came out at 110 s / 137 s —
+that is recorded in `story.warnings` and `report.json` rather than hidden, and it is why
+`--duration` is a target, not a promise. Rendered here on 2 vCPU; see `docs/TEST_REPORT.md` for what
+is and is not verified.
 
 ## Formats and languages, genuinely re-composed
 
 | | 16:9 landscape | 9:16 vertical |
 |---|---|---|
-| headline | top-left, 60 % of the content width | full width, centred block |
-| world | central band below the headline, character at the frame edge | upper band, full width |
+| headline | top-left, 60 % of the content width | full width, block under the top margin |
+| world | one band between headline and captions, presenter at the frame edge | two zones: a wide prop band across the top **plus** the free quadrant beside the presenter |
 | character | bottom corner, 56 % of frame height | bottom corner, 27.5 % |
 | captions | bottom band, pill auto-fitted inside the safe area | band above the safe margin |
+
+The prop slots are different geometry per format — a 9:16 frame is composed again
+(two zones, different label placement), it is never a crop of the 16:9 frame.
 
 Urdu is real Urdu script shaped with HarfBuzz (RTL, Nastaliq), with bidi islands such as
 `(solar panel)` kept in Latin order and digits switched to `۱۲۳`. Nothing is mirrored or romanised.

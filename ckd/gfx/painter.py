@@ -46,8 +46,17 @@ def rgba(color, alpha: int | None = None) -> RGBA:
 
 
 def with_alpha(color, alpha: float) -> RGBA:
+    """Scale a colour's alpha.
+
+    Accepts either a 0..1 fraction (most call sites) or a 0..255 level.  The
+    numeric form used to be clamped to 255, which silently turned `with_alpha(c,
+    120)` (47 %) into a fully opaque fill and blew out the radial sky glows.
+    """
     c = rgba(color)
-    return (c[0], c[1], c[2], int(max(0, min(255, c[3] * alpha))))
+    a = float(alpha)
+    if a > 1.0:
+        a /= 255.0
+    return (c[0], c[1], c[2], int(max(0, min(255, round(c[3] * a)))))
 
 
 def shade(color, factor: float, alpha: int | None = None) -> RGBA:
@@ -405,7 +414,8 @@ class Painter:
         position is multiplied by the supersample factor.
         """
         p = self._pt(x, y)
-        if scale != 1.0:
+        scale *= self._transform.scale  # camera zoom must resize the sprite too
+        if abs(scale - 1.0) > 1e-3:
             w = max(1, int(round(img.width * scale)))
             h = max(1, int(round(img.height * scale)))
             img = img.resize((w, h), Image.LANCZOS)

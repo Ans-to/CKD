@@ -6,22 +6,23 @@ planning guide — expect ±30 % depending on host contention.
 
 ## Render time
 
-Measured on the final 4-scene solar render (4 languages×formats, 60 s target), one worker:
+Measured on the final six-beat solar render (`--duration 90`, `--quality standard` = 720p24),
+one worker, from `report.json`:
 
-| output | frames | per frame | wall time |
-|---|---|---|---|
-| 16:9 720p, 75 s (English) | 1 795 | ~116 ms | **3 min 30 s** |
-| 16:9 720p, 92 s (Urdu) | 2 199 | ~112 ms | **4 min 05 s** |
-| 9:16 720p, 75 s (English) | 1 795 | ~37 ms | **65 s** |
-| 9:16 720p, 92 s (Urdu) | 2 199 | ~35 ms | **76 s** |
-| 16:9 480p draft | — | roughly 0.4× the 720p cost | **~1 min 20 s** per 75 s |
-| 16:9 1080p (`high`) | — | **not measured** — expect ~2.25× the 720p cost | **~8 min** per 75 s (estimate) |
+| output | frames | per frame | scene render time | video length |
+|---|---|---|---|---|
+| 16:9 720p (English) | 2 642 | ~110 ms | **291 s** | 110.1 s |
+| 16:9 720p (Urdu) | 3 293 | ~107 ms | **352 s** | 137.2 s |
+| 9:16 720p (English) | 2 642 | ~36 ms | **96 s** | 110.1 s |
+| 9:16 720p (Urdu) | 3 293 | ~36 ms | **120 s** | 137.2 s |
+| 16:9 480p draft | — | roughly 0.4× the 720p cost | **~2 min** per 110 s | — |
+| 16:9 1080p (`high`) | — | **not measured** — expect ~2.25× the 720p cost | **~11 min** per 110 s (estimate) | — |
 
-**All four combinations** of one 4-scene plan (en/ur × 16:9/9:16) took **9 min 20 s** end to end on
-2 vCPU, including concat, mux, probe and verify, and produced four verified MP4s.
+**All four combinations** of the same six-beat plan took **14 min 40 s** end to end on 2 vCPU,
+including narration, per-scene clips, concat, mux, probe and verify, and produced four verified MP4s.
 
-Per-scene timings from the same run (720p 16:9): 46.6 s, 56.4 s, 61.5 s, 47.1 s for 398–516 frames.
-Vertical costs ~0.3× of landscape because there are 2.4× fewer pixels per frame.
+Vertical costs ~0.33× of landscape because there are 3.2× fewer pixels per frame. A scene is
+rendered once per language×format: changing only the caption language does not re-render video.
 
 A second run over an unchanged project is **seconds**: scene clips, narration and the story plan are
 all reused (see `docs/TROUBLESHOOTING.md` for what forces a re-render).

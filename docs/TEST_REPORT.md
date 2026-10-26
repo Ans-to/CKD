@@ -41,26 +41,36 @@ with huge gaps. Fixed by tracking the current char size per FreeType face.
 
 ## 2. Render integrity — all four language/format combinations
 
-Each row is a file in `samples/` or `projects/solar-energy/out/`, produced by the v11 render.
+One topic ("solar energy"), one six-beat plan, rendered with
+`--duration 90 --quality standard` (720p, 24 fps). Each row is the file now in `samples/`
+or `projects/solar-energy/out/`.
 
 | output | duration | size | streams | `verify_video()` |
 |---|---|---|---|---|
-| English 16:9 | 74.79 s | 1280×720 @ 24 | h264 / aac | `(True, [])` |
-| English 9:16 | 74.79 s | 404×720 @ 24 | h264 / aac | `(True, [])` |
-| Urdu 16:9 | 91.63 s | 1280×720 @ 24 | h264 / aac | `(True, [])` |
-| Urdu 9:16 | 91.63 s | 404×720 @ 24 | h264 / aac | `(True, [])` |
+| English 16:9 | 110.08 s | 1280×720 @ 24 | h264 / aac | `(True, [])` |
+| English 9:16 | 110.08 s | 404×720 @ 24 | h264 / aac | `(True, [])` |
+| Urdu 16:9 | 137.21 s | 1280×720 @ 24 | h264 / aac | `(True, [])` |
+| Urdu 9:16 | 137.21 s | 404×720 @ 24 | h264 / aac | `(True, [])` |
 
-Loudness on the English 16:9 file: mean −20.4 dB, peak −0.3 dB (no clipping). `verify_video()` does a
-full-file decode (catches truncation/corruption) plus size/fps/codec/audio-stream checks.
+`verify_video()` does a full-file decode (catches truncation/corruption) plus size/fps/codec/audio
+stream checks. The English 16:9 file decodes to a peak of −0.37 dBFS with no sample at full scale
+(no clipping), mean −17.6 dB.
 
 Subtitles: `samples/*.srt`, one cue per sentence, word times taken from the TTS event stream
-(`timing_kind: espeak-events` in this environment).
+(`timing_kind: espeak-events` in this environment), plus `.ass` alongside the project files.
 
-**Duration honesty.** The four videos were requested with `--duration 60` but came out at 74.8 s and
-91.6 s, because the offline espeak voice speaks at ~1.3 words/s while the planner's table assumes a
-Piper voice at ~2.2–2.6 words/s. The pipeline now measures the narration after synthesis and writes
-the mismatch into `story.warnings` and `report.json` (see "narration measured 74.8s against a 60s
-target"). This is a known, disclosed gap, not a silent miss.
+**Duration honesty.** The plan was requested at `--duration 90` and came out at 110 s (English) and
+137 s (Urdu). The offline espeak voice speaks at ~1.3 words/s while the planner's table assumes the
+Piper neural voice (~2.6 words/s), so every plan written for the neural voice runs long here. The
+pipeline does not hide this: `story.warnings` and `report.json` carry
+
+```
+en: narration measured 110.1s against a 90s target (engine: espeak). ...
+ur: narration measured 137.2s against a 90s target (engine: espeak). ...
+```
+
+and the fitter trimmed one sentence from the `cells` beat to get closer. In Colab, where Piper is
+installed, the same plan fits the requested target; see `docs/VOICES.md`.
 
 ## 3. Visual QA
 
@@ -95,11 +105,53 @@ Defects found and fixed in this loop (all post-hoc, i.e. found by looking at fra
    mirrored to the right edge, with the chip moved to the top-left.
 9. The 9:16 recap put the house's gable inside the battery above it; the house slot
    was lowered and shortened for that format.
+10. Urdu headlines (9:16 especially) ran past the top edge of the frame: Nastaliq
+    ink is much taller than its line box, so a block that "fits" by advance still
+    overflows. Auto-sizing now reserves a 0.80 height / 0.92 width margin for
+    Arabic-script text.
+
+11. `Painter.paste_sprite` applied the camera's translation but not its **scale**, so the
+    static sky plate slid ~20 px sideways at the end of a `push_in` and left a flat dark band
+    down the frame edge. The plate is now drawn outside the camera transform (it is a
+    full-bleed backdrop, not a parallax layer), and `paste_sprite` honours zoom for the props
+    that *are* inside it.
+12. The sky plate only covered `horizon + 260` px, so the bottom of a 720 px frame was
+    never painted; a 9:16 frame showed a hard horizontal seam where the plate ended. The
+    plate now covers the full stage height and starts with an opaque base coat (gradient and
+    polygon joins leave hairline gaps that a static plate turns into black seams).
+13. `Pen.rect` / `Pen.ellipse` inverted their own box when a detail's inset was larger than
+    its size — which happens constantly once props are scaled down for 9:16 — and PIL raised
+    `ValueError: y1 must be greater than or equal to y0`, killing the vertical render. Boxes
+    are now sorted and sub-pixel shapes are skipped.
+14. Every prop name the knowledge base uses (`panel`, `inverter`, `battery`, `array`, `meter`,
+    `bar`) was missing from `SolarWorld.slots()`, so they all fell back to the same centred
+    fallback box: in 9:16 the battery, inverter and grid pylon were drawn on top of each
+    other. Slots are now disjoint per format, and a wire that names a prop resolves to that
+    prop's real box.
+15. The 9:16 light shaft became a hard vertical seam in the narrow frame; it is now 16:9 only.
+16. The exploded cell stack ran off the left edge under the push-in camera (a 7.5 % zoom is
+    enough to crop a plate that starts at the slot edge). The stack insets by the safe margin
+    and clamps its plate width and label column to the frame.
+17. The presenter's arms were one tapered capsule each with a shaded stripe down them: at
+    frame scale they read as noodles with blobs at the cuff. The arm is now sleeve → elbow →
+    tapered forearm → wrist → palm, with the T-shirt sleeve covering the whole upper arm; the
+    poses were retuned so `present` opens both hands, `think` puts the elbow up with the hand
+    near the chin, and `shrug` lifts the palms instead of the shoulders.
+18. Headline and caption type carried a 3 px dark outline that read as a sticker; replaced
+    with a soft contact shadow, which lets the type sit on the artwork (premium-flat look).
+19. In 9:16 the hook's "solar panel" label sat under the presenter's head, the array field
+    was cropped by the right edge, and the recap house overflowed the safe area. All slots
+    are now clamped inside the safe area in both formats.
 
 Known cosmetic weaknesses that remain (documented, not hidden):
 
-- The presenter's pointing arm can pass in front of a prop edge; there is no
-  per-frame occlusion solving, only slot-level placement.
+- The art is deliberately **flat and graphic** (soft gradients, single-tone props,
+  cast shadows, rim light). It is not illustration-grade: no textures, no painted
+  lighting, no character animation beyond pose + mouth + blink + bounce.
+- Prop labels can still sit close to a prop edge in dense recap frames; placement is
+  slot-level, with no per-frame collision solving.
+- The presenter's arm can pass in front of a prop edge; there is no per-frame
+  occlusion solving, only slot-level placement.
 - Curated packs are written for ~45-90 s. Asking for a much shorter target drops
   whole sentences/scenes and records that in `story.warnings`; it cannot invent a
   15 s edit of a 46 s pack.
@@ -144,3 +196,25 @@ reordering) rather than delegated to Pillow.
   produced audio here.
 - **Upscaled 1080p**: `quality=high` is implemented but only 720p/480p were
   rendered and timed (720p ≈ 60-100 s per scene on 2 vCPU).
+
+## 7. Art-system rebuild (v13–v17)
+
+The first visual system (a pixel-art presenter on flat single-fill props) was rejected as not good
+enough, so the art layer was rebuilt rather than patched:
+
+- **Presenter** (`ckd/gfx/character.py`) is a smooth vector rig: tapered torso, separate legs with a
+  real gap, rolled cuffs, boots, a parametric hair dome, sleeve → elbow → tapered forearm → wrist →
+  palm arms, a rim light restricted to the key-light side, and a shared palette with the type.
+  Poses are parameters (`present`, `explain`, `point_left/right`, `think`, `celebrate`, `shrug`,
+  `idle`) — still exactly one character, still no per-scene generation.
+- **Props** (`ckd/scene/worlds/solar_props.py`) are cached sprites built from gradients, cast
+  shadows and specular streaks: house with a lit roof slope and amber windows, solar panel with cell
+  gutters and glass, inverter with a live AC trace, battery with a fill gauge, grid pylon, cable,
+  and the exploded cell slabs.
+- **Type** lost its outline for a soft contact shadow, and the caption pill gained a hairline top
+  light, so headline and captions read as graphic elements, not stickers.
+- **Layout** is now slot-driven with disjoint regions per format (see the defect list above); 9:16 is
+  a two-zone composition, not a crop.
+
+Render cost of the rebuild is unchanged (≈110 ms/frame at 720p16:9, ≈36 ms at 404×720), because
+props are cached sprites and only the animated parts are drawn live.

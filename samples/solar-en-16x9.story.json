@@ -152,6 +152,14 @@
    "motif": "flow",
    "elements": [
     {
+     "type": "wire",
+     "slot": "wire",
+     "params": {
+      "from": "stage_left",
+      "to": "stage_right"
+     }
+    },
+    {
      "type": "panel",
      "slot": "stage_left",
      "params": {
@@ -162,14 +170,6 @@
     {
      "type": "inverter",
      "slot": "stage_right"
-    },
-    {
-     "type": "wire",
-     "slot": "wire",
-     "params": {
-      "from": "panel",
-      "to": "inverter"
-     }
     }
    ],
    "beats": [],
@@ -189,6 +189,119 @@
     },
     {
      "action": "ac_wave",
+     "params": {}
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "id": "storage",
+   "purpose": "explain",
+   "narration": {
+    "en": "Power you do not use right away is either stored in a battery or sent into the grid. That way the lights still work after sunset.",
+    "ur": "جو بجلی آپ فوراً استعمال نہیں کرتے، وہ بیٹری میں محفوظ ہو جاتی ہے یا گرڈ میں چلی جاتی ہے۔ اسی طرح سورج ڈوبنے کے بعد بھی بتیاں جلی رہتی ہیں۔"
+   },
+   "headline": {
+    "en": "Store it or share it",
+    "ur": "ذخیرہ کریں یا بانٹیں"
+   },
+   "keywords": {},
+   "motif": "flow",
+   "elements": [
+    {
+     "type": "wire",
+     "slot": "wire",
+     "params": {
+      "from": "stage_left",
+      "to": "stage_mid"
+     }
+    },
+    {
+     "type": "panel",
+     "slot": "stage_left",
+     "params": {
+      "rows": 3,
+      "cols": 3
+     }
+    },
+    {
+     "type": "battery",
+     "slot": "stage_mid"
+    },
+    {
+     "type": "grid",
+     "slot": "grid"
+    }
+   ],
+   "beats": [],
+   "character": {
+    "pose": "point_right",
+    "slot": "char_left"
+   },
+   "camera": "push_in",
+   "actions": [
+    {
+     "action": "split_flow",
+     "params": {}
+    },
+    {
+     "action": "battery_fill",
+     "params": {}
+    },
+    {
+     "action": "night_glow",
+     "params": {}
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "id": "limits",
+   "purpose": "example",
+   "narration": {
+    "en": "A typical panel turns roughly one fifth of the sunlight hitting it into electricity; the rest becomes heat. More panels, and a clear view of the sky, give you more power.",
+    "ur": "عام طور پر ایک پینل پر پڑنے والی روشنی کا تقریباً پانچواں حصہ بجلی بنتا ہے، باقی گرمی بن جاتا ہے۔ زیادہ پینل اور کھلا آسمان زیادہ بجلی دیتے ہیں۔"
+   },
+   "headline": {
+    "en": "About one fifth becomes power",
+    "ur": "تقریباً پانچواں حصہ بجلی بنتا ہے"
+   },
+   "keywords": {},
+   "motif": "flow",
+   "elements": [
+    {
+     "type": "efficiency_bar",
+     "slot": "bar",
+     "params": {
+      "share": 0.2
+     }
+    },
+    {
+     "type": "array",
+     "slot": "array",
+     "params": {
+      "rows": 2,
+      "cols": 3
+     }
+    }
+   ],
+   "beats": [],
+   "character": {
+    "pose": "present",
+    "slot": "char_left"
+   },
+   "camera": "push_in",
+   "actions": [
+    {
+     "action": "efficiency_bar",
+     "params": {}
+    },
+    {
+     "action": "heat_arrows",
+     "params": {}
+    },
+    {
+     "action": "array_expand",
      "params": {}
     }
    ],
@@ -254,9 +367,9 @@
  ],
  "generator": "curated-pack",
  "warnings": [
-  "narration shortened to approach the 60s target: dropped one sentence from scene 'cells'",
-  "en: narration measured 74.8s against a 60s target (engine: espeak). The plan was sized with an estimated speaking rate; re-run with --duration 75 to keep every beat, or a shorter --duration to drop scenes.",
-  "ur: narration measured 91.6s against a 60s target (engine: espeak). The plan was sized with an estimated speaking rate; re-run with --duration 92 to keep every beat, or a shorter --duration to drop scenes."
+  "narration shortened to approach the 90s target: dropped one sentence from scene 'cells'",
+  "en: narration measured 110.1s against a 90s target (engine: espeak). The plan was sized with an estimated speaking rate; re-run with --duration 110 to keep every beat, or a shorter --duration to drop scenes.",
+  "ur: narration measured 137.2s against a 90s target (engine: espeak). The plan was sized with an estimated speaking rate; re-run with --duration 137 to keep every beat, or a shorter --duration to drop scenes."
  ],
  "source_pack": "solar"
 }

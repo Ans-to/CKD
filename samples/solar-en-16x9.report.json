@@ -23,6 +23,18 @@
    "narration_ur": "پینل ڈائریکٹ کرنٹ بناتا ہے، جو ہمیشہ ایک ہی سمت میں بہتا ہے۔ آپ کے گھر کو متبادل کرنٹ چاہیے جو ہر سیکنڈ کئی بار سمت بدلتا ہے۔ انورٹر یہ تبدیلی کرتا ہے۔"
   },
   {
+   "id": "storage",
+   "purpose": "explain",
+   "narration_en": "Power you do not use right away is either stored in a battery or sent into the grid. That way the lights still work after sunset.",
+   "narration_ur": "جو بجلی آپ فوراً استعمال نہیں کرتے، وہ بیٹری میں محفوظ ہو جاتی ہے یا گرڈ میں چلی جاتی ہے۔ اسی طرح سورج ڈوبنے کے بعد بھی بتیاں جلی رہتی ہیں۔"
+  },
+  {
+   "id": "limits",
+   "purpose": "example",
+   "narration_en": "A typical panel turns roughly one fifth of the sunlight hitting it into electricity; the rest becomes heat. More panels, and a clear view of the sky, give you more power.",
+   "narration_ur": "عام طور پر ایک پینل پر پڑنے والی روشنی کا تقریباً پانچواں حصہ بجلی بنتا ہے، باقی گرمی بن جاتا ہے۔ زیادہ پینل اور کھلا آسمان زیادہ بجلی دیتے ہیں۔"
+  },
+  {
    "id": "recap",
    "purpose": "recap",
    "narration_en": "Light in, electrons moving, an inverter shaping the current, and a battery holding it: that is how a solar panel powers a home.",
@@ -30,16 +42,16 @@
   }
  ],
  "story_warnings": [
-  "narration shortened to approach the 60s target: dropped one sentence from scene 'cells'",
-  "en: narration measured 74.8s against a 60s target (engine: espeak). The plan was sized with an estimated speaking rate; re-run with --duration 75 to keep every beat, or a shorter --duration to drop scenes.",
-  "ur: narration measured 91.6s against a 60s target (engine: espeak). The plan was sized with an estimated speaking rate; re-run with --duration 92 to keep every beat, or a shorter --duration to drop scenes."
+  "narration shortened to approach the 90s target: dropped one sentence from scene 'cells'",
+  "en: narration measured 110.1s against a 90s target (engine: espeak). The plan was sized with an estimated speaking rate; re-run with --duration 110 to keep every beat, or a shorter --duration to drop scenes.",
+  "ur: narration measured 137.2s against a 90s target (engine: espeak). The plan was sized with an estimated speaking rate; re-run with --duration 137 to keep every beat, or a shorter --duration to drop scenes."
  ],
  "narration": {
   "en": {
    "engine": "espeak",
    "voice": "en-us",
    "timing_kind": "espeak-events",
-   "duration": 74.79,
+   "duration": 110.08,
    "warnings": [
     "en: neural voice unavailable (FileNotFoundError: [Errno 2] No such file or directory: '/home/user/.cache/ckd'). Falling back to espeak (development voice)."
    ]
@@ -48,11 +60,11 @@
    "engine": "espeak",
    "voice": "ur",
    "timing_kind": "espeak-events",
-   "duration": 91.63,
+   "duration": 137.21,
    "warnings": [
     "en: neural voice unavailable (FileNotFoundError: [Errno 2] No such file or directory: '/home/user/.cache/ckd'). Falling back to espeak (development voice).",
     "ur: neural voice unavailable (FileNotFoundError: [Errno 2] No such file or directory: '/home/user/.cache/ckd'). Falling back to espeak (development voice).",
-    "narration is 92s for a 60s target; scenes were not truncated (quality first) - rerun with a lower duration target or edit the script"
+    "narration is 137s for a 90s target; scenes were not truncated (quality first) - rerun with a lower duration target or edit the script"
    ]
   }
  },
@@ -61,15 +73,15 @@
    "language": "en",
    "format": "landscape",
    "path": "projects/solar-energy/out/en_landscape.mp4",
-   "duration": 74.78999999999999,
+   "duration": 110.08,
    "width": 1280,
    "height": 720,
    "fps": 24.0,
    "verified": true,
    "problems": [],
    "audio": {
-    "mean_db": -20.4,
-    "peak_db": -0.3
+    "mean_db": -17.6,
+    "peak_db": 0.0
    },
    "timing_kind": "espeak-events",
    "caption_kind": "word-synced (espeak-events)",
@@ -80,15 +92,15 @@
    "language": "en",
    "format": "vertical",
    "path": "projects/solar-energy/out/en_vertical.mp4",
-   "duration": 74.78999999999999,
+   "duration": 110.08,
    "width": 404,
    "height": 720,
    "fps": 24.0,
    "verified": true,
    "problems": [],
    "audio": {
-    "mean_db": -20.4,
-    "peak_db": -0.3
+    "mean_db": -17.6,
+    "peak_db": 0.0
    },
    "timing_kind": "espeak-events",
    "caption_kind": "word-synced (espeak-events)",
@@ -99,15 +111,15 @@
    "language": "ur",
    "format": "landscape",
    "path": "projects/solar-energy/out/ur_landscape.mp4",
-   "duration": 91.63,
+   "duration": 137.21,
    "width": 1280,
    "height": 720,
    "fps": 24.0,
    "verified": true,
    "problems": [],
    "audio": {
-    "mean_db": -20.5,
-    "peak_db": 0.0
+    "mean_db": -18.6,
+    "peak_db": -0.0
    },
    "timing_kind": "espeak-events",
    "caption_kind": "word-synced (espeak-events)",
@@ -118,15 +130,15 @@
    "language": "ur",
    "format": "vertical",
    "path": "projects/solar-energy/out/ur_vertical.mp4",
-   "duration": 91.63,
+   "duration": 137.21,
    "width": 404,
    "height": 720,
    "fps": 24.0,
    "verified": true,
    "problems": [],
    "audio": {
-    "mean_db": -20.5,
-    "peak_db": 0.0
+    "mean_db": -18.6,
+    "peak_db": -0.0
    },
    "timing_kind": "espeak-events",
    "caption_kind": "word-synced (espeak-events)",
@@ -138,139 +150,187 @@
   {
    "stage": "script",
    "status": "done",
-   "detail": "4 scenes, world=solar",
-   "seconds": 0.0010724067687988281
+   "detail": "6 scenes, world=solar",
+   "seconds": 0.01918649673461914
   },
   {
    "stage": "narration:en",
-   "status": "cached",
-   "detail": "74.8s reused",
-   "seconds": 0.011409759521484375
+   "status": "done",
+   "detail": "espeak/en-us 110.1s timing=espeak-events",
+   "seconds": 0.04045367240905762
   },
   {
    "stage": "narration:ur",
-   "status": "cached",
-   "detail": "91.6s reused",
-   "seconds": 0.011196613311767578
+   "status": "done",
+   "detail": "espeak/ur 137.2s timing=espeak-events",
+   "seconds": 0.03949856758117676
   },
   {
    "stage": "scene:en:landscape:1",
    "status": "done",
-   "detail": "485 frames in 56.4s",
-   "seconds": 56.35570025444031
+   "detail": "485 frames in 54.5s",
+   "seconds": 54.53192329406738
   },
   {
    "stage": "scene:en:landscape:2",
    "status": "done",
-   "detail": "398 frames in 46.6s",
-   "seconds": 46.59713435173035
+   "detail": "398 frames in 42.2s",
+   "seconds": 42.17324924468994
   },
   {
    "stage": "scene:en:landscape:3",
    "status": "done",
-   "detail": "516 frames in 61.5s",
-   "seconds": 61.53207516670227
+   "detail": "516 frames in 55.9s",
+   "seconds": 55.855462074279785
   },
   {
    "stage": "scene:en:landscape:4",
    "status": "done",
-   "detail": "396 frames in 47.1s",
-   "seconds": 47.116132497787476
+   "detail": "354 frames in 44.9s",
+   "seconds": 44.91743803024292
+  },
+  {
+   "stage": "scene:en:landscape:5",
+   "status": "done",
+   "detail": "493 frames in 42.6s",
+   "seconds": 42.649327993392944
+  },
+  {
+   "stage": "scene:en:landscape:6",
+   "status": "done",
+   "detail": "396 frames in 50.9s",
+   "seconds": 50.910640478134155
   },
   {
    "stage": "video:en_landscape",
    "status": "done",
-   "detail": "74.8s 1280x720",
+   "detail": "110.1s 1280x720",
    "seconds": 0.0
   },
   {
    "stage": "scene:en:vertical:1",
    "status": "done",
-   "detail": "485 frames in 18.2s",
-   "seconds": 18.197335958480835
+   "detail": "485 frames in 19.1s",
+   "seconds": 19.073221445083618
   },
   {
    "stage": "scene:en:vertical:2",
    "status": "done",
-   "detail": "398 frames in 14.1s",
-   "seconds": 14.051934719085693
+   "detail": "398 frames in 14.6s",
+   "seconds": 14.644673585891724
   },
   {
    "stage": "scene:en:vertical:3",
    "status": "done",
-   "detail": "516 frames in 18.1s",
-   "seconds": 18.14722180366516
+   "detail": "516 frames in 17.5s",
+   "seconds": 17.512573957443237
   },
   {
    "stage": "scene:en:vertical:4",
    "status": "done",
-   "detail": "396 frames in 14.4s",
-   "seconds": 14.42355227470398
+   "detail": "354 frames in 13.7s",
+   "seconds": 13.693501710891724
+  },
+  {
+   "stage": "scene:en:vertical:5",
+   "status": "done",
+   "detail": "493 frames in 13.7s",
+   "seconds": 13.688700437545776
+  },
+  {
+   "stage": "scene:en:vertical:6",
+   "status": "done",
+   "detail": "396 frames in 17.1s",
+   "seconds": 17.103524446487427
   },
   {
    "stage": "video:en_vertical",
    "status": "done",
-   "detail": "74.8s 404x720",
+   "detail": "110.1s 404x720",
    "seconds": 0.0
   },
   {
    "stage": "scene:ur:landscape:1",
    "status": "done",
-   "detail": "562 frames in 61.5s",
-   "seconds": 61.49567914009094
+   "detail": "563 frames in 62.5s",
+   "seconds": 62.45323872566223
   },
   {
    "stage": "scene:ur:landscape:2",
    "status": "done",
-   "detail": "541 frames in 59.4s",
-   "seconds": 59.41780090332031
+   "detail": "541 frames in 54.7s",
+   "seconds": 54.67026329040527
   },
   {
    "stage": "scene:ur:landscape:3",
    "status": "done",
-   "detail": "590 frames in 64.3s",
-   "seconds": 64.33002781867981
+   "detail": "589 frames in 61.1s",
+   "seconds": 61.076502084732056
   },
   {
    "stage": "scene:ur:landscape:4",
    "status": "done",
-   "detail": "506 frames in 56.4s",
-   "seconds": 56.35810589790344
+   "detail": "540 frames in 64.0s",
+   "seconds": 64.00017070770264
+  },
+  {
+   "stage": "scene:ur:landscape:5",
+   "status": "done",
+   "detail": "555 frames in 45.8s",
+   "seconds": 45.76484203338623
+  },
+  {
+   "stage": "scene:ur:landscape:6",
+   "status": "done",
+   "detail": "505 frames in 63.4s",
+   "seconds": 63.36287808418274
   },
   {
    "stage": "video:ur_landscape",
    "status": "done",
-   "detail": "91.6s 1280x720",
+   "detail": "137.2s 1280x720",
    "seconds": 0.0
   },
   {
    "stage": "scene:ur:vertical:1",
    "status": "done",
-   "detail": "562 frames in 19.2s",
-   "seconds": 19.20014262199402
+   "detail": "563 frames in 22.4s",
+   "seconds": 22.367369174957275
   },
   {
    "stage": "scene:ur:vertical:2",
    "status": "done",
-   "detail": "541 frames in 18.7s",
-   "seconds": 18.703904390335083
+   "detail": "541 frames in 19.0s",
+   "seconds": 18.962695360183716
   },
   {
    "stage": "scene:ur:vertical:3",
    "status": "done",
-   "detail": "590 frames in 20.3s",
-   "seconds": 20.28074073791504
+   "detail": "589 frames in 19.8s",
+   "seconds": 19.788506984710693
   },
   {
    "stage": "scene:ur:vertical:4",
    "status": "done",
-   "detail": "506 frames in 17.3s",
-   "seconds": 17.32103943824768
+   "detail": "540 frames in 21.2s",
+   "seconds": 21.24117159843445
+  },
+  {
+   "stage": "scene:ur:vertical:5",
+   "status": "done",
+   "detail": "555 frames in 15.0s",
+   "seconds": 15.037491083145142
+  },
+  {
+   "stage": "scene:ur:vertical:6",
+   "status": "done",
+   "detail": "505 frames in 22.1s",
+   "seconds": 22.080220460891724
   },
   {
    "stage": "video:ur_vertical",
    "status": "done",
-   "detail": "91.6s 404x720",
+   "detail": "137.2s 404x720",
    "seconds": 0.0
   }
  ],
@@ -279,8 +339,8 @@
   "platform": "Linux-6.1.158+-x86_64-with-glibc2.36",
   "cpu_count": 2,
   "mem_total_gb": 4.13,
-  "mem_available_gb": 3.4,
-  "disk_free_gb": 19.94,
+  "mem_available_gb": 3.24,
+  "disk_free_gb": 20.09,
   "disk_total_gb": 21.83,
   "gpu": null
  }

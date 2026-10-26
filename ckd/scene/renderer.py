@@ -86,6 +86,12 @@ URDU_DIGITS = str.maketrans("0123456789", "۰۱۲۳۴۵۶۷۸۹")
 def _autosize(renderer: TextRenderer, text: str, style: TextStyle, max_w: float, max_h: float,
               *, min_size: float = 12.0, max_lines: int = 3):
     """Shrink the font size until the paragraph fits the box (no clipped text)."""
+    # Nastaliq ink is far taller and wider than its advance box: a block that
+    # fits max_h by advance still pushes its ascenders out of the area (and off
+    # the top of a 9:16 frame).  Reserve a margin for Arabic-script text.
+    if style.language == "ur":
+        max_w *= 0.92
+        max_h *= 0.80
     size = style.size
     while size >= min_size:
         st = TextStyle(**{**style.__dict__, "size": size})
@@ -184,9 +190,11 @@ class SceneRenderer:
         intro = clamp(t / 0.42)
         outro = clamp((self.spec.duration - t) / 0.34)
         layer_alpha = min(intro, outro) ** 0.8
+        # the sky/ground plate is full-bleed and stays put: camera-transforming a
+        # pasted sprite that is not resized slides it off the frame edge
+        self.world.background(p, ctx)
         with p.transformed(Transform(tx=cam.pan_x, ty=cam.pan_y, scale=cam.scale,
                                      ox=self.stage.width / 2, oy=self.stage.height / 2)):
-            self.world.background(p, ctx)
             for el in self.spec.scene.elements:
                 self.world.draw_element(p, ctx, el)
 
@@ -286,8 +294,10 @@ class SceneRenderer:
             box = self.renderer.draw_word(
                 p, pw.word, style, ox + pw.x, oy + pw.baseline, color,
                 scale=0.9 + 0.1 * ease, alpha=alpha, dy=dy,
-                outline=with_alpha(st.palette["ink"], alpha), outline_width=size * 0.055,
-                shadow=(0, size * 0.055, size * 0.06, 0.35 * alpha),
+                # premium-flat type: a soft contact shadow instead of a heavy
+                # outline (the outline read as a YouTube thumbnail)
+                outline=None, outline_width=0.0,
+                shadow=(0, size * 0.05, size * 0.10, 0.45 * alpha),
             )
             boxes.append(box)
         # underline sweep under the last headline line
@@ -365,8 +375,11 @@ class SceneRenderer:
         # never let the caption pill leave the safe area
         margin = max(st.safe_x * 0.5, size * 0.35)
         bx = max(margin, min(bx, st.width - margin - bw))
-        p.rect(bx, by, bx + bw, by + bh, fill=with_alpha(st.palette["ink"], 0.74 * alpha),
-               radius=size * 0.7)
+        p.rect(bx, by, bx + bw, by + bh, fill=with_alpha(st.palette["ink"], 0.72 * alpha),
+               radius=size * 0.62)
+        p.rect(bx + size * 0.30, by + max(1.0, bh * 0.045), bx + bw - size * 0.30,
+               by + max(1.5, bh * 0.045) + 1.4,
+               fill=with_alpha(st.palette["paper"], 0.10 * alpha), radius=1.0)
         ox = st.width / 2 - lay.width / 2
         oy = by + (bh - lay.height) / 2
         kw = {k.lower() for k in (self.spec.scene.keywords.get(self.spec.language) or [])}
@@ -383,7 +396,8 @@ class SceneRenderer:
             self.renderer.draw_word(
                 p, pw.word, style, ox + pw.x, oy + pw.baseline, color,
                 scale=scale, alpha=alpha, dy=dy,
-                outline=with_alpha(st.palette["ink"], 0.85 * alpha), outline_width=size * 0.045,
+                outline=None, outline_width=0.0,
+                shadow=(0, size * 0.045, size * 0.055, 0.40 * alpha),
             )
 
     # ------------------------------------------------------------ transition

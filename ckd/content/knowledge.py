@@ -100,9 +100,9 @@ _pack(
                 "ur": "پینل ڈائریکٹ کرنٹ بناتا ہے، جو ہمیشہ ایک ہی سمت میں بہتا ہے۔ آپ کے گھر کو متبادل کرنٹ چاہیے جو ہر سیکنڈ کئی بار سمت بدلتا ہے۔ انورٹر یہ تبدیلی کرتا ہے۔",
             },
             "elements": [
+                {"type": "wire", "slot": "wire", "params": {"from": "stage_left", "to": "stage_right"}},
                 {"type": "panel", "slot": "stage_left", "params": {"rows": 3, "cols": 3}},
                 {"type": "inverter", "slot": "stage_right"},
-                {"type": "wire", "slot": "wire", "params": {"from": "panel", "to": "inverter"}},
             ],
             "actions": [
                 {"action": "dc_arrow", "params": {}},
@@ -120,10 +120,10 @@ _pack(
                 "ur": "جو بجلی آپ فوراً استعمال نہیں کرتے، وہ بیٹری میں محفوظ ہو جاتی ہے یا گرڈ میں چلی جاتی ہے۔ اسی طرح سورج ڈوبنے کے بعد بھی بتیاں جلی رہتی ہیں۔",
             },
             "elements": [
+                {"type": "wire", "slot": "wire", "params": {"from": "stage_left", "to": "stage_mid"}},
                 {"type": "panel", "slot": "stage_left", "params": {"rows": 3, "cols": 3}},
-                {"type": "battery", "slot": "stage_right"},
+                {"type": "battery", "slot": "stage_mid"},
                 {"type": "grid", "slot": "grid"},
-                {"type": "wire", "slot": "wire", "params": {"from": "panel", "to": "battery"}},
             ],
             "actions": [
                 {"action": "split_flow", "params": {}},
@@ -141,11 +141,8 @@ _pack(
                 "ur": "عام طور پر ایک پینل پر پڑنے والی روشنی کا تقریباً پانچواں حصہ بجلی بنتا ہے، باقی گرمی بن جاتا ہے۔ زیادہ پینل اور کھلا آسمان زیادہ بجلی دیتے ہیں۔",
             },
             "elements": [
-                {"type": "efficiency_bar", "slot": "stage", "params": {"share": 0.2}},
-                {"type": "heat_arrows", "slot": "stage", "params": {}},
-                {"type": "array", "slot": "stage_right", "params": {"rows": 2, "cols": 3}},
-                {"type": "label", "slot": "caption_band",
-                 "params": {"en": "≈20% electricity · ≈80% heat", "ur": "تقریباً 20% بجلی · 80% گرمی"}},
+                {"type": "efficiency_bar", "slot": "bar", "params": {"share": 0.2}},
+                {"type": "array", "slot": "array", "params": {"rows": 2, "cols": 3}},
             ],
             "actions": [
                 {"action": "efficiency_bar", "params": {}},
