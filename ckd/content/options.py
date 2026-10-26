@@ -29,6 +29,7 @@ class RenderOptions:
     voice_en: str = "auto"  # auto | piper:<voice> | espeak
     voice_ur: str = "auto"
     allow_espeak_fallback: bool = True
+    master_audio: bool = True  # dialogue mastering (-15 LUFS / -1.5 dBTP)
     llm: str = "none"  # none | gguf path
     seed: int = 7
     notes: str = ""  # optional user outline / extra facts

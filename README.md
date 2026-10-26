@@ -14,7 +14,7 @@ explainer with one recurring character, and renders a verified MP4 — in **Engl
 |---|---|---|
 | 1. script | a knowledge pack (or an optional local GGUF model) builds scenes with narration in every requested language | `ckd/content/` |
 | 2. review | `story.json` is plain JSON you can edit; it is re-validated before rendering | `projects/<topic>/story.json` |
-| 3. narration | local TTS (Piper if it can download, else the offline espeak voice) with measured word timings | `ckd/voice/` |
+| 3. narration | local neural TTS (Kokoro-82M for English, espeak for Urdu here) + a broadcast mastering chain to -15 LUFS / -1.5 dBTP | `ckd/voice/` |
 | 4. storyboard | real stills from the renderer, one contact sheet per language × format | `projects/<topic>/preview/` |
 | 5. scene render | each scene is drawn frame by frame (Pillow + HarfBuzz + FreeType), encoded on its own, then cached | `ckd/scene/`, `ckd/render/` |
 | 6. mux | scene clips are concatenated, audio is muxed, the result is probed and verified, SRT/ASS subtitles + `report.json` are written | `ckd/pipeline/` |

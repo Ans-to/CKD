@@ -101,9 +101,10 @@ def test_report_lists_engine_timing_and_problems(pipe: Pipeline):
     pipe._write_report(story, tracks, result)
     report = json.loads((pipe.project.root / "report.json").read_text(encoding="utf-8"))
     assert report["topic"] == "tiny solar"
-    assert report["narration"]["en"]["engine"] in ("espeak", "piper")
+    assert report["narration"]["en"]["engine"] in ("espeak", "piper", "kokoro")
     assert report["narration"]["en"]["timing_kind"] in (
-        "espeak-events", "piper-events", "measured", "proportional")
+        "espeak-events", "piper-events", "piper-alignment", "measured",
+        "proportional", "estimated")
     for meta in report["videos"].values():
         assert "verified" in meta and "path" in meta
 

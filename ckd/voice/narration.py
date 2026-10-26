@@ -31,7 +31,7 @@ from .espeak import EspeakEngine, EspeakVoice
 
 LOG = get_logger("ckd.voice.narration")
 
-CLAUSE_GAP = 0.16      # silence between clauses inside a scene
+CLAUSE_GAP = 0.22      # silence between clauses inside a scene
 SCENE_TAIL = 0.34      # silence after the last clause of a scene
 SCENE_LEAD = 0.22      # small lead-in before speech starts
 
@@ -92,6 +92,7 @@ class NarrationTrack:
     voice: str
     timing_kind: str
     warnings: List[str] = field(default_factory=list)
+    mastering: dict = field(default_factory=dict)  # measured LUFS / true peak
 
     @property
     def duration(self) -> float:
@@ -106,6 +107,7 @@ class NarrationTrack:
             "sample_rate": self.sample_rate,
             "duration": round(self.duration, 3),
             "warnings": self.warnings,
+            "mastering": self.mastering,
             "scenes": [s.to_dict() for s in self.scenes],
         }
 
@@ -189,8 +191,10 @@ class Narrator:
         allow_download: bool = True,
         allow_espeak_fallback: bool = True,
         cache: SpeechCache | None = None,
-        speed: float = 1.0,
+        speed: float = 0.78,
     ) -> None:
+        # 0.78 is a narration pace (about 160 wpm on Kokoro), not a demo pace.
+        # At 1.0 the same script reads at 192 wpm, which sounds rushed on video.
         self.voice_en = voice_en
         self.voice_ur = voice_ur
         self.allow_download = allow_download
@@ -209,25 +213,53 @@ class Narrator:
         if pref.startswith("espeak"):
             engine = EspeakEngine(EspeakVoice(name=pref.split(":", 1)[1] if ":" in pref else
                                               ("en-us" if lang == "en" else "ur")))
+        elif pref.startswith("kokoro"):
+            from .kokoro_engine import DEFAULT_VOICE, KokoroEngine
+
+            voice = pref.split(":", 1)[1] if ":" in pref else DEFAULT_VOICE
+            engine = KokoroEngine(voice, speed=self.speed, allow_download=self.allow_download)
+        else:
+            engine = self._neural_engine(lang, pref)
+        self._engines[lang] = engine
+        return engine
+
+    def _neural_engine(self, lang: str, pref: str):
+        """Piper if a voice is cached, then Kokoro for English, then espeak.
+
+        Each failure is reported in ``self.warnings`` - the pipeline surfaces
+        those in ``report.json``, so a fallback is never silent.
+        """
+        problems: List[str] = []
+        if pref not in ("auto", "", None):
+            try:
+                from .piper_engine import PiperEngine
+
+                return PiperEngine(pref, allow_download=self.allow_download, speed=self.speed)
+            except Exception as exc:  # noqa: BLE001 - fall back by design
+                problems.append(f"piper {pref}: {type(exc).__name__}: {exc}")
         else:
             try:
                 from .piper_engine import PiperEngine
 
-                if pref not in ("auto", "", None):
-                    engine = PiperEngine(pref, allow_download=self.allow_download, speed=self.speed)
-                else:
-                    engine = PiperEngine.for_language(lang, allow_download=self.allow_download,
-                                                      speed=self.speed)
+                return PiperEngine.for_language(lang, allow_download=self.allow_download,
+                                                speed=self.speed)
             except Exception as exc:  # noqa: BLE001 - fall back by design
-                msg = f"{lang}: neural voice unavailable ({type(exc).__name__}: {exc})."
-                if not self.allow_espeak_fallback:
-                    raise TTSError(msg + " Enable the offline espeak fallback or fix the voice.")
-                LOG.warning(msg + " Using the offline espeak development voice.")
-                self.warnings.append(msg + " Falling back to espeak (development voice).")
-                name = "ur" if lang == "ur" else "en-us"
-                engine = EspeakEngine(EspeakVoice(name=name))
-        self._engines[lang] = engine
-        return engine
+                problems.append(f"piper: {type(exc).__name__}: {exc}")
+        if lang == "en":
+            try:
+                from .kokoro_engine import DEFAULT_VOICE, KokoroEngine
+
+                return KokoroEngine(DEFAULT_VOICE, speed=self.speed,
+                                    allow_download=self.allow_download)
+            except Exception as exc:  # noqa: BLE001 - fall back by design
+                problems.append(f"kokoro: {type(exc).__name__}: {exc}")
+        msg = f"{lang}: neural voice unavailable ({'; '.join(problems)})."
+        if not self.allow_espeak_fallback:
+            raise TTSError(msg + " Enable the offline espeak fallback or fix the voice.")
+        LOG.warning(msg + " Using the offline espeak development voice.")
+        self.warnings.append(msg + " Falling back to espeak (development voice).")
+        name = "ur" if lang == "ur" else "en-us"
+        return EspeakEngine(EspeakVoice(name=name))
 
     # -------------------------------------------------------------- synthesis
     def synth(self, text: str, lang: str) -> SynthesisResult:
@@ -240,8 +272,10 @@ class Narrator:
         if cached is not None:
             return cached
         result = engine.synthesize(text, lang)
-        polished = polish_speech(_normalize_audio(result.audio), result.sample_rate,
-                                 lowpass_hz=7200.0 if ename == "espeak" else 11000.0)
+        # no per-clause peak normalisation: it flattens the read into that
+        # machine-gun cadence.  Loudness is fixed once, by the mastering stage.
+        polished = polish_speech(result.audio, result.sample_rate,
+                                 lowpass_hz=10500.0 if ename == "espeak" else 12000.0)
         audio, lead, trail = trim_silence(polished, result.sample_rate)
         # shift word timings by the trimmed lead-in
         result.timings = [WordTiming(w.text, max(0.0, w.start - lead), max(0.0, w.end - lead))

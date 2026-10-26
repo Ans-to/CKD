@@ -46,6 +46,32 @@ _LIB = None
 _STATE: Dict[str, object] = {"chunks": [], "events": []}
 
 
+def phonemize(text: str, voice: str = "en-us") -> str:
+    """IPA phonemes for ``text`` from the shared espeak instance.
+
+    Used by the Kokoro engine: Kokoro's token vocabulary *is* the espeak-ng IPA
+    inventory, so the Urdu engine's library doubles as the English phonemiser.
+    It must go through ``_library()`` - calling ``espeak_Initialize`` a second
+    time on an engine that already has a synth callback installed wedges
+    ``espeak_Synchronize`` (found the hard way: a test run hung for 15 minutes).
+    """
+    lib = _library()
+    with _LOCK:
+        lib.espeak_SetVoiceByName(voice.encode())
+        chunks: List[str] = []
+        buf = ctypes.create_string_buffer(text.encode("utf-8"))
+        ptr = ctypes.cast(buf, ctypes.c_void_p)
+        handle = ctypes.pointer(ptr)
+        for _ in range(2000):  # hard stop: never loop forever on odd input
+            res = lib.espeak_TextToPhonemes(handle, 1, 0x02)  # 0x02 = IPA
+            if not res:
+                break
+            piece = res.decode("utf-8").strip()
+            if piece:
+                chunks.append(piece)
+        return " ".join(chunks)
+
+
 def _library():
     global _LIB
     if _LIB is not None:
@@ -61,13 +87,19 @@ def _library():
         ctypes.c_uint, ctypes.c_uint, ctypes.c_void_p, ctypes.c_void_p,
     ]
     lib.espeak_SetParameter.argtypes = [ctypes.c_int, ctypes.c_int, ctypes.c_int]
+    lib.espeak_TextToPhonemes.restype = ctypes.c_char_p
+    lib.espeak_TextToPhonemes.argtypes = [
+        ctypes.POINTER(ctypes.c_void_p), ctypes.c_int, ctypes.c_int]
 
     @_CB
     def _cb(wav, n_samples, events):
         chunks = _STATE["chunks"]
         evs = _STATE["events"]
         if n_samples > 0 and wav:
-            arr = np.ctypeslib.as_array(wav, shape=(n_samples * 2,))
+            # n_samples is the number of 16-bit samples in the buffer.  Reading
+            # n_samples * 2 used to pull a buffer-length of uninitialised heap
+            # memory into every chunk: that is the "tatatatttta" noise.
+            arr = np.ctypeslib.as_array(wav, shape=(n_samples,))
             chunks.append(arr.copy())
         if events:
             i = 0
@@ -100,7 +132,7 @@ VOICE_ALIASES = {
 @dataclass
 class EspeakVoice:
     name: str = "en-us"
-    rate: int = 158  # words per minute
+    rate: int = 150  # words per minute (measured 1.3 wps in this build)
     pitch: int = 46
     variant: str | None = None
     amplitude: int = 84

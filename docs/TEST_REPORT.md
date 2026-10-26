@@ -25,10 +25,11 @@ python tools/contact_sheet.py samples/solar-en-16x9.mp4 out.png
 | `tests/test_render.py` | frame geometry and determinism, one character rig across scenes, CPU-only + no network, ffmpeg probe/verify, worlds differ structurally |
 | `tests/test_pipeline.py` | render cache + resume, report contents, compile-only mode |
 | `tests/test_security.py` | no credentials committed, no hosted AI inference endpoints, download hosts limited to model weights, media/models git-ignored |
+| `tests/test_voice_quality.py` | the espeak buffer bug cannot come back (audio length vs reported word events), the per-clause filter keeps 6 kHz consonants, mastering lands within 0.6 LUFS of -15 at <= -1.2 dBTP, and a too-short track is refused rather than silently passed through |
 
 ```
 $ PYTHONPATH=. python3 -m pytest tests -q
-33 passed in 26.2s
+37 passed in 36.1s
 ```
 
 The `test_glyph_raster_size_follows_style_when_one_renderer_mixes_sizes` case is a
@@ -218,3 +219,77 @@ enough, so the art layer was rebuilt rather than patched:
 
 Render cost of the rebuild is unchanged (≈110 ms/frame at 720p16:9, ≈36 ms at 404×720), because
 props are cached sprites and only the animated parts are drawn live.
+
+## 8. Voice rebuild (v18–v19)
+
+The v17 narration was rejected: *"cant understand a single word there is tatatatttta in it"*. The
+complaint was correct, and the cause was not the accent or the pitch — it was a memory bug plus a
+missing mastering stage.
+
+### 8.1 The "tatatatttta" was uninitialised memory
+
+`ckd/voice/espeak.py` passed `shape=(n_samples * 2,)` to `np.ctypeslib.as_array` when reading the audio
+callback buffer. espeak-ng packs **`n_samples`** 16-bit samples there. Half of every chunk was therefore
+whatever happened to be in the heap after the buffer — 452 bursts of noise across a 110 s track, one
+between roughly every word.
+
+Evidence, measured on the same sentence before and after:
+
+| | before | after |
+|---|---|---|
+| declared samples per callback | 1 324 | 1 324 |
+| samples actually read | 2 648 | 1 324 |
+| audio for one 13-word sentence | 5.37 s | 5.63 s (of 139 wpm speech, not noise) |
+| measured F0 | 276 Hz (noise-contaminated) | 98 Hz |
+| energy above 6 kHz | 13 % | 4 % |
+
+The regression test (`test_espeak_buffer_length_matches_declared_events`) fails if the synthesised audio
+is ever materially longer than the word events it contains — the exact signature of reading past the
+buffer.
+
+### 8.2 The engine itself was also wrong for the job
+
+espeak is a formant synthesiser. Even with clean buffers it sounds like a machine, and the user asked
+for a professional voice-over. English now uses **Kokoro-82M** (Apache-2.0, q8 ONNX, CPU). It is
+downloaded once from npm (89 MB, SHA-256 verified) because every Piper voice — the usual choice — is
+LFS-backed and unreachable from this environment; the full list of dead ends is in `docs/VOICES.md`.
+
+| kpi | espeak (v17) | Kokoro (v19) |
+|---|---|---|
+| words per minute | 78 (1.3 w/s) | **146** |
+| noise islands per 100 s of audio | 411 | 0 by construction; 252 syllable peaks in 60 s is normal speech |
+| F0 | 276 Hz, formant buzz | 202 Hz, natural female |
+| word timings | measured (`espeak-events`) | **estimated**, and labelled so everywhere |
+
+Urdu still uses espeak, because no Urdu neural voice exists in any mirror this environment can reach.
+That is stated in the README, `docs/VOICES.md` and `report.json` (`narration_engine: espeak`).
+
+### 8.3 Mastering
+
+Every track now goes through `ckd/voice/mastering.py` before muxing:
+
+```
+high-pass 88 Hz → -1.3 dB @215 Hz → +1.6 dB @3.1 kHz → de-esser
+               → compressor 4:1 / 3 ms attack / 120 ms release / +3 dB makeup
+               → loudnorm -15 LUFS / -1.5 dBTP → static trim, bounded by true peak
+```
+
+| track | in | out | true peak | warning |
+|---|---|---|---|---|
+| English (Kokoro) | -20.5 LUFS | **-15.6 LUFS** | **-1.5 dBTP** | none |
+| Urdu (espeak) | -22.5 LUFS | **-15.5 LUFS** | **-1.5 dBTP** | none |
+
+Rejected attempts, recorded so they are not retried: two-pass *linear* loudnorm undershoots by 1-2 dB
+(linear mode refuses the +8 dB the track needs because it would break the peak ceiling, then silently
+falls back); gain plus plain peak normalisation is not loudness (-22.1 LUFS); and a simple 2.5:1
+compressor leaves a 17 dB crest factor that no normaliser can fix (lands at -16.2 LUFS with the peak
+already at the ceiling). The working combination lowers the crest factor to ~16 dB *first*.
+
+### 8.4 What is still not good
+
+- Urdu is intelligible and correctly shaped but still a formant voice. It is the honest fallback, not
+  a claim of equal quality.
+- Kokoro's word timings are estimated. Captions can lag a syllable at clause boundaries; the files say
+  `estimated` rather than pretending otherwise.
+- Both sample videos are longer than the 30-60 s default because the six-beat plan was requested at
+  `--duration 90`; `--duration 45` produces a plan that fits.

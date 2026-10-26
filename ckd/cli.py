@@ -39,6 +39,7 @@ def _options(args) -> RenderOptions:
         voice_en=getattr(args, "voice_en", "auto"),
         voice_ur=getattr(args, "voice_ur", "auto"),
         allow_espeak_fallback=not getattr(args, "no_fallback", False),
+        master_audio=not getattr(args, "no_master", False),
         llm=getattr(args, "llm", "none"),
         seed=int(getattr(args, "seed", 7)),
         notes=getattr(args, "notes", ""),
@@ -83,6 +84,8 @@ def main(argv: list[str] | None = None) -> int:
         p.add_argument("--voice-en", default="auto")
         p.add_argument("--voice-ur", default="auto")
         p.add_argument("--no-fallback", action="store_true")
+        p.add_argument("--no-master", action="store_true",
+                       help="skip dialogue mastering (EQ/compression/loudness)")
         p.add_argument("--llm", default="none")
         p.add_argument("--seed", type=int, default=7)
         p.add_argument("--notes", default="")

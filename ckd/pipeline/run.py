@@ -64,7 +64,7 @@ ProgressFn = Callable[[str, float, str], None]
 # Bump when the *drawing* changes (composition, palette, timings). Scene caches from
 # an older value are treated as stale, because a cached clip would otherwise keep an
 # old look. Script/logic changes bump the "v" inside script_hash instead.
-RENDER_VERSION = 17
+RENDER_VERSION = 18
 
 
 def _noop(stage: str, frac: float, msg: str) -> None:  # pragma: no cover
@@ -175,7 +175,11 @@ class Pipeline:
             "voice": o.voice_en if lang == "en" else o.voice_ur,
             "fallback": o.allow_espeak_fallback,
             "fps": o.fps,
-            "v": 3,
+            "master": getattr(o, "master_audio", True),
+            # v4: fixed the espeak callback that read past the end of its audio
+            # buffer (that "tatatatttta" noise) and added loudness mastering.
+            # v5: Kokoro neural English voice is now the default engine.
+            "v": 5,
         }
         return hash_json(payload, prefix="narration")
 
@@ -212,6 +216,17 @@ class Pipeline:
             track = narrator.build(story, lang, fps=self.options.fps,
                                    max_seconds=self.options.duration)
             from ..voice.base import write_wav
+            from ..voice.mastering import master_voice
+
+            # Broadcast-style dialogue chain: EQ -> de-ess -> compression ->
+            # loudness to -15 LUFS / -1.5 dBTP.  Without it the track is either
+            # shouty (peak-normalised) or too quiet once a platform normalises it.
+            if getattr(self.options, "master_audio", True):
+                master = master_voice(track.audio, track.sample_rate)
+                track.audio = master.audio
+                track.mastering = master.to_dict()
+                if master.warning:
+                    track.warnings.append(f"audio mastering: {master.warning}")
 
             write_wav(wav, track.audio, track.sample_rate)
             self.project.write_json(track_json, {"hash": want, **track.to_dict(include_words=True)})
@@ -390,6 +405,7 @@ class Pipeline:
                     "audio": loud, "timing_kind": track.timing_kind,
                     "caption_kind": "word-synced (" + track.timing_kind + ")",
                     "narration_engine": track.engine, "narration_voice": track.voice,
+                    "narration_mastering": track.mastering,
                 }
                 results[key] = meta
                 if not ok:

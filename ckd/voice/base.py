@@ -161,14 +161,19 @@ def _fir_lowpass(sr: int, cutoff: float, taps: int = 63) -> np.ndarray:
 _LP_CACHE: dict = {}
 
 
-def polish_speech(audio: np.ndarray, sr: int, *, lowpass_hz: float = 6800.0,
-                  highpass_hz: float = 85.0, target_peak: float = 0.89) -> np.ndarray:
-    """Cheap, deterministic speech conditioning applied to every synthesised clip.
+def polish_speech(audio: np.ndarray, sr: int, *, lowpass_hz: float = 10500.0,
+                  highpass_hz: float = 80.0, target_peak: float = 0.97) -> np.ndarray:
+    """Per-clause conditioning: remove rumble, tame the harshest band, no level games.
 
-    * high-pass removes DC/rumble from the synthesiser
-    * low-pass tames the harsh formant buzz of concatenative/formant voices
-    * gentle soft-clip avoids hard clipping clicks
-    * peak normalisation keeps levels consistent across scenes/languages
+    Two deliberate changes from the first version (both were hurting intelligibility):
+
+    * the low-pass sits at 10.5 kHz instead of 6.8 kHz.  Speech consonants carry
+      most of their cues between 4 and 9 kHz; cutting at 6.8 kHz leaves the voice
+      muffled and "swallowed" - exactly the effect that makes synthetic speech
+      unreadable on a phone speaker.
+    * no per-clause peak normalisation.  Normalising every clause to the same peak
+      flattens the read into a machine-gun cadence; consistent loudness is handled
+      once, at the end, by `ckd.voice.mastering`.
     """
     if audio.size == 0:
         return audio
@@ -178,15 +183,13 @@ def polish_speech(audio: np.ndarray, sr: int, *, lowpass_hz: float = 6800.0,
         kernel = _fir_lowpass(sr, lowpass_hz)
         _LP_CACHE[key] = kernel
     a = audio.astype(np.float32)
-    # high-pass = signal - low-passed signal
     lp = np.convolve(a, kernel, mode="same").astype(np.float32)
     hp_kernel = _fir_lowpass(sr, highpass_hz)
     rumble = np.convolve(a, hp_kernel, mode="same").astype(np.float32)
     a = (lp - rumble * 0.9).astype(np.float32)
-    # soft clip (tanh-ish knee above 0.7)
-    a = np.where(np.abs(a) > 0.7, np.sign(a) * (0.7 + 0.3 * np.tanh((np.abs(a) - 0.7) / 0.3)), a)
-    peak = float(np.max(np.abs(a)))
-    if peak > 1e-6:
+    # safety clip only: leave the read's dynamics alone
+    peak = float(np.max(np.abs(a))) if a.size else 0.0
+    if peak > target_peak:
         a = a * (target_peak / peak)
     return a.astype(np.float32)
 

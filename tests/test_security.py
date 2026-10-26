@@ -57,8 +57,10 @@ def test_no_hosted_ai_inference_endpoints():
 def test_download_hosts_are_limited_to_model_weights():
     """The only outbound hosts allowed are weight mirrors, never inference APIs."""
     # weight/asset mirrors only — never an inference endpoint
+    # registry.npmjs.org is a package registry we fetch model *files* from
+    # (expo-kokoro ships the Kokoro ONNX weights); it serves bytes, not inference.
     allowed = {"github.com", "huggingface.co", "objects.githubusercontent.com", "pypi.org",
-               "raw.githubusercontent.com"}
+               "raw.githubusercontent.com", "registry.npmjs.org"}
     offenders = []
     for path in _files():
         if path.suffix != ".py":

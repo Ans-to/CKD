@@ -7,6 +7,7 @@ freetype-py>=2.4
 imageio-ffmpeg>=0.5      # ships a static ffmpeg binary; no system ffmpeg needed
 python-bidi>=0.4         # only used for direction helpers, not for shaping
 # optional, needed for neural narration (falls back to the offline espeak voice)
+onnxruntime>=1.17       # runs the Kokoro-82M English voice on CPU
 piper-tts>=1.2
 espeakng-loader>=0.2.2
 py-espeak-ng>=0.1.1
