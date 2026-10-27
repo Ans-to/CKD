@@ -117,3 +117,15 @@ jobs:
           if [ -f output/nokia-documentary/render.log ]; then
             tail -n 160 output/nokia-documentary/render.log >> "$GITHUB_STEP_SUMMARY"
           fi
+
+      - name: Preserve preflight crash log on the session branch
+        if: failure() && github.event_name == 'push'
+        run: |
+          if [ -f output/nokia-documentary/render.log ]; then
+            cp output/nokia-documentary/render.log docs/NOKIA_PREFLIGHT_FAILURE.log
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add docs/NOKIA_PREFLIGHT_FAILURE.log
+            git commit -m "Record Blender preflight failure diagnostics"
+            git push origin arena/dc7dfd05-ckd
+          fi
