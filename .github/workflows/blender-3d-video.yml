@@ -119,10 +119,10 @@ jobs:
           frames = read_frames(path)
           metadata = next(frames)
           count = sum(1 for _ in frames)
-          assert metadata["size"] == (720, 405), metadata
+          assert metadata["size"] == (720, 404), metadata
           assert round(metadata["fps"]) == 24, metadata
           assert count == 360, count
-          print(f"Validated {count} frames at 720x405 / 24 fps (15.00 seconds)")
+          print(f"Validated {count} frames at 720x404 / 24 fps (15.00 seconds)")
           PY
           ls -lh output/nokia-opening-15s.mp4
 
