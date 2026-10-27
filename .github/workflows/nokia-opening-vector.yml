@@ -1,0 +1,109 @@
+name: Nokia Documentary Opening (Vector)
+
+on:
+  # The session connection cannot dispatch workflows through the GitHub API.
+  # Keep a narrow branch-push trigger; the rendered sample path is intentionally
+  # excluded so the workflow's own output commit cannot start another render.
+  push:
+    branches:
+      - arena/dc7dfd05-ckd
+    paths:
+      - .github/workflows/nokia-opening-vector.yml
+      - scripts/nokia_opening_vector_15s.py
+      - ckd/scene/renderer.py
+      - ckd/scene/timing.py
+      - ckd/scene/worlds/business.py
+      - ckd/gfx/character.py
+      - requirements.txt
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  render:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        id: setup-python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+
+      # Actions runners are ephemeral. Cache the lightweight, offline vector
+      # renderer stack rather than installing Blender for this 2D rebuild.
+      - name: Restore cached vector-renderer environment
+        id: runtime-cache
+        uses: actions/cache@v4
+        with:
+          path: output/venv
+          key: ${{ runner.os }}-py${{ steps.setup-python.outputs.python-version }}-nokia-vector-pillow13-numpy246-hb057-ft251-ffmpeg060-espeak024-v1
+
+      - name: Install vector-renderer dependencies
+        if: steps.runtime-cache.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p output
+          python -m venv output/venv
+          output/venv/bin/python -m pip install --disable-pip-version-check \
+            pillow==13.0.0 \
+            numpy==2.4.6 \
+            uharfbuzz==0.57.0 \
+            freetype-py==2.5.1 \
+            imageio-ffmpeg==0.6.0 \
+            python-bidi==0.6.12 \
+            espeakng-loader==0.2.4
+
+      - name: Render the first 15 seconds
+        run: |
+          mkdir -p output
+          set -o pipefail
+          output/venv/bin/python scripts/nokia_opening_vector_15s.py \
+            --input samples/nokia-opening-15s.mp4 \
+            --output samples/nokia-opening-15s.mp4 2>&1 | tee output/vector-render.log
+
+      - name: Validate duration, dimensions, frame rate, and frame count
+        run: |
+          output/venv/bin/python - <<'PY'
+          import imageio_ffmpeg
+          path = "samples/nokia-opening-15s.mp4"
+          reader = imageio_ffmpeg.read_frames(path, pix_fmt="rgb24")
+          info = next(reader)
+          count = sum(1 for _ in reader)
+          assert info["size"] == (1280, 720), info
+          assert info["fps"] == 24.0, info
+          assert abs(info["duration"] - 15.0) < 0.03, info
+          assert count == 360, count
+          print(f"Validated {count} frames, {info['size']}, {info['fps']} fps, {info['duration']} s")
+          PY
+
+      - name: Upload the MP4
+        uses: actions/upload-artifact@v4
+        with:
+          name: nokia-opening-15s
+          path: samples/nokia-opening-15s.mp4
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Commit rendered MP4 to this branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add samples/nokia-opening-15s.mp4
+          if git diff --cached --quiet; then
+            echo "The committed MP4 already matches this render."
+          else
+            git commit -m "Render Nokia opening in premium-flat vector style"
+            git push origin arena/dc7dfd05-ckd
+          fi
+
+      - name: Include render diagnostics in the run summary
+        if: failure()
+        run: |
+          echo '## Vector-render diagnostic log (last 120 lines)' >> "$GITHUB_STEP_SUMMARY"
+          if [ -f output/vector-render.log ]; then
+            tail -n 120 output/vector-render.log >> "$GITHUB_STEP_SUMMARY"
+          fi

@@ -45,6 +45,27 @@ def test_character_is_the_same_rig_in_every_scene(wifi_narration, story):
     assert profiles.std(axis=0).mean() < 0.02
 
 
+def test_character_can_enter_at_a_sentence_boundary(wifi_narration, story):
+    from copy import deepcopy
+
+    scene = deepcopy(story.scenes[0])
+    scene.character = {**scene.character, "visible": True, "slot": "char_right",
+                       "pose": "present", "visible_from": 1.5}
+    stage = make_stage(1280, 720, "landscape", story.palette, fps=24)
+    spec = SceneRenderSpec(scene=scene, stage=stage, language="en",
+                           narration=wifi_narration.scenes[0], world=get_world(story.world),
+                           renderer=TextRenderer(ss=1), scene_index=0,
+                           scene_count=len(story.scenes))
+    renderer = SceneRenderer(spec)
+    before = np.asarray(renderer.render(1.0).convert("RGB"))[260:470, 1030:1260]
+    after = np.asarray(renderer.render(2.3).convert("RGB"))[260:470, 1030:1260]
+    skin = lambda a: ((a[:, :, 0] > 185) & (a[:, :, 1] > 125) &
+                      (a[:, :, 1] < 220) & (a[:, :, 2] > 90) &
+                      (a[:, :, 2] < 195)).sum()
+    assert skin(before) < 100
+    assert skin(after) > 1000
+
+
 def test_render_is_cpu_only_and_needs_no_network(monkeypatch, wifi_narration, story):
     import socket
 

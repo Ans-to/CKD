@@ -245,7 +245,11 @@ class SceneRenderer:
         # mouth flaps while words are being spoken, blink on schedule
         mouth = "open" if speaking and (int(t * 11) % 3 != 0) else ("smile" if not speaking else "small")
         blink = any(abs(t - b) < 0.09 for b in self._blink_times)
-        ent = ease_out_back(clamp(t / 0.55))
+        visible_from = max(0.0, float(char.get("visible_from", 0.0)))
+        if t < visible_from:
+            return
+        local_t = t - visible_from
+        ent = ease_out_back(clamp(local_t / 0.55))
         bounce = 0.0
         if speaking:
             bounce = 0.85 + 0.15 * math.sin(t * 9.0)
@@ -323,7 +327,7 @@ class SceneRenderer:
                 p.rect(ux0, uy, ux0 + uw, uy + max(3.0, size * 0.075),
                        fill=with_alpha(st.palette["accent"], 0.9), radius=size * 0.04)
         # purpose kicker
-        kicker = self._kicker_text() if reveal > 0.05 else ""
+        kicker = self._kicker_text() if reveal > 0.05 and self.spec.scene_count > 1 else ""
         if kicker:
             # keep the strip inside the safe area: it used to sit above the frame edge
             # sit it at the far edge of the content area, level with the first line,
