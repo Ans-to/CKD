@@ -6,7 +6,7 @@ Video Sequence Editor for final mux and encode.
 """
 from __future__ import annotations
 
-import json, math, os, re, subprocess, sys, tempfile, wave
+import json, math, os, re, shutil, subprocess, sys, tempfile, wave
 from pathlib import Path
 
 import numpy as np
@@ -157,6 +157,13 @@ def blender_mux(visual,mix,output,frames):
     editor=final.sequence_editor_create()
     strips=editor.strips
     movie=strips.new_movie("Blender procedural visual sequence",str(visual),channel=1,frame_start=1)
+    # Preserve a 1280x720 final canvas when the CPU-efficient scene render is 960x540.
+    if hasattr(movie,"use_auto_scale"):
+        movie.use_auto_scale=True
+    else:
+        visual_info=next(imageio_ffmpeg.read_frames(str(visual),pix_fmt="rgb24"))
+        movie.transform.scale_x=W/visual_info["size"][0]
+        movie.transform.scale_y=H/visual_info["size"][1]
     sound=strips.new_sound("Narration + ducked procedural score",str(mix),channel=2,frame_start=1)
     final.render.use_sequencer=True
     final.render.image_settings.file_format="FFMPEG"
@@ -222,12 +229,31 @@ def quality_report(path,frames,work,voice_path,music_source_path,ducked_music_pa
 def main():
     OUT.mkdir(parents=True,exist_ok=True)
     preview=PREVIEW
+    print(f"Render mode: preview={preview}s, audio duration={DURATION:g}s, {FPS} fps at {W}x{H} delivery",flush=True)
     with tempfile.TemporaryDirectory(prefix="nokia-blender-") as td:
         work=Path(td)
+        if preview:
+            # A short silent visual-only preflight validates Blender/Eevee and composition
+            # quickly; the complete run below generates all narration, music and final QC.
+            timings={"scenes":[{"start_seconds":0,"duration_seconds":preview,"speech_seconds":0}],"duration_seconds":preview,"fps":FPS}
+            (work/"timings.json").write_text(json.dumps(timings))
+            visual,frames=render_visuals(work,preview)
+            final=OUT/f"nokia-documentary-{int(DURATION)}s-preview.mp4"
+            shutil.copyfile(visual,final)
+            reader=imageio_ffmpeg.read_frames(str(final),pix_fmt="rgb24"); info=next(reader); count=0; black=[]
+            for i,frame in enumerate(reader):
+                count+=1
+                a=np.frombuffer(frame,dtype=np.uint8).reshape(H,W,3)[::12,::12]
+                if a.max()<8 or a.std()<0.5: black.append(i)
+            if count!=frames or black: raise RuntimeError(f"Visual preflight failed: decoded={count}, expected={frames}, black={black[:10]}")
+            report={"file":str(final),"duration_seconds":info["duration"],"fps":info["fps"],"size":info["size"],"decoded_frames":count,"expected_frames":frames,"video_codec":info["codec"],"audio_status":"not included in this silent visual-only preflight","possible_black_frame_samples":black,"status":"PASS"}
+            (OUT/"quality-report.json").write_text(json.dumps(report,indent=2))
+            print(json.dumps(report,indent=2),flush=True)
+            return
         voice=synthesize_narration(work); music=synthesize_music(work); mix,ducked_music=mix_and_measure(voice,music,work)
         # The Blender scene builder reads the actual Kokoro timing map from this temporary run.
-        visual,frames=render_visuals(work,preview)
-        final=(OUT/f"nokia-documentary-{int(DURATION)}s-preview.mp4") if PREVIEW else (OUT/"nokia-documentary-15m.mp4")
+        visual,frames=render_visuals(work,0)
+        final=OUT/"nokia-documentary-15m.mp4"
         blender_mux(visual,mix,final,frames)
         report=quality_report(final,frames,OUT,voice,music,ducked_music)
         print(json.dumps(report,indent=2),flush=True)
