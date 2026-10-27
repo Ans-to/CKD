@@ -28,23 +28,25 @@ jobs:
       - name: Check out source
         uses: actions/checkout@v4
 
-      - name: Install Blender and FFmpeg
+      - name: Install Blender Python runtime and FFmpeg
         run: |
           mkdir -p output
           set -o pipefail
           export DEBIAN_FRONTEND=noninteractive
           sudo timeout 180s apt-get update -o Acquire::Retries=1 -o Acquire::http::Timeout=40 -o Acquire::https::Timeout=40 2>&1 | tee output/package-install.log
-          sudo timeout 300s apt-get install --yes blender ffmpeg 2>&1 | tee -a output/package-install.log
-          blender --version
-          ffmpeg -version | head -n 1
+          sudo timeout 180s apt-get install --yes libxrender1 libxfixes3 libxi6 libxkbcommon0 libsm6 libice6 libgl1 2>&1 | tee -a output/package-install.log
+          python3 -m venv output/venv
+          output/venv/bin/python -m pip install --disable-pip-version-check bpy==4.5.3 imageio-ffmpeg==0.6.0 2>&1 | tee -a output/package-install.log
+          output/venv/bin/python -c 'import bpy; print("Blender Python runtime", bpy.app.version_string)'
+          output/venv/bin/python -c 'import imageio_ffmpeg; print("FFmpeg", imageio_ffmpeg.get_ffmpeg_exe())'
 
-      - name: Render the 3D animation
+      - name: Render the 3D animation with Blender
         env:
           FRAMES: ${{ inputs.frames }}
         run: |
           mkdir -p output/blender-frames
           set -o pipefail
-          blender --background --factory-startup --python scripts/blender/nokia_device_shift.py -- --output-dir output/blender-frames --frames "${FRAMES:-192}" --fps 24 2>&1 | tee output/blender-render.log
+          output/venv/bin/python scripts/blender/nokia_device_shift.py -- --output-dir output/blender-frames --frames "${FRAMES:-192}" --fps 24 2>&1 | tee output/blender-render.log
 
       - name: Include Blender failure details in the run summary
         if: failure()
@@ -59,14 +61,16 @@ jobs:
             detail="$(tail -n 40 output/package-install.log | tr '\n' ' ' | sed 's/%/%25/g; s/\r/%0D/g')"
             echo "::error title=Blender installation diagnostic::${detail:0:5000}"
           else
-            echo 'The render and package-install log files were not created.' >> "$GITHUB_STEP_SUMMARY"
+            echo 'No diagnostic log file was created.' >> "$GITHUB_STEP_SUMMARY"
             echo '::error title=Blender diagnostic::No diagnostic log file was created.'
           fi
 
-      - name: Encode MP4
+      - name: Encode and validate MP4
         run: |
-          ffmpeg -hide_banner -y -framerate 24 -i output/blender-frames/frame_%04d.png -c:v libx264 -preset medium -crf 20 -pix_fmt yuv420p -movflags +faststart output/nokia-smartphone-shift-3d.mp4
-          ffprobe -v error -show_entries format=duration,size -show_entries stream=width,height,r_frame_rate,codec_name -of json output/nokia-smartphone-shift-3d.mp4
+          FFMPEG="$(output/venv/bin/python -c 'import imageio_ffmpeg; print(imageio_ffmpeg.get_ffmpeg_exe())')"
+          "$FFMPEG" -hide_banner -y -framerate 24 -i output/blender-frames/frame_%04d.png -c:v libx264 -preset medium -crf 20 -pix_fmt yuv420p -movflags +faststart output/nokia-smartphone-shift-3d.mp4
+          "$FFMPEG" -v error -i output/nokia-smartphone-shift-3d.mp4 -f null -
+          ls -lh output/nokia-smartphone-shift-3d.mp4
 
       - name: Upload downloadable video artifact
         uses: actions/upload-artifact@v4
