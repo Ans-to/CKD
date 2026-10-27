@@ -1,9 +1,9 @@
 name: Blender 3D Video Experiment
 
 on:
-  # The session GitHub connection currently permits branch pushes but not
-  # workflow_dispatch API writes; this narrowly scoped push trigger lets the
-  # current experiment run without enabling renders for ordinary commits.
+  # The session GitHub connection permits branch pushes but not workflow_dispatch
+  # API writes; this scoped push trigger lets the experiment run without enabling
+  # renders for unrelated pushes. Retain workflow_dispatch for normal use.
   push:
     branches:
       - arena/dc7dfd05-ckd
@@ -41,9 +41,21 @@ jobs:
           FRAMES: ${{ inputs.frames }}
         run: |
           mkdir -p output/blender-frames
+          set -o pipefail
           blender --background --factory-startup \
             --python scripts/blender/nokia_device_shift.py -- \
-            --output-dir output/blender-frames --frames "$FRAMES" --fps 24
+            --output-dir output/blender-frames --frames "$FRAMES" --fps 24 \
+            2>&1 | tee output/blender-render.log
+
+      - name: Include Blender failure details in the run summary
+        if: failure()
+        run: |
+          echo '## Blender render log (last 120 lines)' >> "$GITHUB_STEP_SUMMARY"
+          if [ -f output/blender-render.log ]; then
+            tail -n 120 output/blender-render.log >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo 'The Blender process did not create a log file.' >> "$GITHUB_STEP_SUMMARY"
+          fi
 
       - name: Encode MP4
         run: |
