@@ -161,7 +161,7 @@ def build_single_character():
     """One faceless silhouette only; no crowd or second human figure."""
     root = bpy.data.objects.new("One generic user silhouette", None)
     bpy.context.collection.objects.link(root)
-    root.location = (7.5, 0.2, -0.10)  # outside the opening close-up
+    root.location = (0.0, 0.2, -0.10)
     silhouette = mat("Single silhouette", (0.018, 0.028, 0.044, 1.0),
                      metallic=0.1, roughness=0.42)
     rim = mat("Cool silhouette detail", (0.15, 0.28, 0.38, 1.0),
@@ -178,9 +178,9 @@ def build_single_character():
     ]
     for part in parts:
         parent_keep_world(part, root)
-    for frame, x in ((1, 7.5), (188, 7.5), (220, 6.5), (FRAMES, 6.5)):
-        root.location.x = x
-        root.keyframe_insert(data_path="location", frame=frame)
+        for frame, hidden in ((1, True), (192, True), (193, False)):
+            part.hide_render = hidden
+            part.keyframe_insert(data_path="hide_render", frame=frame)
     return root
 
 
@@ -352,10 +352,10 @@ def build_scene(output_dir: Path):
     muted = mat("Disclosure typography", MUTED, roughness=0.4, emission=0.3)
     black = mat("Caption scrim", (0.004, 0.009, 0.018, 1.0), roughness=0.9, emission=0.02)
     title = text_obj("NOKIA: THE RISE AND FALL", "Opening title", white, size=0.20)
-    camera_overlay(title, camera, 0.0, 1.06, -5.8)
+    camera_overlay(title, camera, 0.0, 0.90, -5.8)
     disclosure = text_obj("ILLUSTRATIVE 3D - NOT ARCHIVAL FOOTAGE OR A REAL PRODUCT MODEL",
                           "Honesty disclosure", muted, size=0.075)
-    camera_overlay(disclosure, camera, 0.0, 0.82, -5.8)
+    camera_overlay(disclosure, camera, 0.0, 0.68, -5.8)
 
     # Kokoro word timings are estimated, not forced-aligned; sentence ends are
     # taken from that estimate, and the video keeps the full second sentence.

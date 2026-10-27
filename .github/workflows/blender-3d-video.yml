@@ -110,7 +110,7 @@ jobs:
             -filter_complex "[1:a]aresample=48000,apad,atrim=duration=15[voice];[2:a]volume=0.60[sfx];[voice][sfx]amix=inputs=2:duration=first:normalize=0,loudnorm=I=-16:TP=-1.5:LRA=11,atrim=duration=15[a]" \
             -map 0:v:0 -map "[a]" -t 15 \
             -c:v libx264 -preset medium -crf 20 -pix_fmt yuv420p \
-            -c:a aac -b:a 160k -movflags +faststart \
+            -c:a aac -b:a 160k -ar 48000 -movflags +faststart \
             output/nokia-opening-15s.mp4
           "$FFMPEG" -v error -i output/nokia-opening-15s.mp4 -f null -
           output/venv/bin/python - <<'PY'
