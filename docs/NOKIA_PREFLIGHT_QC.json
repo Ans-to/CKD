@@ -1,0 +1,15 @@
+{
+  "file": "/home/runner/work/CKD/CKD/output/nokia-documentary/nokia-documentary-1s-preview.mp4",
+  "duration_seconds": 1.0,
+  "fps": 30.0,
+  "size": [
+    640,
+    360
+  ],
+  "decoded_frames": 30,
+  "expected_frames": 30,
+  "video_codec": "h264",
+  "audio_status": "not included in this silent visual-only preflight",
+  "possible_black_frame_samples": [],
+  "status": "PASS"
+}
