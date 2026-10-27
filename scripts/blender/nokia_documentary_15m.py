@@ -383,8 +383,8 @@ def build(timings_path, output_path, preview_seconds=0):
     # Two final TAA samples at 960x540 keep the long CPU render feasible;
     # Blender's VSE scales the film to the specified 1280x720 delivery size.
     # The short preflight keeps four samples for cleaner inspection.
-    scene.eevee.taa_render_samples=4 if preview_seconds else 2
-    scene.render.resolution_x=int(spec["resolution"][0]); scene.render.resolution_y=int(spec["resolution"][1]); scene.render.resolution_percentage=100 if preview_seconds else 75
+    scene.eevee.taa_render_samples=1 if preview_seconds else 2
+    scene.render.resolution_x=int(spec["resolution"][0]); scene.render.resolution_y=int(spec["resolution"][1]); scene.render.resolution_percentage=50 if preview_seconds else 75
     scene.render.fps=fps; scene.render.fps_base=1.0
     scene.frame_start=1; scene.frame_end=total_frames
     scene.render.image_settings.file_format="FFMPEG"

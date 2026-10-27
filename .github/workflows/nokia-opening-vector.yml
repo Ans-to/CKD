@@ -47,7 +47,7 @@ jobs:
       - name: Render, mix, and run automated QC
         env:
           PYTHONPATH: ${{ github.workspace }}
-          NOKIA_PREVIEW_SECONDS: ${{ github.event_name == 'workflow_dispatch' && '0' || '5' }}
+          NOKIA_PREVIEW_SECONDS: ${{ github.event_name == 'workflow_dispatch' && '0' || '1' }}
           NOKIA_OUTPUT_DIR: ${{ github.workspace }}/output/nokia-documentary
         run: |
           mkdir -p "$NOKIA_OUTPUT_DIR"
@@ -56,7 +56,7 @@ jobs:
 
       - name: Verify exact duration, frame rate, and frame count
         env:
-          NOKIA_PREVIEW_SECONDS: ${{ github.event_name == 'workflow_dispatch' && '0' || '5' }}
+          NOKIA_PREVIEW_SECONDS: ${{ github.event_name == 'workflow_dispatch' && '0' || '1' }}
         run: |
           python - <<'PY'
           import imageio_ffmpeg, json, os
@@ -68,7 +68,8 @@ jobs:
           frames = sum(1 for _ in reader)
           assert abs(info["duration"] - seconds) < 0.05, info
           assert info["fps"] == 30.0, info
-          assert info["size"] == (1280, 720), info
+          expected_size = (640, 360) if preview else (1280, 720)
+          assert info["size"] == expected_size, info
           assert frames == seconds * 30, frames
           report = json.load(open("output/nokia-documentary/quality-report.json"))
           assert report["status"] == "PASS", report
@@ -80,7 +81,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: nokia-blender-${{ github.event_name == 'workflow_dispatch' && '15-minute-final' || '5-second-preflight' }}
+          name: nokia-blender-${{ github.event_name == 'workflow_dispatch' && '15-minute-final' || '1-second-preflight' }}
           path: |
             output/nokia-documentary/*.mp4
             output/nokia-documentary/*.json
@@ -107,7 +108,7 @@ jobs:
       - name: Save the Blender preflight for visual inspection
         if: github.event_name == 'push'
         run: |
-          cp output/nokia-documentary/nokia-documentary-5s-preview.mp4 samples/nokia-blender-preflight.mp4
+          cp output/nokia-documentary/nokia-documentary-1s-preview.mp4 samples/nokia-blender-preflight.mp4
           cp output/nokia-documentary/quality-report.json docs/NOKIA_PREFLIGHT_QC.json
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"

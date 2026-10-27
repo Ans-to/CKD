@@ -243,7 +243,8 @@ def main():
             reader=imageio_ffmpeg.read_frames(str(final),pix_fmt="rgb24"); info=next(reader); count=0; black=[]
             for i,frame in enumerate(reader):
                 count+=1
-                a=np.frombuffer(frame,dtype=np.uint8).reshape(H,W,3)[::12,::12]
+                vw,vh=info["size"]
+                a=np.frombuffer(frame,dtype=np.uint8).reshape(vh,vw,3)[::12,::12]
                 if a.max()<8 or a.std()<0.5: black.append(i)
             if count!=frames or black: raise RuntimeError(f"Visual preflight failed: decoded={count}, expected={frames}, black={black[:10]}")
             report={"file":str(final),"duration_seconds":info["duration"],"fps":info["fps"],"size":info["size"],"decoded_frames":count,"expected_frames":frames,"video_codec":info["codec"],"audio_status":"not included in this silent visual-only preflight","possible_black_frame_samples":black,"status":"PASS"}
