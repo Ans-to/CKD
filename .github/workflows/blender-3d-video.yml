@@ -1,9 +1,8 @@
 name: Blender 3D Video Experiment
 
 on:
-  # The session GitHub connection permits branch pushes but not workflow_dispatch
-  # API writes; this scoped push trigger lets the experiment run without enabling
-  # renders for unrelated pushes. Retain workflow_dispatch for normal use.
+  # The GitHub connection permits branch pushes but not workflow_dispatch API
+  # writes; this narrow push trigger keeps the experiment runnable on this branch.
   push:
     branches:
       - arena/dc7dfd05-ckd
@@ -34,11 +33,8 @@ jobs:
           mkdir -p output
           set -o pipefail
           export DEBIAN_FRONTEND=noninteractive
-          sudo timeout 180s apt-get update \\
-            -o Acquire::Retries=1 -o Acquire::http::Timeout=40 -o Acquire::https::Timeout=40 \\
-            2>&1 | tee output/package-install.log
-          sudo timeout 300s apt-get install --yes blender ffmpeg \\
-            2>&1 | tee -a output/package-install.log
+          sudo timeout 180s apt-get update -o Acquire::Retries=1 -o Acquire::http::Timeout=40 -o Acquire::https::Timeout=40 2>&1 | tee output/package-install.log
+          sudo timeout 300s apt-get install --yes blender ffmpeg 2>&1 | tee -a output/package-install.log
           blender --version
           ffmpeg -version | head -n 1
 
@@ -48,15 +44,12 @@ jobs:
         run: |
           mkdir -p output/blender-frames
           set -o pipefail
-          blender --background --factory-startup \
-            --python scripts/blender/nokia_device_shift.py -- \
-            --output-dir output/blender-frames --frames "$FRAMES" --fps 24 \
-            2>&1 | tee output/blender-render.log
+          blender --background --factory-startup --python scripts/blender/nokia_device_shift.py -- --output-dir output/blender-frames --frames "$FRAMES" --fps 24 2>&1 | tee output/blender-render.log
 
       - name: Include Blender failure details in the run summary
         if: failure()
         run: |
-          echo '## Blender render log (last 120 lines)' >> "$GITHUB_STEP_SUMMARY"
+          echo '## Blender diagnostic log (last 120 lines)' >> "$GITHUB_STEP_SUMMARY"
           if [ -f output/blender-render.log ]; then
             tail -n 120 output/blender-render.log >> "$GITHUB_STEP_SUMMARY"
             detail="$(tail -n 40 output/blender-render.log | tr '\n' ' ' | sed 's/%/%25/g; s/\r/%0D/g')"
@@ -72,13 +65,8 @@ jobs:
 
       - name: Encode MP4
         run: |
-          ffmpeg -hide_banner -y -framerate 24 \
-            -i output/blender-frames/frame_%04d.png \
-            -c:v libx264 -preset medium -crf 20 -pix_fmt yuv420p \
-            -movflags +faststart output/nokia-smartphone-shift-3d.mp4
-          ffprobe -v error -show_entries format=duration,size \
-            -show_entries stream=width,height,r_frame_rate,codec_name \
-            -of json output/nokia-smartphone-shift-3d.mp4
+          ffmpeg -hide_banner -y -framerate 24 -i output/blender-frames/frame_%04d.png -c:v libx264 -preset medium -crf 20 -pix_fmt yuv420p -movflags +faststart output/nokia-smartphone-shift-3d.mp4
+          ffprobe -v error -show_entries format=duration,size -show_entries stream=width,height,r_frame_rate,codec_name -of json output/nokia-smartphone-shift-3d.mp4
 
       - name: Upload downloadable video artifact
         uses: actions/upload-artifact@v4
