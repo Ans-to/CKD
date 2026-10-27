@@ -11,9 +11,14 @@ from __future__ import annotations
 import argparse
 import re
 import subprocess
+import sys
 import tempfile
 import wave
 from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 import numpy as np
 
@@ -26,7 +31,6 @@ from ckd.text.render import TextRenderer
 from ckd.voice.base import WordTiming
 from ckd.voice.narration import ClauseAudio, SceneAudio
 
-ROOT = Path(__file__).resolve().parents[1]
 INPUT_VIDEO = ROOT / "samples/nokia-opening-15s.mp4"
 OUTPUT_VIDEO = INPUT_VIDEO
 FPS = 24
