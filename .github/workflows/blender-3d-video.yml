@@ -28,6 +28,11 @@ jobs:
       - name: Check out source
         uses: actions/checkout@v4
 
+      - name: Set up Python for Blender's published bpy wheel
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+
       - name: Install Blender Python runtime and FFmpeg
         run: |
           mkdir -p output
@@ -35,7 +40,7 @@ jobs:
           export DEBIAN_FRONTEND=noninteractive
           sudo timeout 180s apt-get update -o Acquire::Retries=1 -o Acquire::http::Timeout=40 -o Acquire::https::Timeout=40 2>&1 | tee output/package-install.log
           sudo timeout 180s apt-get install --yes libxrender1 libxfixes3 libxi6 libxkbcommon0 libsm6 libice6 libgl1 2>&1 | tee -a output/package-install.log
-          python3 -m venv output/venv
+          python -m venv output/venv
           output/venv/bin/python -m pip install --disable-pip-version-check bpy==4.5.3 imageio-ffmpeg==0.6.0 2>&1 | tee -a output/package-install.log
           output/venv/bin/python -c 'import bpy; print("Blender Python runtime", bpy.app.version_string)'
           output/venv/bin/python -c 'import imageio_ffmpeg; print("FFmpeg", imageio_ffmpeg.get_ffmpeg_exe())'
