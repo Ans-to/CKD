@@ -169,6 +169,8 @@ def blender_mux(visual,mix,output,frames):
     movie.transform.scale_y=H/visual_info["size"][1]
     speed=strips.new_effect(name="Blender frame-interpolated visual motion",type="SPEED",channel=2,
                             frame_start=1,frame_end=frames,input1=movie)
+    # The effect strip otherwise inherits the short source duration in Blender's VSE.
+    speed.frame_final_duration=frames
     speed.speed_control="STRETCH"
     speed.use_frame_interpolate=True
     sound=strips.new_sound("Narration + ducked procedural score",str(mix),channel=3,frame_start=1)
