@@ -3,13 +3,15 @@
   "duration_seconds": 1.0,
   "fps": 30.0,
   "size": [
-    640,
-    360
+    1280,
+    720
   ],
   "decoded_frames": 30,
   "expected_frames": 30,
   "video_codec": "h264",
-  "audio_status": "not included in this silent visual-only preflight",
+  "source_visual_frames": 30,
+  "source_visual_fps": 6,
+  "audio_status": "silent track only; narration/music are omitted in this visual preflight",
   "possible_black_frame_samples": [],
   "status": "PASS"
 }
