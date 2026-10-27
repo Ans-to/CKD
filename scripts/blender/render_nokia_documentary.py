@@ -34,6 +34,13 @@ def write_mono(path, audio, sr):
         w.writeframes((a*32767).astype("<i2").tobytes())
 
 
+def write_silence_stereo(path,seconds,sr=SR):
+    frames=round(seconds*sr)
+    with wave.open(str(path),"wb") as w:
+        w.setnchannels(2); w.setsampwidth(2); w.setframerate(sr)
+        w.writeframes(bytes(frames*4))
+
+
 def synthesize_narration(work):
     from ckd.voice.kokoro_engine import KokoroEngine
     engine=KokoroEngine("am_michael",speed=1.05,allow_download=True)
@@ -150,21 +157,21 @@ def render_visuals(work,preview_seconds=0):
 
 
 def blender_mux(visual,mix,output,frames):
-    visual_scene=bpy.context.scene
     final=bpy.data.scenes.new("Blender VSE final assembly")
     final.render.resolution_x=W; final.render.resolution_y=H; final.render.resolution_percentage=100
     final.render.fps=FPS; final.frame_start=1; final.frame_end=frames
     editor=final.sequence_editor_create()
     strips=editor.strips
-    movie=strips.new_movie("Blender procedural visual sequence",str(visual),channel=1,frame_start=1)
-    # Preserve a 1280x720 final canvas when the CPU-efficient scene render is 960x540.
-    if hasattr(movie,"use_auto_scale"):
-        movie.use_auto_scale=True
-    else:
-        visual_info=next(imageio_ffmpeg.read_frames(str(visual),pix_fmt="rgb24"))
-        movie.transform.scale_x=W/visual_info["size"][0]
-        movie.transform.scale_y=H/visual_info["size"][1]
-    sound=strips.new_sound("Narration + ducked procedural score",str(mix),channel=2,frame_start=1)
+    movie=strips.new_movie("Blender procedural visual source",str(visual),channel=1,frame_start=1)
+    # Six-fps procedural frames are blended to the 30-fps delivery inside Blender VSE.
+    visual_info=next(imageio_ffmpeg.read_frames(str(visual),pix_fmt="rgb24"))
+    movie.transform.scale_x=W/visual_info["size"][0]
+    movie.transform.scale_y=H/visual_info["size"][1]
+    speed=strips.new_effect(name="Blender frame-interpolated visual motion",type="SPEED",channel=2,
+                            frame_start=1,frame_end=frames,input1=movie)
+    speed.speed_control="STRETCH"
+    speed.use_frame_interpolate=True
+    sound=strips.new_sound("Narration + ducked procedural score",str(mix),channel=3,frame_start=1)
     final.render.use_sequencer=True
     final.render.image_settings.file_format="FFMPEG"
     final.render.ffmpeg.format="MPEG4"; final.render.ffmpeg.codec="H264"
@@ -237,26 +244,32 @@ def main():
             # quickly; the complete run below generates all narration, music and final QC.
             timings={"scenes":[{"start_seconds":0,"duration_seconds":preview,"speech_seconds":0}],"duration_seconds":preview,"fps":FPS}
             (work/"timings.json").write_text(json.dumps(timings))
-            visual,frames=render_visuals(work,preview)
+            visual,source_frames=render_visuals(work,preview)
             final=OUT/f"nokia-documentary-{int(DURATION)}s-preview.mp4"
-            shutil.copyfile(visual,final)
+            final_frames=round(DURATION*FPS)
+            silence=work/"silent-preflight.wav"; write_silence_stereo(silence,DURATION)
+            blender_mux(visual,silence,final,final_frames)
             reader=imageio_ffmpeg.read_frames(str(final),pix_fmt="rgb24"); info=next(reader); count=0; black=[]
             for i,frame in enumerate(reader):
                 count+=1
                 vw,vh=info["size"]
                 a=np.frombuffer(frame,dtype=np.uint8).reshape(vh,vw,3)[::12,::12]
                 if a.max()<8 or a.std()<0.5: black.append(i)
-            if count!=frames or black: raise RuntimeError(f"Visual preflight failed: decoded={count}, expected={frames}, black={black[:10]}")
-            report={"file":str(final),"duration_seconds":info["duration"],"fps":info["fps"],"size":info["size"],"decoded_frames":count,"expected_frames":frames,"video_codec":info["codec"],"audio_status":"not included in this silent visual-only preflight","possible_black_frame_samples":black,"status":"PASS"}
+            if count!=final_frames or black: raise RuntimeError(f"Visual preflight failed: decoded={count}, expected={final_frames}, black={black[:10]}")
+            report={"file":str(final),"duration_seconds":info["duration"],"fps":info["fps"],"size":info["size"],"decoded_frames":count,"expected_frames":final_frames,"video_codec":info["codec"],"source_visual_frames":source_frames,"source_visual_fps":6,"audio_status":"silent track only; narration/music are omitted in this visual preflight","possible_black_frame_samples":black,"status":"PASS"}
             (OUT/"quality-report.json").write_text(json.dumps(report,indent=2))
             print(json.dumps(report,indent=2),flush=True)
             return
         voice=synthesize_narration(work); music=synthesize_music(work); mix,ducked_music=mix_and_measure(voice,music,work)
         # The Blender scene builder reads the actual Kokoro timing map from this temporary run.
-        visual,frames=render_visuals(work,0)
+        visual,source_frames=render_visuals(work,0)
         final=OUT/"nokia-documentary-15m.mp4"
-        blender_mux(visual,mix,final,frames)
-        report=quality_report(final,frames,OUT,voice,music,ducked_music)
+        final_frames=round(DURATION*FPS)
+        blender_mux(visual,mix,final,final_frames)
+        report=quality_report(final,final_frames,OUT,voice,music,ducked_music)
+        report["source_visual_frames"]=source_frames
+        report["source_visual_fps"]=6
+        (OUT/"quality-report.json").write_text(json.dumps(report,indent=2))
         print(json.dumps(report,indent=2),flush=True)
 
 if __name__=="__main__": main()

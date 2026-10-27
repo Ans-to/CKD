@@ -68,8 +68,7 @@ jobs:
           frames = sum(1 for _ in reader)
           assert abs(info["duration"] - seconds) < 0.05, info
           assert info["fps"] == 30.0, info
-          expected_size = (640, 360) if preview else (1280, 720)
-          assert info["size"] == expected_size, info
+          assert info["size"] == (1280, 720), info
           assert frames == seconds * 30, frames
           report = json.load(open("output/nokia-documentary/quality-report.json"))
           assert report["status"] == "PASS", report

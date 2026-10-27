@@ -149,7 +149,7 @@ def phone_lineup(mats, count=5):
     return out
 
 
-def build_scene_group(idx, entry, mats, start, end, total_frames):
+def build_scene_group(idx, entry, mats, start, end, total_frames, render_fps):
     before=set(bpy.data.objects)
     m=mats
     accent=[m["gold"],m["cyan"],m["teal"],m["green"],m["red"]][idx%5]
@@ -352,9 +352,10 @@ def build_scene_group(idx, entry, mats, start, end, total_frames):
     root.rotation_euler.z=0.0; root.keyframe_insert(data_path="rotation_euler",frame=start)
     root.rotation_euler.z=0.035; root.keyframe_insert(data_path="rotation_euler",frame=end)
     root.scale=(0.001,0.001,0.001); root.keyframe_insert(data_path="scale",frame=start)
-    root.scale=(1,1,1); root.keyframe_insert(data_path="scale",frame=min(end,start+18))
+    transition=max(1,round(0.6*render_fps))
+    root.scale=(1,1,1); root.keyframe_insert(data_path="scale",frame=min(end,start+transition))
     if end < total_frames:
-        root.scale=(1,1,1); root.keyframe_insert(data_path="scale",frame=max(start,end-18))
+        root.scale=(1,1,1); root.keyframe_insert(data_path="scale",frame=max(start,end-transition))
         root.scale=(0.001,0.001,0.001); root.keyframe_insert(data_path="scale",frame=end)
     return root
 
@@ -363,7 +364,9 @@ def build(timings_path, output_path, preview_seconds=0):
     spec=json.loads(SPEC.read_text())
     timings=json.loads(Path(timings_path).read_text())
     total_seconds=float(preview_seconds or 900)
-    fps=int(spec["fps"]); total_frames=round(total_seconds*fps)
+    delivery_fps=int(spec["fps"])
+    fps=6
+    total_frames=round(total_seconds*fps)
     bpy.ops.object.select_all(action="SELECT"); bpy.ops.object.delete(use_global=False)
     for block in list(bpy.data.materials): bpy.data.materials.remove(block)
     m={k:material(k,v,metallic=0.25 if k in ("silver","trim","phone","touch") else 0.0,roughness=0.32 if k in ("glass","phone","touch") else 0.58,emission=0.12 if k in ("cyan","gold","teal") else 0.0) for k,v in PALETTE.items()}
@@ -409,14 +412,13 @@ def build(timings_path, output_path, preview_seconds=0):
     for idx,entry in enumerate(entries):
         duration=float(timings["scenes"][idx]["duration_seconds"])
         start=cursor; end=min(total_frames,cursor+round(duration*fps))
-        build_scene_group(idx,entry,m,start,end,total_frames)
+        build_scene_group(idx,entry,m,start,end,total_frames,fps)
         cursor=end
     scene.render.engine="BLENDER_EEVEE_NEXT"
-    # Two final TAA samples at 960x540 keep the long CPU render feasible;
-    # Blender's VSE scales the film to the specified 1280x720 delivery size.
-    # The short preflight keeps four samples for cleaner inspection.
-    scene.eevee.taa_render_samples=1 if preview_seconds else 2
-    scene.render.resolution_x=int(spec["resolution"][0]); scene.render.resolution_y=int(spec["resolution"][1]); scene.render.resolution_percentage=50 if preview_seconds else 75
+    # Render a 640x360 six-fps Blender source, then frame-blend and upscale in the
+    # Blender VSE to a 1280x720, 30-fps delivery. This keeps a long CPU render feasible.
+    scene.eevee.taa_render_samples=1
+    scene.render.resolution_x=int(spec["resolution"][0]); scene.render.resolution_y=int(spec["resolution"][1]); scene.render.resolution_percentage=50
     scene.render.fps=fps; scene.render.fps_base=1.0
     scene.frame_start=1; scene.frame_end=total_frames
     scene.render.image_settings.file_format="FFMPEG"
