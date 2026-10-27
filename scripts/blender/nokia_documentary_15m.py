@@ -110,10 +110,15 @@ def phone(name, x, z, scale, mats, touch=False, clamshell=False):
     else:
         parts += [cube(name+" display trim",(x,-0.15,z+0.52),(w*0.66,0.06,0.58),trim,0.06),
                   cube(name+" display",(x,-0.185,z+0.52),(w*0.55,0.018,0.45),screen,0.025),
-                  cube(name+" earpiece",(x,-0.16,z+h*0.38),(0.28,0.045,0.045),trim,0.02)]
+                  cube(name+" earpiece",(x,-0.16,z+h*0.38),(0.28,0.045,0.045),trim,0.02),
+                  cube(name+" compact antenna",(x+0.28,0.03,z+h*0.5+0.07),(0.07,0.07,0.16),trim,0.025),
+                  text("12:08",(x,-0.205,z+0.56),0.12,mats[3],name+" monochrome clock")]
+        key_labels=("1","2","3","4","5","6","7","8","9","*","0","#")
         for r in range(4):
             for c in range(3):
-                parts.append(cube(name+f" key {r}-{c}",(x+(c-1)*0.22,-0.17,z-0.22-r*0.22),(0.15,0.08,0.12),key,0.035))
+                cx=x+(c-1)*0.22; kz=z-0.22-r*0.22
+                parts.append(cube(name+f" key {r}-{c}",(cx,-0.17,kz),(0.15,0.08,0.12),key,0.035))
+                parts.append(text(key_labels[r*3+c],(cx,-0.22,kz-0.025),0.065,mats[2],name+f" key legend {r}-{c}"))
     if clamshell:
         seam=cube(name+" hinge",(x,-0.01,z),(w*0.9,0.29,0.07),trim,0.025); parts.append(seam)
     for o in parts:
