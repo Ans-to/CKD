@@ -29,11 +29,11 @@ def arguments() -> argparse.Namespace:
     argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
     parser = argparse.ArgumentParser()
     parser.add_argument("--output-dir", required=True)
-    parser.add_argument("--frames", type=int, default=192)
+    parser.add_argument("--frames", type=int, default=96)
     parser.add_argument("--fps", type=int, default=24)
     args = parser.parse_args(argv)
-    if not 24 <= args.frames <= 360:
-        parser.error("frames must be between 24 and 360 (1–15 seconds at 24 fps)")
+    if not 24 <= args.frames <= 240:
+        parser.error("frames must be between 24 and 240 (1–10 seconds at 24 fps)")
     if args.fps != 24:
         parser.error("this experiment is configured for 24 fps")
     return args
@@ -291,10 +291,10 @@ def build_scene(args: argparse.Namespace):
     scene = bpy.context.scene
     scene.render.engine = "CYCLES"
     scene.cycles.device = "CPU"
-    scene.cycles.samples = 8
+    scene.cycles.samples = 2
     scene.cycles.use_denoising = True
-    scene.render.resolution_x = 1280
-    scene.render.resolution_y = 720
+    scene.render.resolution_x = 960
+    scene.render.resolution_y = 540
     scene.render.resolution_percentage = 100
     scene.render.fps = args.fps
     scene.render.image_settings.file_format = "PNG"

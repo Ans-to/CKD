@@ -12,9 +12,9 @@ on:
   workflow_dispatch:
     inputs:
       frames:
-        description: "Animation length in frames (24 fps; default 192 = 8 seconds)"
+        description: "Animation length in frames (24 fps; default 96 = 4 seconds)"
         required: false
-        default: "192"
+        default: "96"
         type: number
 
 permissions:
@@ -51,7 +51,7 @@ jobs:
         run: |
           mkdir -p output/blender-frames
           set -o pipefail
-          output/venv/bin/python scripts/blender/nokia_device_shift.py -- --output-dir output/blender-frames --frames "${FRAMES:-192}" --fps 24 2>&1 | tee output/blender-render.log
+          output/venv/bin/python scripts/blender/nokia_device_shift.py -- --output-dir output/blender-frames --frames "${FRAMES:-96}" --fps 24 2>&1 | tee output/blender-render.log
 
       - name: Include Blender failure details in the run summary
         if: failure()
