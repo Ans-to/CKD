@@ -2,6 +2,7 @@
 projects/
 _cache/
 models/
+/output/nokia-documentary/
 *.wav
 !
 # python

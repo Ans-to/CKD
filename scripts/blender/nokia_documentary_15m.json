@@ -1,0 +1,110 @@
+{
+  "title": "The Rise and Fall of Nokia",
+  "target_duration_seconds": 900,
+  "fps": 30,
+  "resolution": [1280, 720],
+  "render_engine": "BLENDER_EEVEE_NEXT",
+  "visual_policy": "All visible images, models, maps, typography, environments, transitions, and effects are generated procedurally in Blender. Do not load image or video assets.",
+  "audio_policy": {
+    "narration_target_average_dbfs": -16,
+    "narration_target_peak_dbfs": -6,
+    "music_under_narration_dbfs": -28,
+    "music_duck_db": 6,
+    "final_integrated_lufs": -14,
+    "maximum_true_peak_dbtp": -1,
+    "sample_rate_hz": 48000
+  },
+  "scenes": [
+    {
+      "id": "01_lost_empire",
+      "title": "The Lost Empire",
+      "duration_seconds": 55,
+      "visual": "A dark studio. A generic, non-branded classic candy-bar phone is modeled from beveled meshes, screen glass, speaker slots, and a detailed keypad. It is isolated on a circular dais under a restrained key-and-rim lighting setup as the camera makes a slow, controlled push. Fine dust-like particles and extruded Blender typography complete the reveal; no imported logo or imagery is used.",
+      "narration": "Imagine a familiar shape: a small handset, a physical keypad, and a battery that seemed to last forever. For a time, a Finnish company put mobile communication into the pockets of hundreds of millions of people. Nokia became more than a manufacturer. Its name became shorthand for the mobile phone itself. Yet the market did not stop moving when Nokia reached the summit. The story that follows is not a simple tale of one bad device or one bad decision. It is a story of a company that mastered one era of mobile technology, then struggled to move its strengths into a new era built around software, services, and ecosystems. To understand the reversal, we first have to go far earlier than the phone in the darkness: to a river in Finland and a paper mill founded in 1865."
+    },
+    {
+      "id": "02_origins",
+      "title": "The Origins",
+      "duration_seconds": 70,
+      "visual": "A nineteenth-century Finnish river valley built from geometry: flowing procedural river surface, snow-dusted rocks, pine silhouettes, timber stacks, paper-mill buildings, water wheel, chimneys, and smoke made from Blender particles. The camera tracks from the mill toward the water, then across a geometric timeline of later industries.",
+      "narration": "Fredrik Idestam established a paper mill in 1865 near Tampere, Finland. A second mill was built by the Nokianvirta River, whose name would eventually attach itself to the company. Nokia did not begin as a phone maker, and its later corporate identity was not formed in one step. In 1898, Finnish Rubber Works was founded. Finnish Cable Works followed in 1912. The three businesses came together in 1967 as Nokia Corporation, bringing paper, rubber, cable, electronics, and other activities under one corporate roof. This long industrial history matters because Nokia repeatedly changed what it made. The 1960s electronics division began working on radio transmission equipment. In the decades that followed, telecommunications became a strategic focus, while many older businesses were sold. The company’s rise was already a story of reinvention before a mobile handset entered the picture."
+    },
+    {
+      "id": "03_mobile_revolution",
+      "title": "The Mobile Revolution",
+      "duration_seconds": 68,
+      "visual": "A procedural device gallery of five Nokia-era-inspired generic silhouettes, from physical-key models through a clamshell to an early touchscreen form. Each device has distinct proportions, keypad layout, screen, and material treatment. A balanced studio lineup and concise chapter typography carry the evolution forward; these are product-inspired schematics, not exact replicas.",
+      "narration": "In the 1980s, mobile telephony was still expensive, specialized, and physically large. Nordic operators built early cellular systems, and Nokia’s predecessor businesses supplied equipment for that changing world. Nokia introduced the Mobira Senator car phone in 1982, a substantial device designed for a vehicle rather than a pocket. As networks became more capable and components became smaller, portable handsets followed. The first generation of mobile communication was not yet a mass-market convenience; it was infrastructure, radio engineering, batteries, and manufacturing coming together. A decisive technical shift arrived with GSM, a digital standard developed through European cooperation. Nokia equipment carried the first official GSM call in Finland in 1991. Digital networks improved capacity and made roaming and services more practical. Nokia was positioned not only to sell phones, but to help build the systems that made those phones useful."
+    },
+    {
+      "id": "04_global_dominance",
+      "title": "Global Dominance",
+      "duration_seconds": 72,
+      "visual": "A sphere built from latitude-longitude curves and simplified native-mesh continent silhouettes, labeled as a schematic. Connection arcs trace the global network story. Separate typography states Nokia's own Q4 2007 estimate of about 40 percent global mobile-device share, explicitly distinguishing it from smartphone share.",
+      "narration": "By the late 1990s, mobile phones were moving from business tool to everyday object. Nokia’s history records that it became the world’s best-selling mobile-phone brand in 1998. Its advantage was not one feature alone. It combined engineering, supply chains, a broad range of prices, operator relationships, and designs adapted to many markets. The company could sell premium handsets while also reaching customers buying their first mobile phone. In its own fourth-quarter 2007 results, Nokia estimated that it held about forty percent of the global mobile-device market, and reported roughly 437 million device volumes for the year. That figure refers to mobile devices overall, not to smartphones alone. The distinction matters: Nokia’s scale rested on a broad handset business, while the software-centered smartphone market was becoming a different contest. At the peak, scale looked like protection. It could also make change harder to see."
+    },
+    {
+      "id": "05_the_peak",
+      "title": "The Peak",
+      "duration_seconds": 62,
+      "visual": "A cinematic lineup of generic Nokia-era-inspired phone forms on display plinths: compact candy-bar, clamshell, business keyboard, and early touchscreen variants. Procedural metal, polymer, glass, and rubber shaders sit under controlled studio lighting. A restrained timeline marks the wider story without implying unsupported sales figures; models are schematic, not exact replicas.",
+      "narration": "At its height, Nokia was not making just one kind of phone. It built devices for calls and messages, for business email, for music, for cameras, and for consumers who wanted something distinctive. The company’s industrial design, manufacturing reach, and experience with radio systems were formidable. The 3310 became an emblem of a period when durability, simple menus, replaceable covers, and long battery life were central virtues. Other devices pushed cameras, color displays, maps, and multimedia forward. This breadth makes the later decline more complicated than a story of technical ignorance. Nokia had talented engineers and prototypes; it recognized many emerging features. The challenge was turning technical possibility into a coherent, timely product experience that customers and developers would choose. A strong portfolio can create momentum, but managing many platforms and product lines can also divide attention. The very scale that powered Nokia’s success would soon be tested by a different measure of competition."
+    },
+    {
+      "id": "06_smartphone_revolution",
+      "title": "The Smartphone Revolution",
+      "duration_seconds": 72,
+      "visual": "Two non-branded devices face each other on a dark circular stage: a detailed physical-key phone and a generic touchscreen smartphone. The keypad parts reorganize into a large glass surface while a camera orbit and surface lighting emphasize the change from hardware controls to software interaction.",
+      "narration": "On January 9, 2007, Apple announced the iPhone: a device that put a large multi-touch screen and software-centered interaction at the heart of the phone experience. This was not the first smartphone, and Nokia had already been developing advanced devices. The change was that the interface itself became the product’s central promise. Browsing, maps, media, and applications could be shaped through software rather than fixed buttons and menus. Later in 2007, Google and partners announced Android, opening another path for a broad device ecosystem. The market’s center of gravity was shifting from a handset’s specifications to the relationship among operating system, applications, developers, network services, and user experience. Nokia’s challenge was therefore not simply to build a touchscreen. It had to compete in a system where software updates and developer support could change what a phone became after it left the factory."
+    },
+    {
+      "id": "07_competition",
+      "title": "The Competition",
+      "duration_seconds": 68,
+      "visual": "A Blender-built ecosystem map with abstract application tiles, users, developers, devices, and service nodes. Procedural cable curves connect the nodes; the iOS/Android/Nokia labels appear as text only. The camera moves through the network as nodes multiply and update pulses travel along links.",
+      "narration": "An ecosystem compounds. More users can attract more developers; more useful applications can attract more users. That feedback loop is not automatic, and it does not guarantee a winner, but it can become powerful. Apple controlled a tightly integrated platform. Android spread across many manufacturers and price points. Nokia had a huge installed base and extensive operator relationships, but its software environment was fragmented across generations and devices. Developers had to decide where their limited time would reach the most customers. For consumers, the question was increasingly practical: which phone offered the applications, services, and updates they expected? Hardware excellence still mattered. It simply no longer settled the choice by itself. This is why the smartphone transition was not a clean contest between a good phone and a bad phone. It was a contest between systems, and Nokia’s system needed to become more coherent at the same time the market was accelerating."
+    },
+    {
+      "id": "08_software_problem",
+      "title": "The Software Problem",
+      "duration_seconds": 68,
+      "visual": "A procedural software architecture: branching nodes, overlapping interface panels, disconnected release lanes, and a central device silhouette. Lines first multiply chaotically, then partially resolve into a simplified flow. Date labels distinguish Symbian, MeeGo, and Windows Phone eras without claiming a single cause.",
+      "narration": "Nokia’s software challenge was not that it had no operating systems or no technical talent. Symbian had powered many smartphones, and the company invested in MeeGo as another modern platform. But maintaining legacy products while developing new ones required coordination across teams, tools, and release schedules. The user experience could feel inconsistent from one device family to another. Developers faced uncertainty about which platform would matter next. Inside a large organization, expertise can be distributed across many units, and decisions that require rapid alignment become harder as the market moves faster. These are organizational pressures, not proof that any single employee or decision caused the outcome. Nokia also had to weigh backward compatibility, operator needs, and the risk of abandoning a huge installed base. The software problem was therefore a problem of timing and focus: how to make a clear platform commitment, deliver it quickly, and give users and developers confidence that it would last."
+    },
+    {
+      "id": "09_decline",
+      "title": "The Decline",
+      "duration_seconds": 70,
+      "visual": "A chart stage with the analyst-estimated Nokia smartphone market-share values labeled 2007, 2008, 2009, 2010, and H1 2013. A clear source caption attributes the figures to Gartner as summarized by the BBC. Do not interpolate missing years or confuse smartphone share with total device share. The model phone lineup recedes as the bars descend.",
+      "narration": "The visible decline came through several measures, and they should not be collapsed into one chart. Nokia remained a major maker of phones while its position in smartphones weakened. Gartner estimates summarized by the BBC put Nokia’s smartphone market share at 49.4 percent in 2007, 43.7 percent in 2008, 41.1 percent in 2009, and 34.2 percent in 2010; by the first half of 2013, the figure was about three percent. These are analyst estimates of the smartphone market, not Nokia’s total handset share. Competition intensified; product cycles, software choices, and consumer expectations were all changing. In 2011, chief executive Stephen Elop described the company’s situation in a widely reported “burning platform” memo and announced a strategic partnership with Microsoft. Nokia chose Windows Phone as its primary smartphone platform while planning a transition away from Symbian. The partnership created a new direction, but also a difficult interval: customers and developers had to understand the future platform before the transition was complete. The decision involved trade-offs under pressure, not a certainty that another path would have succeeded. No single number explains every cause."
+    },
+    {
+      "id": "10_microsoft_deal",
+      "title": "The Microsoft Deal",
+      "duration_seconds": 64,
+      "visual": "Two abstract corporate buildings and a procedural transaction bridge. A timeline marks September 2013 announcement and April 2014 completion. On-screen figures show €3.79 billion for Devices & Services and €1.65 billion for patent licensing, with source label; no company logos are imported.",
+      "narration": "On September 3, 2013, Microsoft and Nokia announced an agreement for Microsoft to acquire substantially all of Nokia’s Devices and Services business and to license Nokia patents and mapping services. Microsoft described the total value as 5.44 billion euros: 3.79 billion for the business and 1.65 billion for patent licensing. The transaction was completed on April 25, 2014. Nokia retained businesses outside the sale, including its network operations, and continued to own the Nokia brand, while licensing it for certain acquired phone products. The deal was an ending for Nokia’s role as a major handset maker, but not the disappearance of Nokia as a company. The distinction matters because dramatic headlines often turn a complex restructuring into a simple “Nokia was bought” story. What changed hands was a substantial devices business; what remained would become the foundation for the next chapter."
+    },
+    {
+      "id": "11_lessons",
+      "title": "The Lessons",
+      "duration_seconds": 70,
+      "visual": "Five distinct three-dimensional objects arrive one at a time: a software node, an ecosystem ring, a branching organization, a decision compass, and a shifting expectation dial. Each object has a short label and a separate material palette; the camera links them in one continuous move.",
+      "narration": "Nokia’s history offers lessons, not a formula for predicting every market. First, software can redefine a product after purchase. Second, ecosystems create value through relationships among users, developers, and services, not only through the device. Third, organizational complexity can slow response when responsibilities and platforms are fragmented. Fourth, strategic decisions under uncertainty involve trade-offs; a bold change can create new risks even when the old direction is failing. Fifth, customer expectations can move from reliability and battery life toward touch interaction, applications, and continual updates. These lessons do not erase Nokia’s achievements or reduce its decline to one cause. They help explain why a company with engineering strength, global reach, and a powerful brand could still lose its central position in one market. The most useful question is not whether Nokia was brilliant or foolish. It is how a successful organization keeps learning when the definition of success changes."
+    },
+    {
+      "id": "12_a_different_nokia",
+      "title": "A Different Nokia",
+      "duration_seconds": 72,
+      "visual": "A modern communications landscape made entirely from geometry: towers, small-cell nodes, fiber-optic paths, network racks, and animated data pulses. A procedural 5G coverage map rises from a grid surface; labels distinguish network infrastructure from consumer handsets.",
+      "narration": "After the devices transaction, Nokia focused on communications networks, software, and technology licensing. The acquisition of Alcatel-Lucent in 2016 expanded its network portfolio, and Nokia continued to compete in mobile infrastructure as operators built newer generations of connectivity. This is not a return to the old handset business under another name. It is a different role in the communications stack: equipment, software, standards, patents, and systems that help networks carry data. The company has faced new cycles of competition and restructuring, as every technology business does. But the wider history is more than a rise followed by an ending. Nokia began in a paper mill, became a diversified industrial group, concentrated on telecommunications, led the handset era, and then redirected itself after losing the phone business. A company can leave a market and still remain part of the infrastructure that connects it."
+    },
+    {
+      "id": "13_final_message",
+      "title": "The Final Message",
+      "duration_seconds": 89,
+      "visual": "The generic classic phone from the opening returns beside a generic modern smartphone, both modeled anew in Blender. The camera pulls back through a ring of network geometry and a sequence of dated milestones. Final type reads “A market can change faster than a leader.” The last frame holds with music, not silence.",
+      "narration": "Return to the small phone that opened this story. Its physical buttons and focused purpose were not weaknesses; they were strengths in the market that made it successful. The lesson is that strengths are contextual. Reliability, manufacturing scale, and global distribution mattered enormously. When software and ecosystems changed what people expected from a phone, those strengths had to be translated into a new experience. Nokia’s story does not prove that hardware stopped mattering, or that software alone guarantees victory. It shows that leadership must keep adapting the whole system around a product: technology, organization, developer relationships, timing, and customer trust. The paper mill of 1865 and the network infrastructure of today belong to the same long history of change. The company did not simply vanish; its center of gravity moved. And the question every leader faces is still the one Nokia’s rise and fall leaves with us: when the market changes, can the organization change with it?"
+    }
+  ]
+}

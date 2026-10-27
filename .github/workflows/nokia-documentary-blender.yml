@@ -1,0 +1,116 @@
+name: Nokia Documentary (Blender-only)
+
+on:
+  workflow_dispatch:
+    inputs:
+      preview_seconds:
+        description: "60 renders the first scene as a Blender preflight; set 0 for the complete 15-minute film"
+        required: true
+        default: "60"
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  render:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    steps:
+      - name: Check out the session branch
+        uses: actions/checkout@v4
+        with:
+          ref: arena/dc7dfd05-ckd
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install Blender Python runtime and local narration stack
+        run: |
+          python -m pip install --disable-pip-version-check \
+            bpy==4.5.15 \
+            numpy==1.26.4 \
+            onnxruntime==1.22.0 \
+            imageio-ffmpeg==0.6.0 \
+            espeakng-loader==0.2.4
+
+      - name: Render, mix, and run automated QC
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+          NOKIA_PREVIEW_SECONDS: ${{ inputs.preview_seconds }}
+          NOKIA_OUTPUT_DIR: ${{ github.workspace }}/output/nokia-documentary
+        run: |
+          mkdir -p "$NOKIA_OUTPUT_DIR"
+          set -o pipefail
+          python scripts/blender/render_nokia_documentary.py 2>&1 | tee "$NOKIA_OUTPUT_DIR/render.log"
+
+      - name: Verify exact duration, frame rate, and frame count
+        run: |
+          python - <<'PY'
+          import imageio_ffmpeg, json, os
+          preview = int(os.environ.get("NOKIA_PREVIEW_SECONDS", "0"))
+          seconds = preview or 900
+          path = f"output/nokia-documentary/nokia-documentary-{seconds}s-preview.mp4" if preview else "output/nokia-documentary/nokia-documentary-15m.mp4"
+          reader = imageio_ffmpeg.read_frames(path, pix_fmt="rgb24")
+          info = next(reader)
+          frames = sum(1 for _ in reader)
+          assert abs(info["duration"] - seconds) < 0.05, info
+          assert info["fps"] == 30.0, info
+          assert info["size"] == (1280, 720), info
+          assert frames == seconds * 30, frames
+          report = json.load(open("output/nokia-documentary/quality-report.json"))
+          assert report["status"] == "PASS", report
+          print(f"Validated {frames} decoded frames: {info['size']} @ {info['fps']} fps, {info['duration']}s")
+          print(json.dumps(report, indent=2))
+          PY
+        env:
+          NOKIA_PREVIEW_SECONDS: ${{ inputs.preview_seconds }}
+
+      - name: Upload Blender render and diagnostics
+        uses: actions/upload-artifact@v4
+        with:
+          name: nokia-blender-${{ inputs.preview_seconds == '0' && '15-minute-final' || 'preflight' }}
+          path: |
+            output/nokia-documentary/*.mp4
+            output/nokia-documentary/*.json
+            output/nokia-documentary/render.log
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Publish the finished MP4 and QC report to the session branch
+        if: inputs.preview_seconds == '0'
+        run: |
+          cp output/nokia-documentary/nokia-documentary-15m.mp4 samples/nokia-documentary-15m.mp4
+          cp output/nokia-documentary/quality-report.json docs/NOKIA_QC_REPORT.json
+          if [ -f samples/nokia-blender-preflight.mp4 ]; then git rm -f samples/nokia-blender-preflight.mp4 docs/NOKIA_PREFLIGHT_QC.json; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add samples/nokia-documentary-15m.mp4 docs/NOKIA_QC_REPORT.json
+          if git diff --cached --quiet; then
+            echo "The committed Blender documentary and QC report already match this render."
+          else
+            git commit -m "Render 15-minute Nokia documentary in Blender"
+            git push origin arena/dc7dfd05-ckd
+          fi
+
+      - name: Save the Blender preflight for visual inspection
+        if: inputs.preview_seconds != '0'
+        run: |
+          cp "output/nokia-documentary/nokia-documentary-${{ inputs.preview_seconds }}s-preview.mp4" samples/nokia-blender-preflight.mp4
+          cp output/nokia-documentary/quality-report.json docs/NOKIA_PREFLIGHT_QC.json
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add samples/nokia-blender-preflight.mp4 docs/NOKIA_PREFLIGHT_QC.json
+          git commit -m "Add Blender render preflight for Nokia documentary" || true
+          git push origin arena/dc7dfd05-ckd
+
+      - name: Add failure diagnostics to the workflow summary
+        if: failure()
+        run: |
+          echo '## Blender render diagnostics' >> "$GITHUB_STEP_SUMMARY"
+          if [ -f output/nokia-documentary/render.log ]; then
+            tail -n 160 output/nokia-documentary/render.log >> "$GITHUB_STEP_SUMMARY"
+          fi
