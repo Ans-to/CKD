@@ -83,7 +83,7 @@ def parent_to(obj, root):
 def make_phone_root(name: str, center_x: float):
     root = bpy.data.objects.new(name, None)
     bpy.context.collection.objects.link(root)
-    root.location = (center_x, 0.0, 0.02)
+    root.location = (center_x, 0.0, -0.15)
     return root
 
 
@@ -233,17 +233,17 @@ def build_scene(args: argparse.Namespace):
     # Matte ground gives the objects a readable contact shadow without pretending
     # this is a photographed Nokia product or a mechanically accurate model.
     floor_mat = material("Midnight studio floor", NAVY, roughness=0.72)
-    rounded_box("Studio floor", (0.0, 0.0, -1.28), (200.0, 200.0, 0.10), floor_mat, 0.01)
+    rounded_box("Studio floor", (0.0, 0.0, -1.45), (200.0, 200.0, 0.10), floor_mat, 0.01)
 
     classic = make_keypad_phone(-1.72, graphite, trim, screen, keys)
     touch = make_touch_phone(1.72, graphite, trim, screen, apps)
     add_connector(gold_glow, args.frames)
 
     text_object("THE SMARTPHONE SHIFT", "Title", (0.0, -0.75, 1.74), 0.34, title_mat)
-    text_object("KEYPAD-CENTRIC", "Keypad label", (-1.72, -0.62, -1.55), 0.19, title_mat)
-    text_object("TOUCHSCREEN-CENTRIC", "Touchscreen label", (1.72, -0.62, -1.55), 0.19, title_mat)
+    text_object("KEYPAD", "Keypad label", (-1.72, -0.62, -1.31), 0.18, title_mat)
+    text_object("TOUCHSCREEN", "Touchscreen label", (1.72, -0.62, -1.31), 0.18, title_mat)
     text_object("ILLUSTRATIVE 3D SCHEMATIC - NOT A REAL PRODUCT MODEL",
-                "Disclosure footer", (0.0, -0.80, -2.00), 0.105, muted_mat)
+                "Disclosure footer", (0.0, -0.80, 1.43), 0.105, muted_mat)
 
     world = bpy.data.worlds.new("Midnight blue environment")
     bpy.context.scene.world = world
