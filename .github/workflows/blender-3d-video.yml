@@ -1,6 +1,15 @@
 name: Blender 3D Video Experiment
 
 on:
+  # The session GitHub connection currently permits branch pushes but not
+  # workflow_dispatch API writes; this narrowly scoped push trigger lets the
+  # current experiment run without enabling renders for ordinary commits.
+  push:
+    branches:
+      - arena/dc7dfd05-ckd
+    paths:
+      - .github/workflows/blender-3d-video.yml
+      - scripts/blender/nokia_device_shift.py
   workflow_dispatch:
     inputs:
       frames:
