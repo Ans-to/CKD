@@ -18,7 +18,7 @@ on:
         type: number
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   render:
@@ -76,6 +76,16 @@ jobs:
           "$FFMPEG" -hide_banner -y -framerate 24 -i output/blender-frames/frame_%04d.png -c:v libx264 -preset medium -crf 20 -pix_fmt yuv420p -movflags +faststart output/nokia-smartphone-shift-3d.mp4
           "$FFMPEG" -v error -i output/nokia-smartphone-shift-3d.mp4 -f null -
           ls -lh output/nokia-smartphone-shift-3d.mp4
+
+      - name: Save rendered MP4 on the session branch
+        if: github.ref == 'refs/heads/arena/dc7dfd05-ckd'
+        run: |
+          cp output/nokia-smartphone-shift-3d.mp4 samples/nokia-smartphone-shift-3d.mp4
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add samples/nokia-smartphone-shift-3d.mp4
+          git commit -m "Add rendered Blender 3D experiment video"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
 
       - name: Upload downloadable video artifact
         uses: actions/upload-artifact@v4

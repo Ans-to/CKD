@@ -14,6 +14,6 @@ The render uses Blender 4.5's Python runtime (`bpy`) with Cycles on CPU at 960×
 2. Select **Run workflow**. Leave frames at `192` for the default 8-second test.
 3. When the job finishes, download the `nokia-smartphone-shift-3d` artifact from that run. It contains `nokia-smartphone-shift-3d.mp4`.
 
-The workflow is `workflow_dispatch` only; ordinary pushes do not render 3D video. GitHub Actions must be enabled for the repository, and the workflow file must be available on the default branch before GitHub exposes it as a manual workflow. Changes can still be reviewed on the feature branch first.
+The workflow is manually dispatchable from the repository's **Actions** tab once it is on the default branch. In this Arena experiment branch only, a path-scoped push trigger is also enabled so the render can run even when the GitHub connection cannot dispatch workflows through the API; its output MP4 is committed back to this branch and uploaded as a run artifact. Other branches and ordinary source changes do not trigger renders. GitHub Actions must be enabled for the repository.
 
 For a local render, install Blender and FFmpeg, then run the Blender script in background mode and encode the generated `frame_####.png` sequence with FFmpeg as the workflow does.
