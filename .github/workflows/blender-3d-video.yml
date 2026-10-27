@@ -53,8 +53,11 @@ jobs:
           echo '## Blender render log (last 120 lines)' >> "$GITHUB_STEP_SUMMARY"
           if [ -f output/blender-render.log ]; then
             tail -n 120 output/blender-render.log >> "$GITHUB_STEP_SUMMARY"
+            detail="$(tail -n 40 output/blender-render.log | tr '\n' ' ' | sed 's/%/%25/g; s/\r/%0D/g')"
+            echo "::error title=Blender render diagnostic::${detail:0:5000}"
           else
             echo 'The Blender process did not create a log file.' >> "$GITHUB_STEP_SUMMARY"
+            echo '::error title=Blender render diagnostic::No Blender log file was created.'
           fi
 
       - name: Encode MP4
