@@ -1,0 +1,55 @@
+name: Blender 3D Video Experiment
+
+on:
+  workflow_dispatch:
+    inputs:
+      frames:
+        description: "Animation length in frames (24 fps; default 192 = 8 seconds)"
+        required: false
+        default: "192"
+        type: number
+
+permissions:
+  contents: read
+
+jobs:
+  render:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Install Blender and FFmpeg
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes blender ffmpeg
+          blender --version
+          ffmpeg -version | head -n 1
+
+      - name: Render the 3D animation
+        env:
+          FRAMES: ${{ inputs.frames }}
+        run: |
+          mkdir -p output/blender-frames
+          blender --background --factory-startup \
+            --python scripts/blender/nokia_device_shift.py -- \
+            --output-dir output/blender-frames --frames "$FRAMES" --fps 24
+
+      - name: Encode MP4
+        run: |
+          ffmpeg -hide_banner -y -framerate 24 \
+            -i output/blender-frames/frame_%04d.png \
+            -c:v libx264 -preset medium -crf 20 -pix_fmt yuv420p \
+            -movflags +faststart output/nokia-smartphone-shift-3d.mp4
+          ffprobe -v error -show_entries format=duration,size \
+            -show_entries stream=width,height,r_frame_rate,codec_name \
+            -of json output/nokia-smartphone-shift-3d.mp4
+
+      - name: Upload downloadable video artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: nokia-smartphone-shift-3d
+          path: output/nokia-smartphone-shift-3d.mp4
+          if-no-files-found: error
+          retention-days: 14

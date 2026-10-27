@@ -1,0 +1,18 @@
+# rendered media & caches (large, reproducible)
+projects/
+_cache/
+models/
+*.wav
+!
+# python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ipynb_checkpoints/
+.venv/
+# editor / OS
+.DS_Store
+*.swp
+
+# build artifacts
+dist/

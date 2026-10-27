@@ -1,0 +1,99 @@
+1
+00:00:00,220 --> 00:00:03,308
+Every day, sunlight lands on your roof.
+
+2
+00:00:03,012 --> 00:00:05,402
+Most of it turns into heat and
+
+3
+00:00:05,402 --> 00:00:08,224
+drifts away. A solar panel catches that
+
+4
+00:00:08,224 --> 00:00:10,542
+light and turns part of it into
+
+5
+00:00:10,542 --> 00:00:11,772
+electricity.
+
+6
+00:00:11,720 --> 00:00:14,793
+Inside the panel sit many silicon cells.
+
+7
+00:00:14,497 --> 00:00:17,539
+When light particles, called photons, hit the
+
+8
+00:00:17,539 --> 00:00:20,500
+silicon, they knock electrons loose.
+
+9
+00:00:20,512 --> 00:00:24,023
+The panel produces direct current, which always
+
+10
+00:00:24,023 --> 00:00:26,998
+flows one way. Your home needs alternating
+
+11
+00:00:26,998 --> 00:00:30,539
+current that changes direction many times a
+
+12
+00:00:30,539 --> 00:00:32,904
+second. An inverter makes that change.
+
+13
+00:00:32,928 --> 00:00:35,357
+Power you do not use right away
+
+14
+00:00:35,357 --> 00:00:38,113
+is either stored in a battery or
+
+15
+00:00:38,113 --> 00:00:39,933
+sent into the grid. That way the
+
+16
+00:00:39,933 --> 00:00:42,554
+lights still work after sunset.
+
+17
+00:00:42,595 --> 00:00:45,474
+A typical panel turns roughly one fifth
+
+18
+00:00:45,474 --> 00:00:48,992
+of the sunlight hitting it into electricity;
+
+19
+00:00:48,992 --> 00:00:51,328
+the rest becomes heat. More panels, and
+
+20
+00:00:51,328 --> 00:00:53,326
+a clear view of the sky, give
+
+21
+00:00:53,326 --> 00:00:54,547
+you more power.
+
+22
+00:00:54,512 --> 00:00:57,798
+Light in, electrons moving, an inverter shaping
+
+23
+00:00:57,798 --> 00:01:00,754
+the current, and a battery holding it:
+
+24
+00:01:00,754 --> 00:01:03,265
+that is how a solar panel powers
+
+25
+00:01:03,265 --> 00:01:03,942
+a home.

@@ -1,0 +1,23 @@
+{
+  "topic": "solar energy",
+  "languages": [
+    "en"
+  ],
+  "formats": [
+    "landscape"
+  ],
+  "duration": 40,
+  "quality": "standard",
+  "fps": 24,
+  "include_captions": true,
+  "include_character": false,
+  "voice_en": "auto",
+  "voice_ur": "auto",
+  "allow_espeak_fallback": true,
+  "llm": "none",
+  "seed": 7,
+  "notes": "",
+  "palette": "auto",
+  "burn_captions": true,
+  "subtitle_files": true
+}

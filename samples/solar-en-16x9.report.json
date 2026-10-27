@@ -1,0 +1,349 @@
+{
+ "topic": "solar energy",
+ "world": "solar",
+ "generator": "curated-pack",
+ "palette": "warm",
+ "scenes": [
+  {
+   "id": "hook",
+   "purpose": "hook",
+   "narration_en": "Every day, sunlight lands on your roof. Most of it turns into heat and drifts away. A solar panel catches that light and turns part of it into electricity.",
+   "narration_ur": "ہر روز سورج کی روشنی آپ کی چھت پر پڑتی ہے۔ اس کا زیادہ تر حصہ گرمی بن کر اڑ جاتا ہے۔ سولر پینل اس روشنی کو پکڑ کر اس کا کچھ حصہ بجلی میں بدل دیتا ہے۔"
+  },
+  {
+   "id": "cells",
+   "purpose": "explain",
+   "narration_en": "Inside the panel sit many silicon cells. When light particles, called photons, hit the silicon, they knock electrons loose.",
+   "narration_ur": "پینل کے اندر سلکان کے بہت سے خلیے ہوتے ہیں۔ جب روشنی کے ذرے، جنہیں فوٹون کہتے ہیں، سلکان پر گرتے ہیں تو وہ الیکٹرانوں کو آزاد کر دیتے ہیں۔"
+  },
+  {
+   "id": "inverter",
+   "purpose": "explain",
+   "narration_en": "The panel produces direct current, which always flows one way. Your home needs alternating current that changes direction many times a second. An inverter makes that change.",
+   "narration_ur": "پینل ڈائریکٹ کرنٹ بناتا ہے، جو ہمیشہ ایک ہی سمت میں بہتا ہے۔ آپ کے گھر کو متبادل کرنٹ چاہیے جو ہر سیکنڈ کئی بار سمت بدلتا ہے۔ انورٹر یہ تبدیلی کرتا ہے۔"
+  },
+  {
+   "id": "storage",
+   "purpose": "explain",
+   "narration_en": "Power you do not use right away is either stored in a battery or sent into the grid. That way the lights still work after sunset.",
+   "narration_ur": "جو بجلی آپ فوراً استعمال نہیں کرتے، وہ بیٹری میں محفوظ ہو جاتی ہے یا گرڈ میں چلی جاتی ہے۔ اسی طرح سورج ڈوبنے کے بعد بھی بتیاں جلی رہتی ہیں۔"
+  },
+  {
+   "id": "limits",
+   "purpose": "example",
+   "narration_en": "A typical panel turns roughly one fifth of the sunlight hitting it into electricity; the rest becomes heat. More panels, and a clear view of the sky, give you more power.",
+   "narration_ur": "عام طور پر ایک پینل پر پڑنے والی روشنی کا تقریباً پانچواں حصہ بجلی بنتا ہے، باقی گرمی بن جاتا ہے۔ زیادہ پینل اور کھلا آسمان زیادہ بجلی دیتے ہیں۔"
+  },
+  {
+   "id": "recap",
+   "purpose": "recap",
+   "narration_en": "Light in, electrons moving, an inverter shaping the current, and a battery holding it: that is how a solar panel powers a home.",
+   "narration_ur": "روشنی اندر، الیکٹران حرکت میں، انورٹر کرنٹ کو درست کرتا ہوا، اور بیٹری اسے سنبھالے ہوئے: یوں سولر پینل گھر کو بجلی دیتا ہے۔"
+  }
+ ],
+ "story_warnings": [
+  "narration shortened to approach the 90s target: dropped one sentence from scene 'cells'",
+  "en: narration measured 110.1s against a 90s target (engine: espeak). The plan was sized with an estimated speaking rate; re-run with --duration 110 to keep every beat, or a shorter --duration to drop scenes.",
+  "ur: narration measured 137.2s against a 90s target (engine: espeak). The plan was sized with an estimated speaking rate; re-run with --duration 137 to keep every beat, or a shorter --duration to drop scenes.",
+  "en: narration measured 110.5s against a 90s target (engine: espeak). The plan was sized with an estimated speaking rate; re-run with --duration 110 to keep every beat, or a shorter --duration to drop scenes.",
+  "ur: narration measured 137.6s against a 90s target (engine: espeak). The plan was sized with an estimated speaking rate; re-run with --duration 138 to keep every beat, or a shorter --duration to drop scenes."
+ ],
+ "narration": {
+  "en": {
+   "engine": "kokoro",
+   "voice": "af_heart",
+   "timing_kind": "estimated",
+   "duration": 63.62,
+   "warnings": []
+  },
+  "ur": {
+   "engine": "espeak",
+   "voice": "ur",
+   "timing_kind": "espeak-events",
+   "duration": 75.21,
+   "warnings": [
+    "ur: neural voice unavailable (piper: ResourceError: Could not download voice ur_PK-fasih-medium from any mirror (<urlopen error TLS/SSL connection has been closed (EOF) (_ssl.c:992)>). Place the files manually in /home/user/.cache/ckd/voices/ur_PK-fasih-medium or use the offline espeak voice.). Falling back to espeak (development voice)."
+   ]
+  }
+ },
+ "videos": {
+  "en_landscape": {
+   "language": "en",
+   "format": "landscape",
+   "path": "projects/solar-energy/out/en_landscape.mp4",
+   "duration": 63.63,
+   "width": 1280,
+   "height": 720,
+   "fps": 24.0,
+   "verified": true,
+   "problems": [],
+   "audio": {
+    "mean_db": -16.5,
+    "peak_db": -1.5
+   },
+   "timing_kind": "estimated",
+   "caption_kind": "word-synced (estimated)",
+   "narration_engine": "kokoro",
+   "narration_voice": "af_heart",
+   "narration_mastering": {}
+  },
+  "en_vertical": {
+   "language": "en",
+   "format": "vertical",
+   "path": "projects/solar-energy/out/en_vertical.mp4",
+   "duration": 63.63,
+   "width": 404,
+   "height": 720,
+   "fps": 24.0,
+   "verified": true,
+   "problems": [],
+   "audio": {
+    "mean_db": -16.5,
+    "peak_db": -1.5
+   },
+   "timing_kind": "estimated",
+   "caption_kind": "word-synced (estimated)",
+   "narration_engine": "kokoro",
+   "narration_voice": "af_heart",
+   "narration_mastering": {}
+  },
+  "ur_landscape": {
+   "language": "ur",
+   "format": "landscape",
+   "path": "projects/solar-energy/out/ur_landscape.mp4",
+   "duration": 75.21000000000001,
+   "width": 1280,
+   "height": 720,
+   "fps": 24.0,
+   "verified": true,
+   "problems": [],
+   "audio": {
+    "mean_db": -16.6,
+    "peak_db": -1.3
+   },
+   "timing_kind": "espeak-events",
+   "caption_kind": "word-synced (espeak-events)",
+   "narration_engine": "espeak",
+   "narration_voice": "ur",
+   "narration_mastering": {}
+  },
+  "ur_vertical": {
+   "language": "ur",
+   "format": "vertical",
+   "path": "projects/solar-energy/out/ur_vertical.mp4",
+   "duration": 75.21000000000001,
+   "width": 404,
+   "height": 720,
+   "fps": 24.0,
+   "verified": true,
+   "problems": [],
+   "audio": {
+    "mean_db": -16.6,
+    "peak_db": -1.3
+   },
+   "timing_kind": "espeak-events",
+   "caption_kind": "word-synced (espeak-events)",
+   "narration_engine": "espeak",
+   "narration_voice": "ur",
+   "narration_mastering": {}
+  }
+ },
+ "stages": [
+  {
+   "stage": "script",
+   "status": "done",
+   "detail": "6 scenes, world=solar",
+   "seconds": 0.0018053054809570312
+  },
+  {
+   "stage": "narration:en",
+   "status": "cached",
+   "detail": "63.6s reused",
+   "seconds": 0.011699438095092773
+  },
+  {
+   "stage": "narration:ur",
+   "status": "cached",
+   "detail": "75.2s reused",
+   "seconds": 0.009658098220825195
+  },
+  {
+   "stage": "scene:en:landscape:1",
+   "status": "done",
+   "detail": "276 frames in 30.6s",
+   "seconds": 30.56462526321411
+  },
+  {
+   "stage": "scene:en:landscape:2",
+   "status": "done",
+   "detail": "211 frames in 20.9s",
+   "seconds": 20.857941150665283
+  },
+  {
+   "stage": "scene:en:landscape:3",
+   "status": "done",
+   "detail": "298 frames in 30.1s",
+   "seconds": 30.113281965255737
+  },
+  {
+   "stage": "scene:en:landscape:4",
+   "status": "done",
+   "detail": "232 frames in 26.7s",
+   "seconds": 26.677462339401245
+  },
+  {
+   "stage": "scene:en:landscape:5",
+   "status": "done",
+   "detail": "286 frames in 23.2s",
+   "seconds": 23.208938360214233
+  },
+  {
+   "stage": "scene:en:landscape:6",
+   "status": "done",
+   "detail": "224 frames in 27.1s",
+   "seconds": 27.0837504863739
+  },
+  {
+   "stage": "video:en_landscape",
+   "status": "done",
+   "detail": "63.6s 1280x720",
+   "seconds": 0.0
+  },
+  {
+   "stage": "scene:en:vertical:1",
+   "status": "done",
+   "detail": "276 frames in 10.7s",
+   "seconds": 10.724381923675537
+  },
+  {
+   "stage": "scene:en:vertical:2",
+   "status": "done",
+   "detail": "211 frames in 7.2s",
+   "seconds": 7.193840980529785
+  },
+  {
+   "stage": "scene:en:vertical:3",
+   "status": "done",
+   "detail": "298 frames in 9.4s",
+   "seconds": 9.415910243988037
+  },
+  {
+   "stage": "scene:en:vertical:4",
+   "status": "done",
+   "detail": "232 frames in 8.5s",
+   "seconds": 8.522916793823242
+  },
+  {
+   "stage": "scene:en:vertical:5",
+   "status": "done",
+   "detail": "286 frames in 7.9s",
+   "seconds": 7.8881261348724365
+  },
+  {
+   "stage": "scene:en:vertical:6",
+   "status": "done",
+   "detail": "224 frames in 9.5s",
+   "seconds": 9.493969917297363
+  },
+  {
+   "stage": "video:en_vertical",
+   "status": "done",
+   "detail": "63.6s 404x720",
+   "seconds": 0.0
+  },
+  {
+   "stage": "scene:ur:landscape:1",
+   "status": "done",
+   "detail": "310 frames in 33.0s",
+   "seconds": 33.00715494155884
+  },
+  {
+   "stage": "scene:ur:landscape:2",
+   "status": "done",
+   "detail": "297 frames in 29.5s",
+   "seconds": 29.463061094284058
+  },
+  {
+   "stage": "scene:ur:landscape:3",
+   "status": "done",
+   "detail": "324 frames in 32.6s",
+   "seconds": 32.58686637878418
+  },
+  {
+   "stage": "scene:ur:landscape:4",
+   "status": "done",
+   "detail": "296 frames in 34.3s",
+   "seconds": 34.27430272102356
+  },
+  {
+   "stage": "scene:ur:landscape:5",
+   "status": "done",
+   "detail": "304 frames in 25.4s",
+   "seconds": 25.448902130126953
+  },
+  {
+   "stage": "scene:ur:landscape:6",
+   "status": "done",
+   "detail": "274 frames in 33.2s",
+   "seconds": 33.23268222808838
+  },
+  {
+   "stage": "video:ur_landscape",
+   "status": "done",
+   "detail": "75.2s 1280x720",
+   "seconds": 0.0
+  },
+  {
+   "stage": "scene:ur:vertical:1",
+   "status": "done",
+   "detail": "310 frames in 11.9s",
+   "seconds": 11.948714256286621
+  },
+  {
+   "stage": "scene:ur:vertical:2",
+   "status": "done",
+   "detail": "297 frames in 9.6s",
+   "seconds": 9.632221698760986
+  },
+  {
+   "stage": "scene:ur:vertical:3",
+   "status": "done",
+   "detail": "324 frames in 10.2s",
+   "seconds": 10.173789978027344
+  },
+  {
+   "stage": "scene:ur:vertical:4",
+   "status": "done",
+   "detail": "296 frames in 10.9s",
+   "seconds": 10.942039489746094
+  },
+  {
+   "stage": "scene:ur:vertical:5",
+   "status": "done",
+   "detail": "304 frames in 8.0s",
+   "seconds": 8.019039630889893
+  },
+  {
+   "stage": "scene:ur:vertical:6",
+   "status": "done",
+   "detail": "274 frames in 11.6s",
+   "seconds": 11.553467750549316
+  },
+  {
+   "stage": "video:ur_vertical",
+   "status": "done",
+   "detail": "75.2s 404x720",
+   "seconds": 0.0
+  }
+ ],
+ "environment": {
+  "python": "3.11.2",
+  "platform": "Linux-6.1.158+-x86_64-with-glibc2.36",
+  "cpu_count": 2,
+  "mem_total_gb": 4.13,
+  "mem_available_gb": 3.29,
+  "disk_free_gb": 19.36,
+  "disk_total_gb": 21.83,
+  "gpu": null
+ }
+}

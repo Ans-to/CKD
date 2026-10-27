@@ -1,0 +1,24 @@
+{
+  "topic": "how wifi works",
+  "languages": [
+    "en",
+    "ur"
+  ],
+  "formats": [
+    "landscape"
+  ],
+  "duration": 45,
+  "quality": "standard",
+  "fps": 24,
+  "include_captions": true,
+  "include_character": true,
+  "voice_en": "auto",
+  "voice_ur": "auto",
+  "allow_espeak_fallback": true,
+  "llm": "none",
+  "seed": 7,
+  "notes": "5 GHz travels a shorter distance but carries more data||5 گیگا ہرٹز کم فاصلہ طے کرتی ہے مگر زیادہ ڈیٹا لے جاتی ہے",
+  "palette": "auto",
+  "burn_captions": true,
+  "subtitle_files": true
+}
