@@ -2,37 +2,39 @@ Render mode: preview=1s, audio duration=1s, 30 fps at 1280x720 delivery
 EGL Error (0x3009): EGL_BAD_MATCH: Arguments are inconsistent (for example, a valid context requires buffers not supplied by a valid surface).
 EGL Error (0x3009): EGL_BAD_MATCH: Arguments are inconsistent (for example, a valid context requires buffers not supplied by a valid surface).
 EGL Error (0x3009): EGL_BAD_MATCH: Arguments are inconsistent (for example, a valid context requires buffers not supplied by a valid surface).
-Fra:1 Mem:48.60M (Peak 48.60M) | Time:00:17.94 | Rendering 1 / 1 samples
+Fra:1 Mem:48.60M (Peak 48.60M) | Time:00:24.46 | Rendering 1 / 1 samples
 Append frame 1
-Time: 00:18.01 (Saving: 00:00.06)
+Time: 00:24.55 (Saving: 00:00.07)
 
-Fra:2 Mem:48.60M (Peak 52.12M) | Time:00:01.60 | Rendering 1 / 1 samples
+Fra:2 Mem:48.60M (Peak 52.12M) | Time:00:01.73 | Rendering 1 / 1 samples
 Append frame 2
-Time: 00:01.61 (Saving: 00:00.00)
+Time: 00:01.74 (Saving: 00:00.00)
 
-Fra:3 Mem:48.60M (Peak 52.12M) | Time:00:01.58 | Rendering 1 / 1 samples
+Fra:3 Mem:48.60M (Peak 52.12M) | Time:00:01.71 | Rendering 1 / 1 samples
 Append frame 3
-Time: 00:01.59 (Saving: 00:00.00)
+Time: 00:01.72 (Saving: 00:00.00)
 
-Fra:4 Mem:48.60M (Peak 52.12M) | Time:00:01.59 | Rendering 1 / 1 samples
+Fra:4 Mem:48.60M (Peak 52.12M) | Time:00:01.73 | Rendering 1 / 1 samples
 Append frame 4
-Time: 00:01.60 (Saving: 00:00.00)
+Time: 00:01.74 (Saving: 00:00.00)
 
-Fra:5 Mem:48.60M (Peak 52.12M) | Time:00:01.59 | Rendering 1 / 1 samples
+Fra:5 Mem:48.60M (Peak 52.12M) | Time:00:01.73 | Rendering 1 / 1 samples
 Append frame 5
-Time: 00:01.60 (Saving: 00:00.00)
+Time: 00:01.74 (Saving: 00:00.00)
 
-Fra:6 Mem:48.60M (Peak 52.12M) | Time:00:01.59 | Rendering 1 / 1 samples
+Fra:6 Mem:48.60M (Peak 52.12M) | Time:00:01.69 | Rendering 1 / 1 samples
 Append frame 6
-Time: 00:01.60 (Saving: 00:00.00)
+Time: 00:01.70 (Saving: 00:00.00)
 
+Error: Strips.new_effect: effect takes 1 input strip
 Traceback (most recent call last):
-  File "/home/runner/work/CKD/CKD/scripts/blender/render_nokia_documentary.py", line 277, in <module>
+  File "/home/runner/work/CKD/CKD/scripts/blender/render_nokia_documentary.py", line 278, in <module>
     if __name__=="__main__": main()
                              ^^^^^^
-  File "/home/runner/work/CKD/CKD/scripts/blender/render_nokia_documentary.py", line 253, in main
+  File "/home/runner/work/CKD/CKD/scripts/blender/render_nokia_documentary.py", line 254, in main
     blender_mux(visual,silence,final,final_frames)
-  File "/home/runner/work/CKD/CKD/scripts/blender/render_nokia_documentary.py", line 173, in blender_mux
-    speed.frame_final_duration=frames
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^
-AttributeError: bpy_struct: attribute "frame_final_duration" from "SpeedControlStrip" is read-only
+  File "/home/runner/work/CKD/CKD/scripts/blender/render_nokia_documentary.py", line 172, in blender_mux
+    speed=strips.new_effect(name="Blender frame-interpolated visual motion",type="SPEED",channel=2,
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: Error: Strips.new_effect: effect takes 1 input strip
+
