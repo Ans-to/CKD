@@ -385,8 +385,8 @@ def build_scene(output_dir: Path):
     scene.cycles.device = "CPU"
     scene.cycles.samples = 1
     scene.cycles.use_denoising = True
-    scene.render.resolution_x = 960
-    scene.render.resolution_y = 540
+    scene.render.resolution_x = 720
+    scene.render.resolution_y = 405
     scene.render.resolution_percentage = 100
     scene.render.fps = FPS
     scene.render.image_settings.file_format = "PNG"

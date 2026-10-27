@@ -6,7 +6,7 @@ This optional GitHub Actions experiment renders a short stylized Nokia documenta
 
 `scripts/blender/nokia_opening_15s.py` opens on a generic classic-style feature phone in a dark reveal, then transitions to one faceless silhouette beside an abstract Snake-era game graphic. The first two narration sentences are spoken in full; the remaining time holds on the visual with a restrained sound-design tail. There is exactly one human character.
 
-The device is illustrative only: it is not an accurate Nokia handset, archival footage, or an engineering model. The video carries an on-screen disclosure. Narration is synthesized locally with the repository's Kokoro-82M ONNX voice (`am_michael`, Apache-2.0). The model is downloaded from the public npm package and run on the Actions CPU runner; no hosted AI-inference API is used. Caption cut points use Kokoro's estimated timings, not forced alignment. A small original two-note chime is synthesized locally, not copied from Nokia's ringtone. The preview is exactly 15 seconds, 960×540, 24 fps, with 360 frames.
+The device is illustrative only: it is not an accurate Nokia handset, archival footage, or an engineering model. The video carries an on-screen disclosure. Narration is synthesized locally with the repository's Kokoro-82M ONNX voice (`am_michael`, Apache-2.0). The model is downloaded from the public npm package and run on the Actions CPU runner; no hosted AI-inference API is used. Caption cut points use Kokoro's estimated timings, not forced alignment. A small original two-note chime is synthesized locally, not copied from Nokia's ringtone. The preview is exactly 15 seconds, 720×405, 24 fps, with 360 frames.
 
 ### Run it
 
