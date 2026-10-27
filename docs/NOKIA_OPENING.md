@@ -6,7 +6,7 @@ The current opening is rendered with CKD's accepted **premium-flat / vector-rig*
 
 - **Video:** [`samples/nokia-opening-15s.mp4`](../samples/nokia-opening-15s.mp4)
 - **GitHub download:** [Download the MP4](https://github.com/Ans-to/CKD/raw/refs/heads/arena/dc7dfd05-ckd/samples/nokia-opening-15s.mp4)
-- **Length/format:** 15 seconds, 1280×720, 24 fps, 360 frames, H.264 + AAC
+- **Length/format:** 15 seconds, 1280×720, 60 fps, 900 frames, H.264 + AAC
 - **Narration:** the previously approved local Kokoro voice track is retained; only the rejected visuals were rebuilt.
 
 The cut changes at the strict sentence boundary: first, a networked globe and one generic classic handset rising and sinking into a tailored pocket illustrate global reach and portability; then those distinct graphics clear for sentence-derived kinetic typography, **“NOKIA ≈ MOBILE PHONES.”** Captions reset at the same cut, and the second beat uses no repeated phone drawable. This is intentionally a faceless documentary opening, so the project's character is hidden in this scene.
@@ -24,7 +24,7 @@ pip install pillow numpy uharfbuzz freetype-py imageio-ffmpeg python-bidi espeak
 python scripts/nokia_opening_vector_15s.py
 ```
 
-The **Nokia Documentary Opening (Vector)** GitHub Actions workflow caches its Python render dependencies, validates the 15-second/720p/24-fps/360-frame output, uploads an artifact, and commits a changed MP4 to this session branch. The committed sample is also directly downloadable using the link above.
+The **Nokia Documentary Opening (Vector)** GitHub Actions workflow caches its Python render dependencies, validates the 15-second/720p/60-fps/900-frame output, uploads an artifact, and commits a changed MP4 to this session branch. The committed sample is also directly downloadable using the link above.
 
 ## Earlier Blender studies
 

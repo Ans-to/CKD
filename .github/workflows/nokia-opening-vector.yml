@@ -74,9 +74,9 @@ jobs:
           info = next(reader)
           count = sum(1 for _ in reader)
           assert info["size"] == (1280, 720), info
-          assert info["fps"] == 24.0, info
+          assert info["fps"] == 60.0, info
           assert abs(info["duration"] - 15.0) < 0.03, info
-          assert count == 360, count
+          assert count == 900, count
           print(f"Validated {count} frames, {info['size']}, {info['fps']} fps, {info['duration']} s")
           PY
 

@@ -39,7 +39,7 @@ from ckd.voice.narration import ClauseAudio, SceneAudio
 
 INPUT_VIDEO = ROOT / "samples/nokia-opening-15s.mp4"
 OUTPUT_VIDEO = INPUT_VIDEO
-FPS = 24
+FPS = 60
 DURATION = 15.0
 FRAMES = int(FPS * DURATION)
 SAMPLE_RATE = 48_000
