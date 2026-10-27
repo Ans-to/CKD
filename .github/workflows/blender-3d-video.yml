@@ -44,7 +44,7 @@ jobs:
         run: |
           mkdir -p output/blender-frames
           set -o pipefail
-          blender --background --factory-startup --python scripts/blender/nokia_device_shift.py -- --output-dir output/blender-frames --frames "$FRAMES" --fps 24 2>&1 | tee output/blender-render.log
+          blender --background --factory-startup --python scripts/blender/nokia_device_shift.py -- --output-dir output/blender-frames --frames "${FRAMES:-192}" --fps 24 2>&1 | tee output/blender-render.log
 
       - name: Include Blender failure details in the run summary
         if: failure()
