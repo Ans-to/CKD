@@ -8,14 +8,10 @@ on:
       - arena/dc7dfd05-ckd
     paths:
       - .github/workflows/blender-3d-video.yml
-      - scripts/blender/nokia_device_shift.py
+      - scripts/blender/nokia_opening_15s.py
+      - ckd/voice/**
+      - ckd/util/logging.py
   workflow_dispatch:
-    inputs:
-      frames:
-        description: "Animation length in frames (24 fps; default 96 = 4 seconds)"
-        required: false
-        default: "96"
-        type: number
 
 permissions:
   contents: write
@@ -29,68 +25,121 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Python for Blender's published bpy wheel
+        id: setup-python
         uses: actions/setup-python@v6
         with:
           python-version: "3.11"
 
-      - name: Install Blender Python runtime and FFmpeg
+      - name: Install Blender's small shared-library prerequisites
         run: |
           mkdir -p output
           set -o pipefail
-          export DEBIAN_FRONTEND=noninteractive
-          sudo timeout 180s apt-get update -o Acquire::Retries=1 -o Acquire::http::Timeout=40 -o Acquire::https::Timeout=40 2>&1 | tee output/package-install.log
-          sudo timeout 180s apt-get install --yes libxrender1 libxfixes3 libxi6 libxkbcommon0 libsm6 libice6 libgl1 2>&1 | tee -a output/package-install.log
-          python -m venv output/venv
-          output/venv/bin/python -m pip install --disable-pip-version-check bpy==4.5.3 imageio-ffmpeg==0.6.0 2>&1 | tee -a output/package-install.log
-          output/venv/bin/python -c 'import bpy; print("Blender Python runtime", bpy.app.version_string)'
-          output/venv/bin/python -c 'import imageio_ffmpeg; print("FFmpeg", imageio_ffmpeg.get_ffmpeg_exe())'
+          sudo timeout 180s apt-get update -o Acquire::Retries=1 -o Acquire::http::Timeout=40 -o Acquire::https::Timeout=40 2>&1 | tee output/os-install.log
+          sudo timeout 180s apt-get install --yes libxrender1 libxfixes3 libxi6 libxkbcommon0 libsm6 libice6 libgl1 2>&1 | tee -a output/os-install.log
 
-      - name: Render the 3D animation with Blender
+      # GitHub-hosted runners are ephemeral. Cache the virtual environment so
+      # bpy/Blender and the local Kokoro dependencies are reused on later runs.
+      - name: Restore cached Blender Python runtime
+        id: runtime-cache
+        uses: actions/cache@v4
+        with:
+          path: output/venv
+          key: ${{ runner.os }}-py${{ steps.setup-python.outputs.python-version }}-bpy4.5.3-imageioffmpeg0.6.0-onnxruntime1.22.0-espeak0.2-v1
+
+      - name: Restore cached local Kokoro model
+        uses: actions/cache@v4
+        with:
+          path: output/kokoro
+          key: ${{ runner.os }}-kokoro-82m-q8-am-michael-v1
+
+      - name: Install Blender Python runtime and local voice dependencies
+        if: steps.runtime-cache.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p output
+          set -o pipefail
+          python -m venv output/venv
+          output/venv/bin/python -m pip install --disable-pip-version-check \
+            bpy==4.5.3 \
+            imageio-ffmpeg==0.6.0 \
+            onnxruntime==1.22.0 \
+            espeakng-loader==0.2.2 \
+            py-espeak-ng==0.1.1 2>&1 | tee output/package-install.log
+
+      - name: Verify cached runtime
         env:
-          FRAMES: ${{ inputs.frames }}
+          CKD_KOKORO_DIR: ${{ github.workspace }}/output/kokoro
+        run: |
+          output/venv/bin/python -c 'import bpy, imageio_ffmpeg, onnxruntime; print("Blender Python runtime", bpy.app.version_string); print("FFmpeg", imageio_ffmpeg.get_ffmpeg_exe()); print("ONNX Runtime", onnxruntime.__version__)'
+
+      - name: Render and narrate the first 15 seconds
+        env:
+          CKD_KOKORO_DIR: ${{ github.workspace }}/output/kokoro
         run: |
           mkdir -p output/blender-frames
           set -o pipefail
-          output/venv/bin/python scripts/blender/nokia_device_shift.py -- --output-dir output/blender-frames --frames "${FRAMES:-96}" --fps 24 2>&1 | tee output/blender-render.log
+          output/venv/bin/python scripts/blender/nokia_opening_15s.py --output-dir output/blender-frames 2>&1 | tee output/blender-render.log
 
-      - name: Include Blender failure details in the run summary
+      - name: Include render failure details in the run summary
         if: failure()
         run: |
-          echo '## Blender diagnostic log (last 120 lines)' >> "$GITHUB_STEP_SUMMARY"
+          echo '## Blender/render diagnostic log (last 120 lines)' >> "$GITHUB_STEP_SUMMARY"
           if [ -f output/blender-render.log ]; then
             tail -n 120 output/blender-render.log >> "$GITHUB_STEP_SUMMARY"
             detail="$(tail -n 40 output/blender-render.log | tr '\n' ' ' | sed 's/%/%25/g; s/\r/%0D/g')"
-            echo "::error title=Blender render diagnostic::${detail:0:5000}"
+            echo "::error title=Render diagnostic::${detail:0:5000}"
           elif [ -f output/package-install.log ]; then
             tail -n 120 output/package-install.log >> "$GITHUB_STEP_SUMMARY"
             detail="$(tail -n 40 output/package-install.log | tr '\n' ' ' | sed 's/%/%25/g; s/\r/%0D/g')"
-            echo "::error title=Blender installation diagnostic::${detail:0:5000}"
+            echo "::error title=Runtime installation diagnostic::${detail:0:5000}"
+          elif [ -f output/os-install.log ]; then
+            tail -n 120 output/os-install.log >> "$GITHUB_STEP_SUMMARY"
+            detail="$(tail -n 40 output/os-install.log | tr '\n' ' ' | sed 's/%/%25/g; s/\r/%0D/g')"
+            echo "::error title=OS dependency diagnostic::${detail:0:5000}"
           else
             echo 'No diagnostic log file was created.' >> "$GITHUB_STEP_SUMMARY"
-            echo '::error title=Blender diagnostic::No diagnostic log file was created.'
+            echo '::error title=Render diagnostic::No diagnostic log file was created.'
           fi
 
-      - name: Encode and validate MP4
+      - name: Encode, mix narration, and validate the 15-second MP4
         run: |
           FFMPEG="$(output/venv/bin/python -c 'import imageio_ffmpeg; print(imageio_ffmpeg.get_ffmpeg_exe())')"
-          "$FFMPEG" -hide_banner -y -framerate 24 -i output/blender-frames/frame_%04d.png -c:v libx264 -preset medium -crf 20 -pix_fmt yuv420p -movflags +faststart output/nokia-smartphone-shift-3d.mp4
-          "$FFMPEG" -v error -i output/nokia-smartphone-shift-3d.mp4 -f null -
-          ls -lh output/nokia-smartphone-shift-3d.mp4
+          "$FFMPEG" -hide_banner -y \
+            -framerate 24 -i output/blender-frames/frame_%04d.png \
+            -i output/blender-frames/nokia-opening-voice.wav \
+            -i output/blender-frames/nokia-opening-sound.wav \
+            -filter_complex "[1:a]aresample=48000,apad,atrim=duration=15[voice];[2:a]volume=0.60[sfx];[voice][sfx]amix=inputs=2:duration=first:normalize=0,loudnorm=I=-16:TP=-1.5:LRA=11,atrim=duration=15[a]" \
+            -map 0:v:0 -map "[a]" -t 15 \
+            -c:v libx264 -preset medium -crf 20 -pix_fmt yuv420p \
+            -c:a aac -b:a 160k -movflags +faststart \
+            output/nokia-opening-15s.mp4
+          "$FFMPEG" -v error -i output/nokia-opening-15s.mp4 -f null -
+          output/venv/bin/python - <<'PY'
+          from imageio_ffmpeg import read_frames
+          path = "output/nokia-opening-15s.mp4"
+          frames = read_frames(path)
+          metadata = next(frames)
+          count = sum(1 for _ in frames)
+          assert metadata["size"] == (960, 540), metadata
+          assert round(metadata["fps"]) == 24, metadata
+          assert count == 360, count
+          print(f"Validated {count} frames at 960x540 / 24 fps (15.00 seconds)")
+          PY
+          ls -lh output/nokia-opening-15s.mp4
 
       - name: Save rendered MP4 on the session branch
         if: github.ref == 'refs/heads/arena/dc7dfd05-ckd'
         run: |
-          cp output/nokia-smartphone-shift-3d.mp4 samples/nokia-smartphone-shift-3d.mp4
+          cp output/nokia-opening-15s.mp4 samples/nokia-opening-15s.mp4
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add samples/nokia-smartphone-shift-3d.mp4
-          git commit -m "Add rendered Blender 3D experiment video"
+          git add samples/nokia-opening-15s.mp4
+          git commit -m "Add narrated Nokia opening 15-second video"
           git push origin "HEAD:${GITHUB_REF_NAME}"
 
       - name: Upload downloadable video artifact
         uses: actions/upload-artifact@v4
         with:
-          name: nokia-smartphone-shift-3d
-          path: output/nokia-smartphone-shift-3d.mp4
+          name: nokia-opening-15s
+          path: output/nokia-opening-15s.mp4
           if-no-files-found: error
           retention-days: 14
