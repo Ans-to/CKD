@@ -163,17 +163,9 @@ def blender_mux(visual,mix,output,frames):
     editor=final.sequence_editor_create()
     strips=editor.strips
     movie=strips.new_movie("Blender procedural visual source",str(visual),channel=1,frame_start=1)
-    # Six-fps procedural frames are blended to the 30-fps delivery inside Blender VSE.
     visual_info=next(imageio_ffmpeg.read_frames(str(visual),pix_fmt="rgb24"))
     movie.transform.scale_x=W/visual_info["size"][0]
     movie.transform.scale_y=H/visual_info["size"][1]
-    speed=strips.new_effect(name="Blender frame-interpolated visual motion",type="SPEED",channel=2,
-                            frame_start=1,frame_end=frames,input1=movie)
-    # A fivefold slow-down maps the six-fps source timeline to the 30-fps output;
-    # Blender's interpolator synthesizes the in-between frames from adjacent renders.
-    speed.speed_control="MULTIPLY"
-    speed.speed_factor=0.2
-    speed.use_frame_interpolate=True
     sound=strips.new_sound("Narration + ducked procedural score",str(mix),channel=3,frame_start=1)
     final.render.use_sequencer=True
     final.render.image_settings.file_format="FFMPEG"

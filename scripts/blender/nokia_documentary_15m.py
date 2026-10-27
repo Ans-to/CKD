@@ -364,8 +364,7 @@ def build(timings_path, output_path, preview_seconds=0):
     spec=json.loads(SPEC.read_text())
     timings=json.loads(Path(timings_path).read_text())
     total_seconds=float(preview_seconds or 900)
-    delivery_fps=int(spec["fps"])
-    fps=6
+    fps=int(spec["fps"])
     total_frames=round(total_seconds*fps)
     bpy.ops.object.select_all(action="SELECT"); bpy.ops.object.delete(use_global=False)
     for block in list(bpy.data.materials): bpy.data.materials.remove(block)
@@ -415,8 +414,8 @@ def build(timings_path, output_path, preview_seconds=0):
         build_scene_group(idx,entry,m,start,end,total_frames,fps)
         cursor=end
     scene.render.engine="BLENDER_EEVEE_NEXT"
-    # Render a 640x360 six-fps Blender source, then frame-blend and upscale in the
-    # Blender VSE to a 1280x720, 30-fps delivery. This keeps a long CPU render feasible.
+    # Render the procedural scene directly at the final 30-fps cadence, then use
+    # Blender VSE only for audio assembly and upscale to the 1280x720 delivery.
     scene.eevee.taa_render_samples=1
     scene.render.resolution_x=int(spec["resolution"][0]); scene.render.resolution_y=int(spec["resolution"][1]); scene.render.resolution_percentage=50
     scene.render.fps=fps; scene.render.fps_base=1.0
