@@ -52,8 +52,9 @@ def cube(name, loc, size, mat, bevel=0.04):
     if bevel:
         b = o.modifiers.new("Manufactured edge radii", "BEVEL")
         b.width = min(bevel, min(size) * 0.22)
-        b.segments = 3
-        o.modifiers.new("Weighted corner normals", "WEIGHTED_NORMAL")
+        b.segments = 2
+        if max(size)>0.45:
+            o.modifiers.new("Weighted corner normals", "WEIGHTED_NORMAL")
     o.data.materials.append(mat)
     return o
 
@@ -162,8 +163,8 @@ def build_scene_group(idx, entry, mats, start, end, total_frames):
         p=phone("Classic generic handset",0,0.05,1,phone_mats,touch=False)
         p.rotation_euler.z=-0.12
         cube("Circular reveal dais",(0,0,-1.55),(3.2,2.3,0.35),m["trim"],0.18)
-        for i in range(48):
-            ang=i*math.tau/48; sphere("Procedural dust",(math.cos(ang)*4.4,0.8,math.sin(ang)*2.2),(0.025,0.025,0.025),m["cyan"],8,6)
+        for i in range(24):
+            ang=i*math.tau/24; sphere("Procedural dust",(math.cos(ang)*4.4,0.8,math.sin(ang)*2.2),(0.025,0.025,0.025),m["cyan"],8,6)
     elif idx==1:
         cube("Paper mill main hall",(-1.7,0,0),(4.8,2.4,2.5),m["paperwood"],0.18)
         cube("Mill roof",(-1.7,0,1.45),(5.0,2.6,0.25),m["roof"],0.08)
@@ -320,7 +321,26 @@ def build_scene_group(idx, entry, mats, start, end, total_frames):
         curve("Continuity orbit",[(-3,-0.4,-1.4),(-1,-1.2,-2.0),(1,-1.2,-2.0),(3,-0.4,-1.4)],m["gold"],0.045)
         text("A MARKET CAN CHANGE FASTER THAN A LEADER",(0,-3.2,2.7),0.34,m["paper"],"Final message")
 
-    created=[o for o in bpy.data.objects if o not in before]
+    # Bake the chapter's native geometry, text and curves into one mesh object.
+    # Material slots and shape are retained; collapsing Blender object/draw-call
+    # overhead is important for long EEVEE renders on CPU-only hosted runners.
+    renderables=[o for o in bpy.data.objects if o not in before and o.type in {"MESH","CURVE","FONT"}]
+    for obj in renderables:
+        if obj.parent:
+            world_matrix=obj.matrix_world.copy(); obj.parent=None; obj.matrix_world=world_matrix
+    bpy.ops.object.select_all(action="DESELECT")
+    for obj in renderables: obj.select_set(True)
+    if renderables:
+        bpy.context.view_layer.objects.active=renderables[0]
+        bpy.ops.object.convert(target="MESH")
+        renderables=list(bpy.context.selected_objects)
+        if len(renderables)>1:
+            bpy.ops.object.join()
+        merged=bpy.context.view_layer.objects.active
+        created=[merged] if merged else []
+    else:
+        created=[]
+    bpy.ops.object.select_all(action="DESELECT")
     set_visibility(created,start,end,total_frames)
     root=bpy.data.objects.new(f"Scene motion root {idx+1}",None)
     bpy.context.collection.objects.link(root)
@@ -373,10 +393,17 @@ def build(timings_path, output_path, preview_seconds=0):
     for name,loc,power,color,size in (("Warm key",(-7,-9,10),1800,(1.0,0.72,0.48),7),("Cool fill",(7,-5,4),1300,(0.35,0.60,1.0),6),("Rim",(0,5,8),2200,(0.15,0.75,1.0),5)):
         ld=bpy.data.lights.new(name,"AREA"); ld.energy=power; ld.color=color; ld.shape="DISK"; ld.size=size
         lo=bpy.data.objects.new(name,ld); bpy.context.collection.objects.link(lo); lo.location=loc; lo.rotation_euler=(Vector((0,0,0))-lo.location).to_track_quat("-Z","Y").to_euler()
-    # Low-density procedural particles in the studio; no image textures or imported assets.
-    for i in range(100):
+    # Sparse ambient motes are one joined native mesh, not 100 per-frame draw calls.
+    ambient=[]
+    for i in range(24):
         x=math.sin(i*12.9898)*5.5; y=1.5+math.cos(i*8.233)*1.2; z=-1.3+(i%17)*0.19
-        sphere("Procedural ambient mote",(x,y,z),(0.012,0.012,0.012),m["cyan"],8,6)
+        ambient.append(sphere("Procedural ambient mote",(x,y,z),(0.012,0.012,0.012),m["cyan"],8,6))
+    if ambient:
+        bpy.ops.object.select_all(action="DESELECT")
+        for obj in ambient: obj.select_set(True)
+        bpy.context.view_layer.objects.active=ambient[0]
+        bpy.ops.object.join()
+        bpy.ops.object.select_all(action="DESELECT")
     cursor=1
     entries=spec["scenes"][:len(timings["scenes"])]
     for idx,entry in enumerate(entries):
