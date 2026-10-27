@@ -24,6 +24,11 @@ jobs:
         with:
           ref: arena/dc7dfd05-ckd
 
+      - name: Install headless Blender rendering libraries
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y libegl1 libgl1 libxi6 libxrender1 libxkbcommon0 libsm6 libice6
+
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
