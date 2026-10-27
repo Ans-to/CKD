@@ -353,9 +353,9 @@ def build_scene(output_dir: Path):
     black = mat("Caption scrim", (0.004, 0.009, 0.018, 1.0), roughness=0.9, emission=0.02)
     title = text_obj("NOKIA: THE RISE AND FALL", "Opening title", white, size=0.20)
     camera_overlay(title, camera, 0.0, 0.90, -5.8)
-    disclosure = text_obj("ILLUSTRATIVE 3D - NOT ARCHIVAL FOOTAGE OR A REAL PRODUCT MODEL",
-                          "Honesty disclosure", muted, size=0.075)
-    camera_overlay(disclosure, camera, 0.0, 0.68, -5.8)
+    disclosure = text_obj("ILLUSTRATIVE 3D - NOT ARCHIVAL\nFOOTAGE OR A REAL PRODUCT MODEL",
+                          "Honesty disclosure", muted, size=0.06, align="LEFT")
+    camera_overlay(disclosure, camera, -1.88, 0.66, -5.8)
 
     # Kokoro word timings are estimated, not forced-aligned; sentence ends are
     # taken from that estimate, and the video keeps the full second sentence.
