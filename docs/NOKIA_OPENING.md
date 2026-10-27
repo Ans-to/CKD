@@ -9,9 +9,9 @@ The current opening is rendered with CKD's accepted **premium-flat / vector-rig*
 - **Length/format:** 15 seconds, 1280×720, 24 fps, 360 frames, H.264 + AAC
 - **Narration:** the previously approved local Kokoro voice track is retained; only the rejected visuals were rebuilt.
 
-The cut changes exactly at the sentence boundary: first, one generic classic handset animates against the documentary skyline; then the phone graphic clears and the single vector-rig character enters beside the sentence-derived typographic beat **“NOKIA ≈ MOBILE PHONES.”** Captions reset at the same cut. No phone drawable is repeated in the second shot.
+The cut changes at the strict sentence boundary: first, a networked globe and one generic classic handset rising and sinking into a tailored pocket illustrate global reach and portability; then those distinct graphics clear for sentence-derived kinetic typography, **“NOKIA ≈ MOBILE PHONES.”** Captions reset at the same cut, and the second beat uses no repeated phone drawable. This is intentionally a faceless documentary opening, so the project's character is hidden in this scene.
 
-The visible disclosure reads **“STYLIZED GRAPHIC · NOT ARCHIVAL FOOTAGE.”** The handset is generic illustrative geometry, not an accurate Nokia product model, archival footage, or a technical schematic.
+The visible disclosure reads **“STYLIZED GRAPHICS · NOT ARCHIVAL FOOTAGE · NOT AN ACCURATE PRODUCT MODEL.”** The handset is generic illustrative geometry, not a real Nokia product model or a technical schematic.
 
 ## Render it
 
