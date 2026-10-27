@@ -31,8 +31,14 @@ jobs:
 
       - name: Install Blender and FFmpeg
         run: |
-          sudo apt-get update
-          sudo apt-get install --yes blender ffmpeg
+          mkdir -p output
+          set -o pipefail
+          export DEBIAN_FRONTEND=noninteractive
+          sudo timeout 180s apt-get update \\
+            -o Acquire::Retries=1 -o Acquire::http::Timeout=40 -o Acquire::https::Timeout=40 \\
+            2>&1 | tee output/package-install.log
+          sudo timeout 300s apt-get install --yes blender ffmpeg \\
+            2>&1 | tee -a output/package-install.log
           blender --version
           ffmpeg -version | head -n 1
 
@@ -55,9 +61,13 @@ jobs:
             tail -n 120 output/blender-render.log >> "$GITHUB_STEP_SUMMARY"
             detail="$(tail -n 40 output/blender-render.log | tr '\n' ' ' | sed 's/%/%25/g; s/\r/%0D/g')"
             echo "::error title=Blender render diagnostic::${detail:0:5000}"
+          elif [ -f output/package-install.log ]; then
+            tail -n 120 output/package-install.log >> "$GITHUB_STEP_SUMMARY"
+            detail="$(tail -n 40 output/package-install.log | tr '\n' ' ' | sed 's/%/%25/g; s/\r/%0D/g')"
+            echo "::error title=Blender installation diagnostic::${detail:0:5000}"
           else
-            echo 'The Blender process did not create a log file.' >> "$GITHUB_STEP_SUMMARY"
-            echo '::error title=Blender render diagnostic::No Blender log file was created.'
+            echo 'The render and package-install log files were not created.' >> "$GITHUB_STEP_SUMMARY"
+            echo '::error title=Blender diagnostic::No diagnostic log file was created.'
           fi
 
       - name: Encode MP4
